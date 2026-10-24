@@ -1,0 +1,431 @@
+text,label,lang
+"Necesito un poco de agua, por favor",ok,es
+"Everything is okay with us, thanks.",ok,en
+"no está sudando, y tiene la piel bien caliente",emergency,es
+"super thirsty and tired out here, need break.",warning,en
+"Me salieron ronchitas, por el calor",warning,es
+"Mi compañero dice que quiere vomitar, ya",heat_exhaustion,es
+"Mi compa ta blanco, del susto y calor",heat_exhaustion,es
+"Estoy sudando demasiado, ocupo break",warning,es
+"solo un poco de calor, todo relax",ok,es
+"Tengo mucha sed, me siento cansado",warning,es
+"Skin is burning hot to the touch, red.",emergency,en
+"Me siento mareado, y con dolor de cabeza",heat_exhaustion,es
+"ਮੈਂ ਠੀਕ ਹਾਂ, ਬਸ ਗਰਮੀ ਹੈ",ok,pa
+"ਮੇਰਾ ਸਾਥੀ ਪੀਲਾ ਪੈ ਗਿਆ ਹੈ, ਕਮਜ਼ੋਰ ਹੈ",heat_exhaustion,pa
+"ਅਸੀਂ ਠੀਕ ਕੰਮ ਕਰ ਰਹੇ ਹਾਂ, ਵੀਰੇ",ok,pa
+"Me dieron calambres fuertes, en los brazos",warning,es
+"ਕੀ ਮੈਨੂੰ ਪਾਣੀ ਮਿਲ ਸਕਦਾ ਹੈ, ਜੀ?",ok,pa
+"ਅਸੀਂ ਬਹੁਤ ਥੱਕ ਗਏ ਹਾਂ, ਅਤੇ ਪਿਆਸੇ ਹਾਂ",warning,pa
+"tengo ganas de vomitar, muy feo",heat_exhaustion,es
+"Mareos fuertes, y muchas nauseas",heat_exhaustion,es
+"my coworker is having a bad seizure, down here.",emergency,en
+"I feel dizzy, and my head hurts.",heat_exhaustion,en
+"My coworker has severe cramps, in his legs.",warning,en
+"my coworker just fainted, help!",emergency,en
+"ਉਲਟੀ ਆਉਣ ਵਰਗਾ ਲੱਗ ਰਿਹਾ ਹੈ, ਜੀ",heat_exhaustion,pa
+"Skin is burning hot to the touch, red.",emergency,en
+"We are very tired, and thirsty.",warning,en
+"ਥਕਾਵਟ ਅਤੇ ਪਿਆਸ ਹੈ, ਬਹੁਤ ਗਰਮੀ ਹੈ",warning,pa
+"Me siento al cien, compa",ok,es
+"Can we get some water, sir?",ok,en
+"My coworker is very tired, slowing down.",warning,en
+"Mi compa se siente a toda madre, si",ok,es
+"Mi compañero anda muy cansado, y sudando",warning,es
+"No está sudando, y tiene la piel bien caliente",emergency,es
+"Un poco cansado, pero es normal",ok,es
+"Todo bien, nomas hace mucho calor",ok,es
+"Está diciendo puras pendejadas, no entiende",emergency,es
+"Me duele el musculo, puro calambre wey",warning,es
+"Mi compa ocupa agua, anda cansado",warning,es
+"Everything good, just sweating un chingo",ok,es
+"Mi compañero no sabe ni donde esta, wey",emergency,es
+"Me salio sarpullido, por el calorón",warning,es
+"Mi compañero dice que esta bien, wey",ok,es
+"ਗਰਮੀ ਕਾਰਨ ਚਮੜੀ ਤੇ ਧੱਫੜ ਹਨ, ਲਾਲ ਹੋ ਗਈ",warning,pa
+"Mi compa no habla bien, esta confundido",emergency,es
+"ਉਸਦੀ ਚਮੜੀ ਬਹੁਤ ਗਰਮ, ਅਤੇ ਸੁੱਕੀ ਹੈ",emergency,pa
+"Me siento bien, nada mas calor",ok,es
+"Tengo nauseas gachas, quiero vomitar",heat_exhaustion,es
+"ਉਲਟੀ ਆਉਣ ਵਰਗਾ ਲੱਗ ਰਿਹਾ ਹੈ, ਜੀ",heat_exhaustion,pa
+"My coworker is resting a little, all good.",ok,en
+"Me siento muy debil de repente, wey",heat_exhaustion,es
+"Me siento muy debil de repente, wey",heat_exhaustion,es
+"I think I'm going to throw up, bad.",heat_exhaustion,en
+"Aca echandole ganas, todo bien",ok,es
+"i think i'm going to throw up, bad.",heat_exhaustion,en
+"My coworker has severe cramps, in his legs.",warning,en
+"Emergency, mi compa is having a seizure",emergency,es
+"He's super confused, and slurring words.",emergency,en
+"ando sudando a mares güey, demasiado",warning,es
+"We are doing fine here, hot though.",ok,en
+"Mi compa esta teniendo convulsiones, ayuda",emergency,es
+"my coworker feels dizzy, and nauseous.",heat_exhaustion,en
+"ਉਸਦਾ ਸਰੀਰ ਬਹੁਤ ਗਰਮ ਹੈ, ਅਤੇ ਸੁੱਕਾ ਹੈ",emergency,pa
+"ਬਹੁਤ ਕਮਜ਼ੋਰੀ ਹੈ, ਖੜ੍ਹਾ ਨਹੀਂ ਹੋਇਆ ਜਾਂਦਾ",heat_exhaustion,pa
+"ਉਹਨੂੰ ਕੁਝ ਸਮਝ ਨਹੀਂ ਆ ਰਿਹਾ, ਪਾਗਲ ਹੋ ਗਿਆ",emergency,pa
+"Tengo sarpullido, por el pinche sol",warning,es
+"ਗਰਮੀ ਕਾਰਨ ਚਮੜੀ ਤੇ ਧੱਫੜ ਹਨ, ਲਾਲ ਹੋ ਗਈ",warning,pa
+"Everything good, just sweating un chingo",ok,es
+"Me salieron ronchitas, por el calor",warning,es
+"Perdió el conocimiento, mi compañero se cayo",emergency,es
+"ਲੱਤਾਂ ਵਿੱਚ ਕੜੱਲ ਪੈ ਰਹੇ ਹਨ, ਦਰਦ ਹੈ",warning,pa
+"Mi compañero dice que quiere vomitar, ya",heat_exhaustion,es
+"ਕੀ ਮੈਨੂੰ ਪਾਣੀ ਮਿਲ ਸਕਦਾ ਹੈ, ਜੀ?",ok,pa
+"My buddy collapsed, not waking up.",emergency,en
+"ਥੋੜੀ ਥਕਾਵਟ ਹੈ, ਪਰ ਠੀਕ ਹਾਂ",ok,pa
+"She is acting very confused, and disoriented.",emergency,en
+"We are good, no problem right now",ok,es
+"ਮੇਰੇ ਸਾਥੀ ਨੂੰ ਚੱਕਰ ਆ ਰਹੇ ਹਨ, ਉਹ ਡਿੱਗ ਸਕਦਾ ਹੈ",heat_exhaustion,pa
+"Piel muy seca y caliente, no reacciona",emergency,es
+"Dejo de sudar, y esta desmayado",emergency,es
+"Anda bien pálido, y sudando frio",heat_exhaustion,es
+"Mi compañero dice que quiere vomitar, ya",heat_exhaustion,es
+"Got this heat rash on my neck, itchy.",warning,en
+"Skin is burning hot to the touch, red.",emergency,en
+"ਥਕਾਵਟ ਅਤੇ ਪਿਆਸ ਹੈ, ਬਹੁਤ ਗਰਮੀ ਹੈ",warning,pa
+"ਬਹੁਤ ਪਸੀਨਾ ਆ ਰਿਹਾ ਹੈ, ਪਿਆਸ ਵੀ ਹੈ",warning,pa
+"ਸਾਨੂੰ ਬੱਸ ਪਾਣੀ ਚਾਹੀਦਾ ਹੈ, ਹੋਰ ਕੁਝ ਨਹੀਂ",ok,pa
+"El pulso lo traigo a mil, asusta",heat_exhaustion,es
+"El pulso lo traigo a mil, asusta",heat_exhaustion,es
+"ਲੱਤਾਂ ਵਿੱਚ ਕੜੱਲ ਪੈ ਰਹੇ ਹਨ, ਦਰਦ ਹੈ",warning,pa
+"ਥੋੜ੍ਹਾ ਗਰਮ ਹੈ, ਪਰ ਠੀਕ ਹਾਂ ਮੈਂ",ok,pa
+"Me siento mareado, y con dolor de cabeza",heat_exhaustion,es
+"Un poco cansado, pero es normal",ok,es
+"Siento que me caigo, de debil",heat_exhaustion,es
+"tengo sarpullido, por el pinche sol",warning,es
+"ਮੇਰਾ ਸਾਥੀ ਬੇਹੋਸ਼ ਹੋ ਗਿਆ ਹੈ, ਜਲਦੀ ਆਓ",emergency,pa
+"Me duele el cuerpo, mucho calambre",warning,es
+"Sweating really heavy, out here.",warning,en
+"ਦਿਲ ਦੀ ਧੜਕਨ ਤੇਜ਼ ਹੋ ਗਈ ਹੈ, ਬਹੁਤ",heat_exhaustion,pa
+"Mi compa ta blanco, del susto y calor",heat_exhaustion,es
+"tengo mucha sed, me siento cansado",warning,es
+"ਪਾਣੀ ਦੀ ਪਿਆਸ ਹੈ, ਬਸ ਹੋਰ ਕੁਝ ਨਹੀਂ",ok,pa
+"ਕੋਈ ਗੱਲ ਨਹੀਂ, ਬਸ ਗਰਮੀ ਹੈ",ok,pa
+"Mi compañero no sabe ni donde esta, wey",emergency,es
+"My buddy is pale, and weak.",heat_exhaustion,en
+"It's hot, but we are okay.",ok,en
+"mi compa nomas quiere agua, wey",ok,es
+"Dejo de sudar, y esta desmayado",emergency,es
+"Se cayó, y no reacciona para nada",emergency,es
+"She is acting very confused, and disoriented.",emergency,en
+"i feel dizzy, and my head hurts.",heat_exhaustion,en
+"We are good, no problem right now",ok,es
+"i feel completely drained, and weak.",heat_exhaustion,en
+"ਕੰਮ ਚੱਲ ਰਿਹਾ ਹੈ, ਸਭ ਠੀਕ ਹੈ",ok,pa
+"Tengo ganas de vomitar, muy feo",heat_exhaustion,es
+"No responde, se cayo al suelo",emergency,es
+"Mi compa nomas quiere agua, wey",ok,es
+"ਦਿਲ ਦੀ ਧੜਕਨ ਤੇਜ਼ ਹੋ ਗਈ ਹੈ, ਬਹੁਤ",heat_exhaustion,pa
+"My coworker is having a bad seizure, down here.",emergency,en
+"todo bien, nomas hace mucho calor",ok,es
+"Tengo chingos de sed wey, no aguanto",warning,es
+"Everything good, just sweating un chingo",ok,es
+"I think I'm going to throw up, bad.",heat_exhaustion,en
+"ਮੈਂ ਠੀਕ ਹਾਂ, ਬਸ ਗਰਮੀ ਹੈ",ok,pa
+"tengo chingos de sed wey, no aguanto",warning,es
+"I have a heat rash, from the sun.",warning,en
+"ਬਹੁਤ ਪਸੀਨਾ ਆ ਰਿਹਾ ਹੈ, ਪਿਆਸ ਵੀ ਹੈ",warning,pa
+"He fainted, and is super hot",emergency,es
+"Ando sudando a mares güey, demasiado",warning,es
+"Mi compañero anda muy cansado, y sudando",warning,es
+"Estamos bien, trabajando duro en el sol",ok,es
+"ando sudando a mares güey, demasiado",warning,es
+"I'm sweating a ton, boss.",warning,en
+"Siento calambres, ando sudando un chingo",warning,es
+"ਕੰਮ ਚੱਲ ਰਿਹਾ ਹੈ, ਸਭ ਠੀਕ ਹੈ",ok,pa
+"Mi compañero tiene sed, y calambres",warning,es
+"Me duele el cuerpo, mucho calambre",warning,es
+"Tengo ganas de vomitar, muy feo",heat_exhaustion,es
+"Tengo sarpullido, por el pinche sol",warning,es
+"ਉਲਟੀ ਆਉਣ ਵਰਗਾ ਲੱਗ ਰਿਹਾ ਹੈ, ਜੀ",heat_exhaustion,pa
+"my coworker is having a bad seizure, down here.",emergency,en
+"ਮੈਨੂੰ ਬਹੁਤ ਪਸੀਨਾ ਆ ਰਿਹਾ ਹੈ, ਵੀਰੇ",warning,pa
+"ਮੇਰੇ ਸਾਥੀ ਨੂੰ ਚੱਕਰ ਆ ਰਹੇ ਹਨ, ਉਹ ਡਿੱਗ ਸਕਦਾ ਹੈ",heat_exhaustion,pa
+"Mi compañero tiene el pulso rapido, miren",heat_exhaustion,es
+"No responde, se cayo al suelo",emergency,es
+"Mi compañero tiene el pulso rapido, miren",heat_exhaustion,es
+"ਮੇਰਾ ਸਾਥੀ ਬਹੁਤ ਥੱਕ ਗਿਆ ਹੈ, ਪਾਣੀ ਦਿਓ",warning,pa
+"Tengo un dolor de cabeza, muy cabron",heat_exhaustion,es
+"ਪਸੀਨਾ ਆਉਣਾ ਬੰਦ ਹੋ ਗਿਆ ਹੈ, ਇਹ ਗੰਭੀਰ ਹੈ",emergency,pa
+"She is acting very confused, and disoriented.",emergency,en
+a que hora es el break?,ok,es
+"Me siento muy debil de repente, wey",heat_exhaustion,es
+"ਮੇਰਾ ਸਾਥੀ ਬਹੁਤ ਕਮਜ਼ੋਰ ਅਤੇ ਪੀਲਾ ਹੈ, ਵੀਰੇ",heat_exhaustion,pa
+"ਮੇਰਾ ਸਾਥੀ ਪੀਲਾ ਪੈ ਗਿਆ ਹੈ, ਕਮਜ਼ੋਰ ਹੈ",heat_exhaustion,pa
+"Skin is burning hot to the touch, red.",emergency,en
+"Everything good, just sweating un chingo",ok,es
+"Got heat cramps, need water bad.",warning,en
+"Emergency, mi compa is having a seizure",emergency,es
+"ਉਹਨੂੰ ਕੁਝ ਸਮਝ ਨਹੀਂ ਆ ਰਿਹਾ, ਪਾਗਲ ਹੋ ਗਿਆ",emergency,pa
+"Habla trabado, y esta muy confundido",emergency,es
+"ਸਭ ਠੀਕ ਹੈ, ਕੋਈ ਸਮੱਸਿਆ ਨਹੀਂ ਜੀ",ok,pa
+"Mi compañero dice que quiere vomitar, ya",heat_exhaustion,es
+"piel muy seca y caliente, no reacciona",emergency,es
+"Feeling okay right now, just working.",ok,en
+"Mi compañero anda muy cansado, y sudando",warning,es
+"Just a normal hot day, working hard.",ok,en
+"Mi compa se siente a toda madre, si",ok,es
+"ਮੇਰਾ ਸਾਥੀ ਬਹੁਤ ਪਸੀਨਾ ਵਹਾ ਰਿਹਾ ਹੈ, ਥੱਕਿਆ ਹੈ",warning,pa
+"ਪਸੀਨਾ ਬਿਲਕੁਲ ਬੰਦ ਹੋ ਗਿਆ ਹੈ, ਉਹ ਬੇਹੋਸ਼ ਹੈ ਪੂਰੀ ਤਰ੍ਹਾਂ",emergency,pa
+"My coworker says he's good, right now.",ok,en
+"My buddy collapsed, not waking up.",emergency,en
+"I'm very thirsty, and cansado",warning,es
+"Me siento bien, nada mas calor",ok,es
+"Mi compa tiene calambres bien feos, ayuda",warning,es
+"Mi compa se ve bien palido, compa",heat_exhaustion,es
+"ਮੇਰੀ ਦਿਲ ਦੀ ਧੜਕਨ ਬਹੁਤ ਤੇਜ਼ ਹੈ, ਡਰ ਲੱਗਦਾ ਹੈ",heat_exhaustion,pa
+"Me salio sarpullido, por el calorón",warning,es
+"Mi compañero no sabe ni donde esta, wey",emergency,es
+"we just need a quick break, soon.",ok,en
+"Mi compañero tiene el pulso rapido, miren",heat_exhaustion,es
+"ਮੇਰਾ ਸਾਥੀ ਠੀਕ ਹੈ, ਕੋਈ ਫਿਕਰ ਨਹੀਂ",ok,pa
+"Ya mero salimos, ando bien chido",ok,es
+"He stopped sweating completely, unconscious.",emergency,en
+"Mi compa ocupa agua, anda cansado",warning,es
+"Mi compañero dice que quiere vomitar, ya",heat_exhaustion,es
+"We are very tired, and thirsty.",warning,en
+"ਮੇਰਾ ਸਾਥੀ ਪੀਲਾ ਪੈ ਗਿਆ ਹੈ, ਕਮਜ਼ੋਰ ਹੈ",heat_exhaustion,pa
+"Tengo ganas de vomitar, muy feo",heat_exhaustion,es
+"Heart is beating so fast, out of breath.",heat_exhaustion,en
+"ਮੇਰਾ ਸਾਥੀ ਬੇਹੋਸ਼ ਹੋ ਗਿਆ ਹੈ, ਜਲਦੀ ਆਓ",emergency,pa
+"Pulse is really fast right now, scary.",heat_exhaustion,en
+"I feel lightheaded, need to sit.",heat_exhaustion,en
+"It's hot, but we are okay.",ok,en
+"Está diciendo puras pendejadas, no entiende",emergency,es
+"ਮੈਨੂੰ ਬਹੁਤ ਜ਼ਿਆਦਾ ਪਿਆਸ ਲੱਗੀ ਹੈ, ਪਾਣੀ ਚਾਹੀਦਾ",warning,pa
+"ਬਹੁਤ ਪਸੀਨਾ ਆ ਰਿਹਾ ਹੈ, ਪਿਆਸ ਵੀ ਹੈ",warning,pa
+"Mi compa nomas quiere agua, wey",ok,es
+"me siento muy debil de repente, wey",heat_exhaustion,es
+"My coworker feels dizzy, and nauseous.",heat_exhaustion,en
+"My coworker is very tired, slowing down.",warning,en
+"Me siento bien, nada mas calor",ok,es
+"Mi compa nomas quiere agua, wey",ok,es
+"Le dio un ataque a mi compa, rapido",emergency,es
+"Todo me da vueltas, quiero vomitar",heat_exhaustion,es
+"can we get some water, sir?",ok,en
+"ਅਸੀਂ ਠੀਕ ਕੰਮ ਕਰ ਰਹੇ ਹਾਂ, ਵੀਰੇ",ok,pa
+"ਮੈਨੂੰ ਬਹੁਤ ਜ਼ਿਆਦਾ ਪਿਆਸ ਲੱਗੀ ਹੈ, ਪਾਣੀ ਚਾਹੀਦਾ",warning,pa
+"mi compañero no sabe ni donde esta, wey",emergency,es
+"ਅਸੀਂ ਬਹੁਤ ਥੱਕ ਗਏ ਹਾਂ, ਅਤੇ ਪਿਆਸੇ ਹਾਂ",warning,pa
+"Me siento muy debil de repente, wey",heat_exhaustion,es
+"ਮੈਨੂੰ ਗਰਮੀ ਕਰਕੇ ਧੱਫੜ ਹੋ ਗਏ ਹਨ, ਦੇਖੋ",warning,pa
+"ਬ੍ਰੇਕ ਕਦੋਂ ਹੋਵੇਗੀ, ਵੀਰੇ?",ok,pa
+"I have cramps in my arms, hurts.",warning,en
+"Sweating really heavy, out here.",warning,en
+"ਮੈਨੂੰ ਬਹੁਤ ਜ਼ਿਆਦਾ ਪਿਆਸ ਲੱਗੀ ਹੈ, ਪਾਣੀ ਚਾਹੀਦਾ",warning,pa
+"El corazon me late bien rapido, wey",heat_exhaustion,es
+"ਬੋਲਣ ਵਿੱਚ ਤਕਲੀਫ ਹੈ, ਸਮਝ ਨਹੀਂ ਆਉਂਦੀ",emergency,pa
+"Perdió el conocimiento, mi compañero se cayo",emergency,es
+"Mi compañero se desmayó, rapido vengan",emergency,es
+A que hora es el break?,ok,es
+"Mi compa ocupa agua, anda cansado",warning,es
+"Solo un poco de calor, todo relax",ok,es
+"ਦਿਲ ਦੀ ਧੜਕਨ ਤੇਜ਼ ਹੋ ਗਈ ਹੈ, ਬਹੁਤ",heat_exhaustion,pa
+"Can we get some water, sir?",ok,en
+"ਉਸਨੂੰ ਅਚਾਨਕ ਦੌਰਾ ਪੈ ਗਿਆ, ਮਦਦ ਦੀ ਲੋੜ ਹੈ",emergency,pa
+"El corazon me late bien rapido, wey",heat_exhaustion,es
+"ਬਹੁਤ ਪਸੀਨਾ ਆ ਰਿਹਾ ਹੈ, ਪਿਆਸ ਵੀ ਹੈ",warning,pa
+"ਉਲਟੀ ਆਉਣ ਦਾ ਅਹਿਸਾਸ ਹੋ ਰਿਹਾ ਹੈ, ਬੁਰਾ ਹਾਲ ਹੈ",heat_exhaustion,pa
+"He is very confused, talking nonsense.",emergency,en
+"se cayó, y no reacciona para nada",emergency,es
+"Tengo nauseas gachas, quiero vomitar",heat_exhaustion,es
+"mi compa se siente bien débil, wey",heat_exhaustion,es
+"ਉਹ ਡਿੱਗ ਪਿਆ ਹੈ, ਬੇਹੋਸ਼ ਹੈ",emergency,pa
+"My pulse is racing, super fast.",heat_exhaustion,en
+"ਉਸਨੂੰ ਅਚਾਨਕ ਦੌਰਾ ਪੈ ਗਿਆ, ਮਦਦ ਦੀ ਲੋੜ ਹੈ",emergency,pa
+"my coworker just fainted, help!",emergency,en
+"Mi compañero se desmayó, rapido vengan",emergency,es
+"Perdió el conocimiento, mi compañero se cayo",emergency,es
+"Mi compa ta blanco, del susto y calor",heat_exhaustion,es
+"Solo un poco de calor, todo relax",ok,es
+"When do we get a water break, please?",ok,en
+"Me dieron calambres fuertes, en los brazos",warning,es
+"Ta cabron el sol, pero ando bien",ok,es
+"Solo un poco de calor, todo relax",ok,es
+"Sudo mucho, y tengo sed",warning,es
+"ਦੌਰਾ ਪੈ ਰਿਹਾ ਹੈ, ਜਲਦੀ ਐਂਬੂਲੈਂਸ ਬੁਲਾਓ",emergency,pa
+A que hora es el break?,ok,es
+"Heat rash is bothering me, quite a bit.",warning,en
+"tengo ganas de vomitar, muy feo",heat_exhaustion,es
+"When do we get a water break, please?",ok,en
+"Se cayó, y no reacciona para nada",emergency,es
+"Me siento muy debil de repente, wey",heat_exhaustion,es
+"Se desmayo en el solazo, no reacciona",emergency,es
+"no está sudando, y tiene la piel bien caliente",emergency,es
+"Mi compañero anda muy cansado, y sudando",warning,es
+"He stopped sweating completely, unconscious.",emergency,en
+"Estoy sudando demasiado, ocupo break",warning,es
+"ਮੇਰੇ ਹੱਥਾਂ ਪੈਰਾਂ ਵਿੱਚ ਕੜੱਲ ਪੈ ਰਹੇ ਹਨ, ਬਚਾਓ",warning,pa
+"Tengo calambres en las piernas, duele",warning,es
+"I'm very thirsty, and cansado",warning,es
+"ਮੇਰਾ ਸਾਥੀ ਆਰਾਮ ਕਰ ਰਿਹਾ ਹੈ, ਠੀਕ ਹੈ",ok,pa
+"ਉਸਦਾ ਸਰੀਰ ਬਹੁਤ ਗਰਮ ਹੈ, ਅਤੇ ਸੁੱਕਾ ਹੈ",emergency,pa
+"ਬ੍ਰੇਕ ਕਦੋਂ ਹੋਵੇਗੀ, ਵੀਰੇ?",ok,pa
+"ਮੇਰੇ ਸਾਥੀ ਨੂੰ ਚੱਕਰ ਆ ਰਹੇ ਹਨ, ਉਹ ਡਿੱਗ ਸਕਦਾ ਹੈ",heat_exhaustion,pa
+"Got this heat rash on my neck, itchy.",warning,en
+"I have cramps in my arms, hurts.",warning,en
+"My coworker is sweating heavily, all day.",warning,en
+"me siento al cien, compa",ok,es
+"Mi compañero tiene el pulso rapido, miren",heat_exhaustion,es
+"piel muy seca y caliente, no reacciona",emergency,es
+"I am extremely thirsty right now, please.",warning,en
+"Tengo chingos de sed wey, no aguanto",warning,es
+"Ta cabron el sol, pero ando bien",ok,es
+"Heart is beating so fast, out of breath.",heat_exhaustion,en
+"Can we get some water, sir?",ok,en
+"Mi compañero anda muy cansado, y sudando",warning,es
+"Tengo un dolor de cabeza, muy cabron",heat_exhaustion,es
+"He is unconscious, and not waking up.",emergency,en
+"I am perfectly fine, thanks.",ok,en
+"Hace calor, pero aguantamos",ok,es
+"I feel lightheaded, need to sit.",heat_exhaustion,en
+"Mi compañero anda muy cansado, y sudando",warning,es
+"Se desmayo en el solazo, no reacciona",emergency,es
+"Me salieron ronchitas, por el calor",warning,es
+"se cayó, y no reacciona para nada",emergency,es
+"Everything good, just sweating un chingo",ok,es
+"ਉਹ ਬਹੁਤ ਉਲਝਣ ਵਿੱਚ ਹੈ, ਕੁਝ ਸਮਝ ਨਹੀਂ ਆ ਰਿਹਾ",emergency,pa
+"No responde, se cayo al suelo",emergency,es
+"Just sweating a bit, no worries.",ok,en
+"When do we get a water break, please?",ok,en
+"My coworker just fainted, help!",emergency,en
+"Just need some water, quickly.",ok,en
+"ਮੇਰੇ ਸਾਥੀ ਨੂੰ ਪਾਣੀ ਚਾਹੀਦਾ ਹੈ, ਪਲੀਜ਼",ok,pa
+"I have a heat rash, from the sun.",warning,en
+"Me duele el musculo, puro calambre wey",warning,es
+"ਪਸੀਨਾ ਬਿਲਕੁਲ ਬੰਦ ਹੋ ਗਿਆ ਹੈ, ਉਹ ਬੇਹੋਸ਼ ਹੈ ਪੂਰੀ ਤਰ੍ਹਾਂ",emergency,pa
+"ਉਹ ਡਿੱਗ ਪਿਆ ਹੈ, ਬੇਹੋਸ਼ ਹੈ",emergency,pa
+"my coworker is just normally tired, boss.",ok,en
+"ਬਹੁਤ ਪਸੀਨਾ ਆ ਰਿਹਾ ਹੈ, ਪਿਆਸ ਵੀ ਹੈ",warning,pa
+"Tiene la piel seca, y super caliente",emergency,es
+"se cayó, y no reacciona para nada",emergency,es
+"ਉਸਦੀ ਚਮੜੀ ਬਹੁਤ ਗਰਮ, ਅਤੇ ਸੁੱਕੀ ਹੈ",emergency,pa
+"Ayuda, mi compañero se desmayo aqui",emergency,es
+"Feeling really weak, and nauseous.",heat_exhaustion,en
+"ਬਹੁਤ ਪਿਆਸ ਲੱਗੀ ਹੈ, ਪਾਣੀ ਦਿਓ",warning,pa
+"Mucho cansancio, y demasiada sed",warning,es
+"mucho cansancio, y demasiada sed",warning,es
+"Mi compa nomas quiere agua, wey",ok,es
+"ਉਲਟੀ ਆਉਣ ਦਾ ਅਹਿਸਾਸ ਹੋ ਰਿਹਾ ਹੈ, ਬੁਰਾ ਹਾਲ ਹੈ",heat_exhaustion,pa
+"siento que me va a dar algo, puro mareo",heat_exhaustion,es
+"Ando sudando a mares güey, demasiado",warning,es
+"He is very confused, talking nonsense.",emergency,en
+"i feel completely drained, and weak.",heat_exhaustion,en
+"He passed out in the field, right now.",emergency,en
+"We are very tired, and thirsty.",warning,en
+"Mi compa se siente bien débil, wey",heat_exhaustion,es
+"somebody is having a seizure here, call 911!",emergency,en
+"He fainted, and is super hot",emergency,es
+"ਉਸਦਾ ਸਰੀਰ ਬਹੁਤ ਗਰਮ ਹੈ, ਅਤੇ ਸੁੱਕਾ ਹੈ",emergency,pa
+"Mi compa se siente bien débil, wey",heat_exhaustion,es
+"Got a bad headache, dizzy too.",heat_exhaustion,en
+"Mi compañero no sabe ni donde esta, wey",emergency,es
+"ਮੇਰੀ ਦਿਲ ਦੀ ਧੜਕਨ ਬਹੁਤ ਤੇਜ਼ ਹੈ, ਡਰ ਲੱਗਦਾ ਹੈ",heat_exhaustion,pa
+"Estamos bien, trabajando duro en el sol",ok,es
+"ਅਸੀਂ ਠੀਕ ਕੰਮ ਕਰ ਰਹੇ ਹਾਂ, ਵੀਰੇ",ok,pa
+"le dio un ataque a mi compa, rapido",emergency,es
+"Me siento bien, nada mas calor",ok,es
+"ਮੇਰਾ ਸਾਥੀ ਠੀਕ ਹੈ, ਕੋਈ ਫਿਕਰ ਨਹੀਂ",ok,pa
+"Se desmayo en el solazo, no reacciona",emergency,es
+"Tengo ganas de vomitar, muy feo",heat_exhaustion,es
+"ਪਸੀਨਾ ਬਿਲਕੁਲ ਬੰਦ ਹੋ ਗਿਆ ਹੈ, ਉਹ ਬੇਹੋਸ਼ ਹੈ ਪੂਰੀ ਤਰ੍ਹਾਂ",emergency,pa
+"ਸਿਰ ਵਿੱਚ ਬਹੁਤ ਦਰਦ ਹੈ, ਚੱਕਰ ਆਉਂਦੇ ਹਨ",heat_exhaustion,pa
+"ਉਸਦਾ ਸਰੀਰ ਬਹੁਤ ਗਰਮ ਹੈ, ਅਤੇ ਸੁੱਕਾ ਹੈ",emergency,pa
+"Mi compañero tiene sed, y calambres",warning,es
+"Super thirsty and tired out here, need break.",warning,en
+"tengo calambres en las piernas, duele",warning,es
+"Tiene la piel seca, y super caliente",emergency,es
+"pulse is really fast right now, scary.",heat_exhaustion,en
+"ਪਾਣੀ ਦੀ ਪਿਆਸ ਹੈ, ਬਸ ਹੋਰ ਕੁਝ ਨਹੀਂ",ok,pa
+"Me duele la cabeza un chingo, cabron",heat_exhaustion,es
+"My coworker says he's good, right now.",ok,en
+"Mi compa se siente bien débil, wey",heat_exhaustion,es
+"ਦਿਲ ਦੀ ਧੜਕਨ ਤੇਜ਼ ਹੋ ਗਈ ਹੈ, ਬਹੁਤ",heat_exhaustion,pa
+"ਥੋੜੀ ਥਕਾਵਟ ਹੈ, ਪਰ ਠੀਕ ਹਾਂ",ok,pa
+"My pulse is racing, super fast.",heat_exhaustion,en
+"I'm very thirsty, and cansado",warning,es
+"El pulso lo traigo a mil, asusta",heat_exhaustion,es
+"Habla trabado, y esta muy confundido",emergency,es
+"Feeling really weak, and nauseous.",heat_exhaustion,en
+"Tengo ganas de vomitar, muy feo",heat_exhaustion,es
+"ਮੇਰਾ ਸਾਥੀ ਠੀਕ ਹੈ, ਕੋਈ ਫਿਕਰ ਨਹੀਂ",ok,pa
+"ayuda, mi compañero se desmayo aqui",emergency,es
+"Mi compañero tiene sed, y calambres",warning,es
+"ਪਸੀਨਾ ਬਿਲਕੁਲ ਬੰਦ ਹੋ ਗਿਆ ਹੈ, ਉਹ ਬੇਹੋਸ਼ ਹੈ ਪੂਰੀ ਤਰ੍ਹਾਂ",emergency,pa
+"ਮੈਨੂੰ ਬਹੁਤ ਜ਼ਿਆਦਾ ਪਿਆਸ ਲੱਗੀ ਹੈ, ਪਾਣੀ ਚਾਹੀਦਾ",warning,pa
+"Me salieron ronchitas, por el calor",warning,es
+"Mi compañero anda bien, nomas cansado",ok,es
+"ਮੈਨੂੰ ਚੱਕਰ ਆ ਰਹੇ ਹਨ, ਗਰਮੀ ਕਰਕੇ",heat_exhaustion,pa
+"Ando sudando frio, y con dolor de cabeza",heat_exhaustion,es
+"Mi compañero anda bien, nomas cansado",ok,es
+"Perdió el conocimiento, mi compañero se cayo",emergency,es
+"Tengo mucha sed, me siento cansado",warning,es
+"My coworker is having a bad seizure, down here.",emergency,en
+"ਮੈਨੂੰ ਬਹੁਤ ਜ਼ਿਆਦਾ ਸਿਰ ਦਰਦ ਹੈ, ਗਰਮੀ ਨਾਲ",heat_exhaustion,pa
+"ਮੈਨੂੰ ਉਲਟੀ ਆ ਰਹੀ ਹੈ, ਚੱਕਰ ਵੀ ਹਨ",heat_exhaustion,pa
+"i am perfectly fine, thanks.",ok,en
+"Un poco cansado, pero es normal",ok,es
+"ਉਸਦੀ ਚਮੜੀ ਬਹੁਤ ਗਰਮ, ਅਤੇ ਸੁੱਕੀ ਹੈ",emergency,pa
+"ਉਸਨੂੰ ਦੌਰਾ ਪੈ ਗਿਆ ਹੈ, ਮਦਦ ਕਰੋ",emergency,pa
+"Mi compañero tiene el pulso rapido, miren",heat_exhaustion,es
+"ਸਿਰ ਵਿੱਚ ਬਹੁਤ ਦਰਦ ਹੈ, ਚੱਕਰ ਆਉਂਦੇ ਹਨ",heat_exhaustion,pa
+"ਮੇਰਾ ਸਾਥੀ ਬਹੁਤ ਪਸੀਨਾ ਵਹਾ ਰਿਹਾ ਹੈ, ਥੱਕਿਆ ਹੈ",warning,pa
+"Aca echandole ganas, todo bien",ok,es
+"No pasa nada, puro calor aqui",ok,es
+"ਦਿਲ ਦੀ ਧੜਕਨ ਤੇਜ਼ ਹੋ ਗਈ ਹੈ, ਬਹੁਤ",heat_exhaustion,pa
+"Necesito un poco de agua, por favor",ok,es
+"Ayuda, mi compañero se desmayo aqui",emergency,es
+"Ta cabron el sol, pero ando bien",ok,es
+"My buddy is pale, and weak.",heat_exhaustion,en
+"Feeling super weak, cant stand up well.",heat_exhaustion,en
+"Mi compa se siente a toda madre, si",ok,es
+"Heart is beating so fast, out of breath.",heat_exhaustion,en
+"ਉਸਦੀ ਚਮੜੀ ਬਹੁਤ ਗਰਮ, ਅਤੇ ਸੁੱਕੀ ਹੈ",emergency,pa
+"Tengo mucha sed, me siento cansado",warning,es
+"ਮੇਰਾ ਸਾਥੀ ਬਹੁਤ ਪਸੀਨਾ ਵਹਾ ਰਿਹਾ ਹੈ, ਥੱਕਿਆ ਹੈ",warning,pa
+"Se desmayo en el solazo, no reacciona",emergency,es
+"he is very confused, talking nonsense.",emergency,en
+"I have a heat rash, from the sun.",warning,en
+"ਕੋਈ ਗੱਲ ਨਹੀਂ, ਬਸ ਗਰਮੀ ਹੈ",ok,pa
+"My coworker has severe cramps, in his legs.",warning,en
+"We are very tired, and thirsty.",warning,en
+"I feel completely drained, and weak.",heat_exhaustion,en
+"Esta convulsionando el señor, llamen ayuda",emergency,es
+"Mi compa nomas quiere agua, wey",ok,es
+"Mi compa se siente bien débil, wey",heat_exhaustion,es
+"Everything is okay with us, thanks.",ok,en
+"Está diciendo puras pendejadas, no entiende",emergency,es
+"I am perfectly fine, thanks.",ok,en
+"Everything good, just sweating un chingo",ok,es
+"My coworker is resting a little, all good.",ok,en
+"Todo chido wey, nomas sudando",ok,es
+"Ya mero toca la sombra, todo bien",ok,es
+Echame agua fria y sigo al cien,ok,es
+"No hay pedo, aguanto el solazo",ok,es
+Me esta saliendo sarpullido en el cuello,warning,es
+"Tengo un chingo de sed, pasame el termo",warning,es
+Me dieron unos calambres bien ojetes,warning,es
+"Sudando un chorro, necesito parar poquito",warning,es
+Me siento bien mareado la neta,heat_exhaustion,es
+"Tengo nauseas, creo que vomitare",heat_exhaustion,es
+Mi compa se ve bien palido del rostro,heat_exhaustion,es
+Traigo un dolor de cabeza que no aguanto,heat_exhaustion,es
+"El compa ya no reacciona, ayuda",emergency,es
+Dejo de sudar y esta bien caliente,emergency,es
+Esta convulsionando en la tierra rapido,emergency,es
+"Just a bit hot, doing fine.",ok,en
+Water break soon and I'll be good.,ok,en
+My legs are cramping up real bad.,warning,en
+Sweating like crazy out here.,warning,en
+I feel dizzy and my stomach hurts.,heat_exhaustion,en
+My heart is beating too fast.,heat_exhaustion,en
+He just passed out in the dirt!,emergency,en
+She is confused and skin is dry hot.,emergency,en
+"ਮੈਂ ਠੀਕ ਹਾਂ, ਕੰਮ ਵਧੀਆ ਚੱਲ ਰਿਹਾ ਹੈ",ok,pa
+"ਮੈਨੂੰ ਬਹੁਤ ਗਰਮੀ ਲੱਗ ਰਹੀ ਹੈ, ਪਾਣੀ ਦਿਓ",warning,pa
+ਮੇਰੀਆਂ ਬਾਹਾਂ ਵਿੱਚ ਕੜੱਲ ਹਨ,warning,pa
+"ਮੇਰਾ ਸਿਰ ਘੁੰਮ ਰਿਹਾ ਹੈ, ਚੱਕਰ ਆ ਰਹੇ ਹਨ",heat_exhaustion,pa
+ਮੈਨੂੰ ਉਲਟੀ ਆਉਣ ਵਾਲੀ ਹੈ,heat_exhaustion,pa
+ਮੇਰਾ ਸਾਥੀ ਬੇਹੋਸ਼ ਹੋ ਗਿਆ ਹੈ!,emergency,pa
+"ਉਹ ਬਿਲਕੁਲ ਨਹੀਂ ਬੋਲ ਰਿਹਾ, ਮਦਦ ਕਰੋ",emergency,pa
