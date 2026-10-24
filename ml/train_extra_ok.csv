@@ -1,0 +1,151 @@
+text,label,lang
+hi boss,ok,en
+hello,ok,en
+good morning,ok,en
+thanks boss,ok,en
+ok,ok,en
+okay got it,ok,en
+yes sir,ok,en
+see you tomorrow,ok,en
+i miss you,ok,en
+how are you doing,ok,en
+have a good day,ok,en
+can i leave early today,ok,en
+can i go home at 2,ok,en
+my wife is calling me can i leave,ok,en
+can i take my break now,ok,en
+when is lunch,ok,en
+where is the water truck,ok,en
+where do we park,ok,en
+what time do we start tomorrow,ok,en
+which row do we pick next,ok,en
+is there work on saturday,ok,en
+when do we get paid,ok,en
+can i bring my cousin to work,ok,en
+the bathroom is far away,ok,en
+we need more buckets,ok,en
+the tractor is stuck,ok,en
+my phone is almost dead,ok,en
+can you send the address,ok,en
+i'll be 10 minutes late,ok,en
+i forgot my gloves,ok,en
+can i switch to crew 2,ok,en
+is the bus coming at 5,ok,en
+who is driving today,ok,en
+lol,ok,en
+haha ok,ok,en
+thank you for the water,ok,en
+the shade tent fell down can someone help,ok,en
+can we get more ice,ok,en
+i finished my rows,ok,en
+what field are we going to,ok,en
+how many boxes today,ok,en
+can i work extra hours,ok,en
+i need a ride home,ok,en
+my kid is sick can i go,ok,en
+good job everyone,ok,en
+see you at the gate,ok,en
+what's the plan for tomorrow,ok,en
+are we done for today,ok,en
+can you repeat that,ok,en
+i didn't understand the message,ok,en
+hola jefe,ok,es
+buenos días,ok,es
+gracias mayordomo,ok,es
+sí señor,ok,es
+ok,ok,es
+está bien,ok,es
+nos vemos mañana,ok,es
+te extraño,ok,es
+cómo estás,ok,es
+que tenga buen día,ok,es
+puedo salir temprano hoy,ok,es
+me puedo ir a las 2,ok,es
+mi esposa me está llamando puedo irme,ok,es
+puedo tomar mi descanso ahora,ok,es
+a qué hora es la comida,ok,es
+dónde está el camión del agua,ok,es
+dónde nos estacionamos,ok,es
+a qué hora empezamos mañana,ok,es
+qué surco sigue,ok,es
+hay trabajo el sábado,ok,es
+cuándo nos pagan,ok,es
+puedo traer a mi primo a trabajar,ok,es
+el baño está muy lejos,ok,es
+necesitamos más cubetas,ok,es
+el tractor se atoró,ok,es
+mi teléfono se está muriendo,ok,es
+me manda la dirección,ok,es
+voy a llegar 10 minutos tarde,ok,es
+se me olvidaron los guantes,ok,es
+me puedo cambiar a la cuadrilla 2,ok,es
+el camión viene a las 5,ok,es
+quién maneja hoy,ok,es
+jaja ok,ok,es
+gracias por el agua,ok,es
+se cayó la carpa de sombra alguien ayude,ok,es
+pueden traer más hielo,ok,es
+ya terminé mis surcos,ok,es
+a qué campo vamos,ok,es
+cuántas cajas hoy,ok,es
+puedo trabajar horas extra,ok,es
+necesito raite a la casa,ok,es
+mi hijo está enfermo me puedo ir,ok,es
+buen trabajo a todos,ok,es
+nos vemos en la entrada,ok,es
+cuál es el plan para mañana,ok,es
+ya terminamos por hoy,ok,es
+me lo repite,ok,es
+no entendí el mensaje,ok,es
+oiga jefe,ok,es
+órale gracias,ok,es
+ahorita voy,ok,es
+ya llegué,ok,es
+dónde está el mayordomo,ok,es
+se acabaron los vasos,ok,es
+hay que mover la carpa,ok,es
+cuánto falta para la comida,ok,es
+el patrón viene hoy,ok,es
+me presta su teléfono,ok,es
+ya cargamos el camión,ok,es
+vamos a la otra fila,ok,es
+ਸਤ ਸ੍ਰੀ ਅਕਾਲ ਜੀ,ok,pa
+ਹੈਲੋ,ok,pa
+ਧੰਨਵਾਦ ਜੀ,ok,pa
+ਹਾਂ ਜੀ,ok,pa
+ਠੀਕ ਹੈ,ok,pa
+ਕੱਲ੍ਹ ਮਿਲਾਂਗੇ,ok,pa
+ਤੁਸੀਂ ਕਿਵੇਂ ਹੋ,ok,pa
+ਕੀ ਮੈਂ ਅੱਜ ਜਲਦੀ ਜਾ ਸਕਦਾ ਹਾਂ,ok,pa
+ਕੀ ਮੈਂ ਹੁਣ ਬ੍ਰੇਕ ਲੈ ਸਕਦਾ ਹਾਂ,ok,pa
+ਖਾਣਾ ਕਦੋਂ ਹੈ,ok,pa
+ਪਾਣੀ ਵਾਲਾ ਟਰੱਕ ਕਿੱਥੇ ਹੈ,ok,pa
+ਕੱਲ੍ਹ ਕੰਮ ਕਿੰਨੇ ਵਜੇ ਸ਼ੁਰੂ ਹੋਵੇਗਾ,ok,pa
+ਤਨਖਾਹ ਕਦੋਂ ਮਿਲੇਗੀ,ok,pa
+ਸਾਨੂੰ ਹੋਰ ਬਾਲਟੀਆਂ ਚਾਹੀਦੀਆਂ ਹਨ,ok,pa
+ਟਰੈਕਟਰ ਫਸ ਗਿਆ ਹੈ,ok,pa
+ਮੇਰਾ ਫ਼ੋਨ ਬੰਦ ਹੋਣ ਵਾਲਾ ਹੈ,ok,pa
+ਮੈਂ ਦਸ ਮਿੰਟ ਲੇਟ ਹੋਵਾਂਗਾ,ok,pa
+ਮੈਂ ਦਸਤਾਨੇ ਭੁੱਲ ਗਿਆ,ok,pa
+ਅੱਜ ਗੱਡੀ ਕੌਣ ਚਲਾਏਗਾ,ok,pa
+ਪਾਣੀ ਲਈ ਧੰਨਵਾਦ,ok,pa
+ਹੋਰ ਬਰਫ਼ ਲਿਆ ਸਕਦੇ ਹੋ,ok,pa
+ਮੇਰੀਆਂ ਕਤਾਰਾਂ ਖ਼ਤਮ ਹੋ ਗਈਆਂ,ok,pa
+ਅਸੀਂ ਕਿਹੜੇ ਖੇਤ ਜਾ ਰਹੇ ਹਾਂ,ok,pa
+ਕੀ ਮੈਂ ਵਾਧੂ ਘੰਟੇ ਕੰਮ ਕਰ ਸਕਦਾ ਹਾਂ,ok,pa
+ਮੈਨੂੰ ਘਰ ਜਾਣ ਲਈ ਸਵਾਰੀ ਚਾਹੀਦੀ ਹੈ,ok,pa
+ਮੇਰਾ ਬੱਚਾ ਬਿਮਾਰ ਹੈ ਕੀ ਮੈਂ ਜਾ ਸਕਦਾ ਹਾਂ,ok,pa
+ਸਭ ਨੇ ਵਧੀਆ ਕੰਮ ਕੀਤਾ,ok,pa
+ਗੇਟ ਤੇ ਮਿਲਾਂਗੇ,ok,pa
+ਕੀ ਅੱਜ ਦਾ ਕੰਮ ਖ਼ਤਮ ਹੋ ਗਿਆ,ok,pa
+ਦੁਬਾਰਾ ਦੱਸੋ ਜੀ,ok,pa
+ਮੈਨੂੰ ਸੁਨੇਹਾ ਸਮਝ ਨਹੀਂ ਆਇਆ,ok,pa
+ਛਾਂ ਵਾਲਾ ਤੰਬੂ ਡਿੱਗ ਗਿਆ,ok,pa
+ਕੱਲ੍ਹ ਦੀ ਯੋਜਨਾ ਕੀ ਹੈ,ok,pa
+ਬੱਸ ਪੰਜ ਵਜੇ ਆਵੇਗੀ,ok,pa
+ਮੈਂ ਪਹੁੰਚ ਗਿਆ ਹਾਂ,ok,pa
+ਕੱਪ ਖ਼ਤਮ ਹੋ ਗਏ,ok,pa
+ਮਾਲਕ ਅੱਜ ਆਉਣਗੇ,ok,pa
+ਟਰੱਕ ਲੋਡ ਹੋ ਗਿਆ,ok,pa
+ਅਗਲੀ ਕਤਾਰ ਤੇ ਚੱਲੀਏ,ok,pa
+ਵਾਹਿਗੁਰੂ ਭਲਾ ਕਰੇ,ok,pa

@@ -230,7 +230,7 @@ export function CrewView() {
       seen.current.add(m.id);
       setMsgs((x) => [...x, m]);
       setTyped("");
-      speakAny(m.autoReply?.[lang] ?? (m.intent === "health" && m.triage ? t.reply[m.triage.label] : t.sent), lang);
+      if (m.intent === "health" || m.autoReply) speakAny(m.autoReply?.[lang] ?? (m.triage ? t.reply[m.triage.label] : t.sent), lang);
     } finally {
       setBusy(false);
     }
@@ -422,7 +422,9 @@ export function CrewView() {
               ) : (
                 <li key={m.id} className="flex flex-col items-end gap-1">
                   <p className="ml-10 rounded-2xl rounded-br-sm bg-[var(--ink)] px-3 py-2 text-lg leading-snug text-[var(--bg)]">{m.original}</p>
-                  {!msgs.slice(i + 1).some((x) => x.from === "boss") && <p
+                  {m.intent === "other" && !m.autoReply ? (
+                    <p className="text-xs text-[var(--muted)]">✓ {t.sent.split(".")[0]}</p>
+                  ) : !msgs.slice(i + 1).some((x) => x.from === "boss") && <p
                     className="mr-10 self-start rounded-2xl rounded-bl-sm px-3 py-2 text-sm font-medium text-white"
                     style={{ background: m.intent === "health" && m.triage ? TONE[m.triage.label] : "#6f665b" }}
                   >

@@ -37,14 +37,18 @@ export async function understand(text: string): Promise<{
 <message>${text}</message>
 1. intent: "health" (how they or a coworker feel physically, symptoms), "request" (break, water, shade, ride, leave early, permission), "question" (asking for information), or "other" (personal, chit-chat, jokes, off-topic, unclear).
 2. Translate the meaning into es, pa and en. If it's unclear, give your best guess and add "(unclear)".
-3. reply: one or two short sentences from Sombra (not the boss) answering exactly what they said, in es, pa and en. Health: concrete first steps for THEIR symptoms, and say the boss was alerted. Request or question: say the boss has it and will answer here, plus what to do meanwhile if relevant. Other: a brief friendly acknowledgement. Never say the boss approved anything.
+3. reply (es, pa, en), written like a short app notice, never a greeting and never introducing yourself:
+   health: concrete first steps for THEIR symptoms + "Your crew boss has been alerted."
+   request or question: "Your crew boss will answer here." + what to do meanwhile only if it matters for safety.
+   other (greetings, chit-chat, personal): reply must be null.
+   Never say the boss approved anything.
 JSON only: {"intent": "...", "es": "...", "pa": "...", "en": "...", "reply": {"es": "...", "pa": "...", "en": "..."}}`,
         json: true,
         maxTokens: 700,
       }),
     );
     const intent = ["health", "request", "question", "other"].includes(out.intent ?? "") ? out.intent! : "other";
-    const reply = out.reply?.en ? { es: out.reply.es || out.reply.en, pa: out.reply.pa || out.reply.en, en: out.reply.en } : undefined;
+    const reply = intent !== "other" && out.reply?.en ? { es: out.reply.es || out.reply.en, pa: out.reply.pa || out.reply.en, en: out.reply.en } : undefined;
     return { intent, text: { es: out.es || text, pa: out.pa || text, en: out.en || text }, reply };
   } catch {
     return { intent: "other", text: { es: text, pa: text, en: text } };

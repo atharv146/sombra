@@ -70,6 +70,7 @@ export function Command({ fields }: { fields: Field[] }) {
     setCards(fresh());
     setAlerts({});
     setBanner(null);
+    setCrews(DEFAULT_CREWS);
   }
   const [banner, setBanner] = useState<{ crewId: string; label: TriageLabel; text: string } | null>(null);
   const onAlert = useCallback((crewId: string, label: TriageLabel, text: string) => {

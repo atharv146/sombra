@@ -84,7 +84,11 @@ export default function About() {
               : "Coming soon"}
           </dd>
           <dt className="font-semibold">Limits</dt>
-          <dd>Small dataset; it reads words, not vital signs. It supports a crew boss and never replaces calling 911.</dd>
+          <dd>
+            Small dataset; it reads words, not vital signs. It supports a crew boss and never replaces calling 911. We also trained a v2 with 150 extra
+            off-topic sentences: same accuracy, but emergency recall fell from 0.80 to 0.70, so we kept v1 and route off-topic messages with the AI and a
+            confidence gate instead.
+          </dd>
           <dt className="font-semibold">Privacy</dt>
           <dd>Worker IDs only, no names; no audio stored; plans and check-ins expire after 2 days</dd>
         </dl>
