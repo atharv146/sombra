@@ -23,6 +23,7 @@ export function PlanView({
   fields,
   tone,
   nowMin = null,
+  compare,
 }: {
   plan: ShiftPlan;
   crews: Crew[];
@@ -31,7 +32,14 @@ export function PlanView({
   fields: Field[];
   tone: "before" | "after";
   nowMin?: number | null; // "Play the day" clock: draws a moving line
+  compare?: ShiftPlan; // the usual day, for the before -> after table
 }) {
+  const hoursIn = (p: ShiftPlan["crews"][number], fieldId?: string) =>
+    p.blocks.filter((b) => b.kind === "work").reduce((n, b) => {
+      for (let m = toMin(b.start); m < toMin(b.end); m += 60)
+        if (risks.find((r) => r.fieldId === (b.fieldId ?? fieldId) && Number(r.time.slice(11, 13)) === Math.floor(m / 60))?.band === "extreme") n++;
+      return n;
+    }, 0);
   return (
     <section className={`rounded-xl border bg-[var(--card)] p-4 ${tone === "after" ? "border-[#3f6b3a]" : "border-[var(--line)]"}`}>
       <div className="flex flex-wrap items-baseline justify-between gap-2">
@@ -41,6 +49,51 @@ export function PlanView({
         </span>
       </div>
       {tone === "after" && <p className="mt-1 text-sm">{plan.summary}</p>}
+      {compare && (
+        <div className="mt-3 overflow-x-auto">
+          <table className="w-full min-w-[520px] text-sm">
+            <thead>
+              <tr className="text-left text-xs text-[var(--muted)]">
+                <th className="pb-1 font-medium">What changes</th>
+                {plan.crews.map((p) => (
+                  <th key={p.crewId} className="pb-1 font-medium">{crews.find((c) => c.id === p.crewId)?.name}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {([
+                ["Starts", (p) => ampm(toMin(p.blocks[0].start))],
+                ["Done by", (p) => ampm(toMin(p.blocks.filter((b) => b.kind === "work").at(-1)?.end ?? p.blocks.at(-1)!.end))],
+                ["Hours in deadly heat", (p) => `${hoursIn(p, crews.find((c) => c.id === p.crewId)?.fieldId)} h`],
+                ["Paid cool-downs", (p) => `${p.blocks.filter((b) => b.kind === "cooldown").length}`],
+                ["Drinking water", (p) => `${p.waterGallons} gal`],
+                ["Shade tents", (p) => `${p.shadeUnits}`],
+                ["N95 masks", (p) => (p.respirators ? "yes" : "no")],
+              ] as [string, (p: ShiftPlan["crews"][number]) => string][]).map(([label, get]) => (
+                <tr key={label} className="border-t border-[var(--line)]">
+                  <td className="py-1.5 pr-3">{label}</td>
+                  {plan.crews.map((p) => {
+                    const old = compare.crews.find((x) => x.crewId === p.crewId);
+                    const a = old ? get(old) : "–";
+                    const b = get(p);
+                    return (
+                      <td key={p.crewId} className="py-1.5 pr-3 tabular-nums">
+                        {a === b ? (
+                          <span>{b}</span>
+                        ) : (
+                          <>
+                            <span className="text-[#8c1d17] line-through decoration-1">{a}</span> → <b className="text-[#2f5a2b]">{b}</b>
+                          </>
+                        )}
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       <div className="mt-3 flex flex-col gap-3">
         {plan.crews.map((p) => {

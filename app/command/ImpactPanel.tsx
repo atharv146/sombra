@@ -15,7 +15,7 @@ export function ImpactPanel({ before, after, crews, fields, risks }: { before: S
     { label: "Hottest temperature worked", before: `${a.peakTempWorkedF}°F`, after: `${b.peakTempWorkedF}°F`, good: b.peakTempWorkedF < a.peakTempWorkedF },
     { label: "Work hours per worker", before: `${a.workHoursPerWorker}`, after: `${b.workHoursPerWorker} (${kept}% kept)`, good: kept >= 80 },
     { label: "Paid cool-down wages", before: `$${a.paidBreakUsd}`, after: `$${b.paidBreakUsd}`, good: b.paidBreakUsd > a.paidBreakUsd },
-  ];
+  ].filter((r) => !(r.before === "$0" && r.after === "$0"));
   return (
     <section className="rounded-xl border-2 border-[var(--ink)] bg-[var(--card)] p-5">
       <p className="text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">What Sombra changed for {workers} workers</p>

@@ -77,6 +77,14 @@ export function checkPlan(plan: ShiftPlan, crews: Crew[], risks: HourlyRisk[]): 
         }
       }
     }
+    const smoke = Math.max(0, ...blocks.filter((b) => b.kind === "work").flatMap((b) => {
+      const out: number[] = [];
+      for (let m = toMin(b.start); m < toMin(b.end); m += 60) out.push(riskAt(risks, b.fieldId ?? crew.fieldId, m)?.aqi ?? 0);
+      return out;
+    }));
+    if (smoke >= RULES.smokeAqi && !p.respirators) {
+      out.push({ rule: "smoke_151", crewId: crew.id, message: `${crew.name} works in wildfire smoke at AQI ${smoke}; N95 respirators must be provided (§5141.1).` });
+    }
     if (maxTemp >= RULES.shadeF && p.shadeUnits < need.shadeUnits) {
       out.push({
         rule: "shade_80",
@@ -160,7 +168,14 @@ export function autoFix(plan: ShiftPlan, crews: Crew[], risks: HourlyRisk[]): Sh
     }
     const fixed: CrewPlan = { ...p, blocks: mergeAdjacent(blocks) };
     const need = required(crew, fixed);
-    return { ...fixed, waterGallons: Math.max(fixed.waterGallons, need.waterGallons), shadeUnits: Math.max(fixed.shadeUnits, need.shadeUnits) };
+    const smoky = fixed.blocks.some((b) => b.kind === "work" && risks.some((r) => r.fieldId === (b.fieldId ?? crew.fieldId) && (r.aqi ?? 0) >= RULES.smokeAqi && toMin(b.start) <= Number(r.time.slice(11, 13)) * 60 && Number(r.time.slice(11, 13)) * 60 < toMin(b.end)));
+    return {
+      ...fixed,
+      waterGallons: Math.max(fixed.waterGallons, need.waterGallons),
+      shadeUnits: Math.max(fixed.shadeUnits, need.shadeUnits),
+      respirators: fixed.respirators || smoky,
+      notes: smoky && !fixed.notes.some((n) => n.includes("N95")) ? [...fixed.notes, "N95 respirators for every worker (wildfire smoke)"] : fixed.notes,
+    };
   });
   return { ...plan, crews: crewsOut };
 }

@@ -17,6 +17,7 @@ export const AGENTS: Record<AgentId, { name: string; role: string; color: string
 
 export interface SwarmInput {
   mode: "live" | "replay";
+  smokeAqi?: number; // smoke drill
   date: string;
   start: string; // crew lead's usual start, "06:00"
   end: string; // usual end, "14:30"
@@ -46,7 +47,7 @@ async function run(emit: Emit, agent: AgentId, system: string, prompt: string, m
     }
   } catch (err) {
     console.error(`[${agent}]`, err);
-    const text = `Model unavailable, using the rules engine.\n${fallback}`.trim();
+    const text = `AI busy, so the rules engine answered:\n${fallback}`.trim();
     emit({ type: "agent_delta", agent, text: (shown ? "\n" : "") + text });
     return { text, json: "", failed: true };
   }
@@ -85,14 +86,14 @@ export async function runSwarm(input: SwarmInput, emit: Emit): Promise<ShiftPlan
   const voice = "Write like a calm field safety lead texting a crew boss: short lines, no markdown headers, no emoji.";
 
   // 1. Cielo reads the sky.
-  const risks = await fetchRisks(fields, input.mode, input.date);
+  const risks = await fetchRisks(fields, input.mode, input.date, input.smokeAqi);
   emit({ type: "risk", risks });
   const table = riskTable(risks, fields);
   await run(
     emit,
     "cielo",
     `You are Cielo, the weather scout for a Central Valley farm labor crew. ${voice}`,
-    `Hourly conditions on ${input.date} (${input.mode === "replay" ? "real archived heat-wave data" : "today's live forecast"}):\n${table}\n\nIn 3 short lines (under 20 words each, use field names, not ids): when each field becomes dangerous, the worst hour, and which field stays coolest and why.`,
+    `Hourly conditions on ${input.date} (${input.mode === "replay" ? "real archived weather" : "today's live forecast"}${input.smokeAqi ? ", plus a wildfire-smoke drill" : ""}):\n${table}\n\nIn 3 short lines (under 20 words each, use field names, not ids): when each field becomes dangerous, the worst hour, and which field stays coolest and why.`,
     300,
     skyFallback(risks, fields),
   );
@@ -103,6 +104,7 @@ export async function runSwarm(input: SwarmInput, emit: Emit): Promise<ShiftPlan
     id,
     date: input.date,
     mode: input.mode,
+    smoke: !!input.smokeAqi,
     crews: usualPlan(crews, input.start, input.end),
     violations: [],
     briefings: {},
@@ -160,7 +162,7 @@ Reply with JSON only, no working shown:
       emit({ type: "agent_delta", agent: "cuadrilla", text: (parsed.why ?? []).join("\n") });
     } catch (err) {
       console.error("[cuadrilla]", err);
-      emit({ type: "agent_delta", agent: "cuadrilla", text: "Model unavailable, using the rules engine.\nStarting early, ending new workers' day before extreme heat." });
+      emit({ type: "agent_delta", agent: "cuadrilla", text: "AI busy, so the rules engine answered:\nEvery crew starts at 4:30am and stops before deadly heat." });
     }
     let decided = 0;
     if (parsed) {
@@ -196,7 +198,7 @@ Reply with JSON only, no working shown:
     emit({
       type: "agent_done",
       agent: "cuadrilla",
-      summary: `${decided ? `Chose fields and hours for ${decided} crew${decided > 1 ? "s" : ""}` : "Kept usual hours"}; rules engine added ${cooldowns} paid cool-downs`,
+      summary: `${decided ? `Chose fields and hours for ${decided} crew${decided > 1 ? "s" : ""}` : "Moved every crew to a 4:30am start"}; ${cooldowns ? `${cooldowns} paid cool-down${cooldowns > 1 ? "s" : ""} added` : "no 2-hour stretch in 95°F+, so no cool-down needed"}`,
     });
     emit({ type: "plan", plan, revision: 1 });
   }

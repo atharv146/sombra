@@ -8,6 +8,7 @@ import { Channels } from "./Channels";
 import { unlockAudio } from "@/lib/alarm";
 import { ImpactPanel } from "./ImpactPanel";
 import { PlayDay } from "./PlayDay";
+import { SCENARIOS, scenarioFor } from "@/lib/scenarios";
 import { AgentPanel, type AgentCard } from "./AgentPanel";
 import { PlanView } from "./PlanView";
 import { BAND_COLOR } from "./bands";
@@ -32,8 +33,10 @@ const DEFAULT_CREWS: Crew[] = [
 
 const fresh = () => ORDER.map((id) => ({ ...AGENT_META[id], status: "idle" as const, text: "" }));
 
-export function Command({ fields, replayDate }: { fields: Field[]; replayDate: string }) {
-  const [mode, setMode] = useState<"replay" | "live">("replay");
+export function Command({ fields }: { fields: Field[] }) {
+  const [scenarioId, setScenarioId] = useState(SCENARIOS[0].id);
+  const scenario = SCENARIOS.find((x) => x.id === scenarioId) ?? SCENARIOS[0];
+  const mode = scenario.date ? "replay" : "live";
   const [crews, setCrews] = useState(DEFAULT_CREWS);
   const [start, setStart] = useState("06:00");
   const [end, setEnd] = useState("14:30");
@@ -77,16 +80,17 @@ export function Command({ fields, replayDate }: { fields: Field[]; replayDate: s
   // Load the day's weather as soon as the mode changes, so the map and heat strip work before planning.
   useEffect(() => {
     const today = new Date().toLocaleDateString("en-CA", { timeZone: "America/Los_Angeles" });
-    fetch(`/api/risks?mode=${mode}&date=${today}`)
+    fetch(`/api/risks?scenario=${scenarioId}&date=${today}`)
       .then((r) => (r.ok ? r.json() : []))
       .then((r: HourlyRisk[]) => {
         setRisks(r);
-        // A plan made for the other mode no longer matches this weather.
-        setDraft((d) => (d && d.mode !== mode ? null : d));
-        setFinal((f) => (f && f.mode !== mode ? null : f));
+        // A plan made for another day no longer matches this weather.
+        const matches = (p: ShiftPlan | null) => p && scenarioFor(p.date, p.smoke).id === scenarioId;
+        setDraft((d) => (matches(d) ? d : null));
+        setFinal((f) => (matches(f) ? f : null));
       })
       .catch(() => {});
-  }, [mode]);
+  }, [scenarioId]);
 
   // Open on the active plan (if one exists) so channels, the QR code and "Play the day" work without re-planning.
   useEffect(() => {
@@ -94,7 +98,7 @@ export function Command({ fields, replayDate }: { fields: Field[]; replayDate: s
       .then((r) => (r.ok ? r.json() : null))
       .then((p: ShiftPlan | null) => {
         if (!p?.usual || !p.crewInfo) return;
-        setMode(p.mode);
+        setScenarioId(scenarioFor(p.date, p.smoke).id);
         setCrews(p.crewInfo);
         setDraft({ ...p, crews: p.usual, violations: p.usualViolations ?? [], summary: "Your usual schedule" });
         setFinal(p);
@@ -169,7 +173,7 @@ export function Command({ fields, replayDate }: { fields: Field[]; replayDate: s
       const res = await fetch("/api/plan", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ mode, date: mode === "replay" ? replayDate : today, start, end, crews, note }),
+        body: JSON.stringify({ mode, date: scenario.date ?? today, smokeAqi: scenario.smokeAqi, start, end, crews, note }),
       });
       if (!res.body) throw new Error(`Server error ${res.status}`);
       const reader = res.body.pipeThrough(new TextDecoderStream()).getReader();
@@ -233,18 +237,20 @@ export function Command({ fields, replayDate }: { fields: Field[]; replayDate: s
           <div>
             <h1 className="font-display text-5xl leading-none">Sombra</h1>
             <p className="mt-2 max-w-xl text-[15px] leading-snug">
-              On July 11, 2024 it hit 114°F outside Manteca. Enter tomorrow&apos;s crews and Sombra&apos;s AI agents rebuild the day so nobody
+              {scenario.smokeAqi ? "Drill: wildfire smoke rolls over Manteca on a hot day." : scenario.date ? `${scenario.label}: ${scenario.detail.toLowerCase()} outside Manteca.` : "Today's live forecast for Manteca."} Enter tomorrow&apos;s crews and Sombra&apos;s AI agents rebuild the day so nobody
               works through deadly heat, prove it follows California&apos;s heat law, and talk to every worker in Spanish or Punjabi.
             </p>
           </div>
-          <div className="flex rounded-full border border-[var(--line)] p-1 text-sm">
-            {(["replay", "live"] as const).map((m) => (
+          <div className="flex flex-wrap gap-2 text-sm" role="tablist" aria-label="Day to plan">
+            {SCENARIOS.map((x) => (
               <button
-                key={m}
-                onClick={() => setMode(m)}
-                className={`rounded-full px-3 py-1 ${mode === m ? "bg-[var(--ink)] text-[var(--bg)]" : ""}`}
+                key={x.id}
+                onClick={() => setScenarioId(x.id)}
+                title={x.detail}
+                className={`rounded-xl border px-3 py-1.5 text-left leading-tight ${scenarioId === x.id ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--bg)]" : "border-[var(--line)]"}`}
               >
-                {m === "replay" ? `Heat wave · ${replayDate}` : `Live · today`}
+                <span className="block font-semibold">{x.label}</span>
+                <span className="block text-[11px] opacity-75">{x.detail.split(" + ")[0]}</span>
               </button>
             ))}
           </div>
@@ -357,7 +363,7 @@ export function Command({ fields, replayDate }: { fields: Field[]; replayDate: s
         )}
         {draft && final && risks.length > 0 && <ImpactPanel before={draft} after={final} crews={crews} fields={fields} risks={risks} />}
         {draft && <PlanView plan={draft} crews={crews} label="Your usual day" risks={risks} fields={fields} tone="before" nowMin={playMin} />}
-        {final && <PlanView plan={final} crews={crews} label="Sombra's plan" risks={risks} fields={fields} tone="after" nowMin={playMin} />}
+        {final && <PlanView plan={final} crews={crews} label="Sombra's plan" risks={risks} fields={fields} tone="after" nowMin={playMin} compare={draft ?? undefined} />}
       </div>
 
       <aside className="flex flex-col gap-4 lg:sticky lg:top-6 lg:self-start">

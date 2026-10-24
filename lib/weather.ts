@@ -6,9 +6,14 @@ export const REPLAY_DATE = "2024-07-11"; // 114°F in Manteca, the hottest July 
 
 const HOURLY = "temperature_2m,relative_humidity_2m,wind_speed_10m,shortwave_radiation";
 
-export async function fetchRisks(fields: Field[], mode: "live" | "replay", date: string): Promise<HourlyRisk[]> {
-  const all = await Promise.all(fields.map((f) => fieldRisks(f, mode, date)));
-  return all.flat();
+export async function fetchRisks(fields: Field[], mode: "live" | "replay", date: string, smokeAqi?: number): Promise<HourlyRisk[]> {
+  const all = (await Promise.all(fields.map((f) => fieldRisks(f, mode, date)))).flat();
+  if (!smokeAqi) return all;
+  // Smoke drill: wildfire smoke builds through the morning and peaks mid-afternoon.
+  return all.map((r) => {
+    const h = Number(r.time.slice(11, 13));
+    return { ...r, aqi: Math.round(Math.max(r.aqi ?? 0, smokeAqi * (0.55 + 0.45 * Math.sin((Math.PI * (h - 5)) / 14)))) };
+  });
 }
 
 async function fieldRisks(field: Field, mode: "live" | "replay", date: string): Promise<HourlyRisk[]> {

@@ -9,6 +9,7 @@ export async function POST(request: Request) {
   const body = (await request.json()) as Partial<SwarmInput>;
   const input: SwarmInput = {
     mode: body.mode ?? "replay",
+    smokeAqi: body.smokeAqi ? Math.min(Number(body.smokeAqi), 300) : undefined,
     date: body.date!,
     start: body.start && body.start >= "04:00" ? body.start : "06:00",
     end: body.end && body.end <= "19:00" && body.end > (body.start ?? "06:00") ? body.end : "14:30",

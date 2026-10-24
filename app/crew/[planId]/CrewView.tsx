@@ -102,6 +102,8 @@ export function CrewView() {
   const [notice, setNotice] = useState(false);
   const [recSec, setRecSec] = useState(0);
   const seen = useRef(new Set<string>());
+  const endRef = useRef<HTMLDivElement>(null);
+  const count = useRef(0);
   const loaded = useRef(false);
   const t = T[lang];
 
@@ -200,6 +202,12 @@ export function CrewView() {
   useEffect(() => {
     if (rec && recSec >= 20) talkRef.current(); // auto-send long recordings
   }, [rec, recSec]);
+
+  // Keep the newest message in view, like a messaging app.
+  useEffect(() => {
+    if (msgs.length > count.current && count.current > 0) endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    count.current = msgs.length;
+  }, [msgs.length]);
 
   function setLang(l: Lang) {
     unlockAudio();
@@ -398,7 +406,7 @@ export function CrewView() {
           <p className="mt-2 text-[var(--muted)]">{t.none}</p>
         ) : (
           <ol className="mt-3 flex flex-col gap-3">
-            {[...msgs].reverse().map((m) =>
+            {msgs.map((m, i) =>
               m.from === "boss" ? (
                 <li key={m.id} className={`mr-10 rounded-2xl rounded-bl-sm p-3 ${m.kind === "alert" ? "bg-[#b3261e] text-white" : "bg-[var(--track)]"}`}>
                   <div className="flex items-start justify-between gap-3">
@@ -414,12 +422,12 @@ export function CrewView() {
               ) : (
                 <li key={m.id} className="flex flex-col items-end gap-1">
                   <p className="ml-10 rounded-2xl rounded-br-sm bg-[var(--ink)] px-3 py-2 text-lg leading-snug text-[var(--bg)]">{m.original}</p>
-                  <p
+                  {!msgs.slice(i + 1).some((x) => x.from === "boss") && <p
                     className="mr-10 self-start rounded-2xl rounded-bl-sm px-3 py-2 text-sm font-medium text-white"
                     style={{ background: m.intent === "health" && m.triage ? TONE[m.triage.label] : "#6f665b" }}
                   >
                     {m.autoReply?.[lang] ?? (m.intent === "health" && m.triage ? t.reply[m.triage.label] : t.sent)}
-                  </p>
+                  </p>}
                   {m.triage?.label === "emergency" && (
                     <a href="tel:911" className="mt-2 block rounded-lg bg-[#b3261e] py-3 text-center text-lg font-bold text-white">
                       911
@@ -433,6 +441,7 @@ export function CrewView() {
             )}
           </ol>
         )}
+        <div ref={endRef} />
       </section>
     </main>
   );

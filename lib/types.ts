@@ -63,6 +63,7 @@ export interface CrewPlan {
   blocks: ShiftBlock[];
   waterGallons: number;
   shadeUnits: number;
+  respirators?: boolean; // N95s handed out (wildfire smoke, §5141.1)
   notes: string[];
 }
 
@@ -70,6 +71,7 @@ export interface ShiftPlan {
   id: string;
   date: string; // "2024-07-10"
   mode: "live" | "replay";
+  smoke?: boolean; // smoke drill
   crews: CrewPlan[];
   violations: RuleViolation[]; // must be empty before the plan can be sent
   briefings: Partial<Record<Lang, string>>; // whole-plan summary (fallback)

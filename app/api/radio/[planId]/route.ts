@@ -2,6 +2,12 @@ import { addMessage, listMessages } from "@/lib/store";
 import { translateAll } from "@/lib/translate";
 import type { Lang, RadioMessage } from "@/lib/types";
 
+const HEAT_ALERT: Record<Lang, string> = {
+  en: "HEAT ALERT: Stop work now. Go to the shade and drink water. Tell your crew boss if anyone feels sick.",
+  es: "ALERTA DE CALOR: Dejen de trabajar ahora. Vayan a la sombra y tomen agua. Avisen al mayordomo si alguien se siente mal.",
+  pa: "ਗਰਮੀ ਦੀ ਚੇਤਾਵਨੀ: ਹੁਣੇ ਕੰਮ ਬੰਦ ਕਰੋ। ਛਾਂ ਵਿੱਚ ਜਾਓ ਅਤੇ ਪਾਣੀ ਪੀਓ। ਜੇ ਕੋਈ ਬਿਮਾਰ ਮਹਿਸੂਸ ਕਰੇ ਤਾਂ ਸੁਪਰਵਾਈਜ਼ਰ ਨੂੰ ਦੱਸੋ।",
+};
+
 export async function GET(_req: Request, ctx: RouteContext<"/api/radio/[planId]">) {
   const { planId } = await ctx.params;
   return Response.json(await listMessages(planId), { headers: { "cache-control": "no-store" } });
@@ -12,8 +18,7 @@ export async function POST(request: Request, ctx: RouteContext<"/api/radio/[plan
   const { planId } = await ctx.params;
   const b = (await request.json()) as { text?: string; lang?: Lang; crewId?: string; kind?: "chat" | "alert" };
   const kind = b.kind === "alert" ? "alert" : "chat";
-  if (kind === "alert" && !b.text?.trim()) b.text = "HEAT ALERT: Stop work now. Go to the shade and drink water. Tell your crew boss if anyone feels sick.";
-  if (!b.text?.trim()) return Response.json({ error: "Empty message" }, { status: 400 });
+  if (!b.text?.trim() && kind !== "alert") return Response.json({ error: "Empty message" }, { status: 400 });
   const lang = b.lang ?? "en";
   const msg: RadioMessage = {
     id: Math.random().toString(36).slice(2, 10),
@@ -22,7 +27,8 @@ export async function POST(request: Request, ctx: RouteContext<"/api/radio/[plan
     crewId: b.crewId,
     lang,
     kind,
-    text: await translateAll(b.text.slice(0, 500), lang),
+    // The standard heat alert is pre-written in every language, so it never depends on the AI.
+    text: b.text?.trim() ? await translateAll(b.text.slice(0, 500), lang) : HEAT_ALERT,
     at: new Date().toISOString(),
   };
   await addMessage(msg);

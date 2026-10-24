@@ -30,8 +30,8 @@ const COMPAT = {
   groq: {
     url: "https://api.groq.com/openai/v1/chat/completions",
     keys: () => splitKeys(process.env.GROQ_API_KEY),
-    model: process.env.GROQ_MODEL || "openai/gpt-oss-120b",
-    fallbacks: [] as string[],
+    model: process.env.GROQ_MODEL || "llama-3.3-70b-versatile",
+    fallbacks: ["openai/gpt-oss-120b"],
   },
 };
 
@@ -77,36 +77,59 @@ function timedFetch(url: string, init: RequestInit) {
   };
 }
 
-// After a failure, skip the model for 2 minutes so every agent falls back instantly instead of each timing out.
-let downUntil = 0;
+// Providers that have keys, starting with LLM_PROVIDER: if one is out of quota, the next one answers.
+function chain(): Provider[] {
+  const has: Record<Provider, boolean> = {
+    openrouter: COMPAT.openrouter.keys().length > 0,
+    groq: COMPAT.groq.keys().length > 0,
+    gemini: !!process.env.GEMINI_API_KEY,
+    claude: !!process.env.ANTHROPIC_API_KEY,
+  };
+  const first = provider();
+  return [first, ...(["openrouter", "groq", "claude", "gemini"] as Provider[]).filter((p) => p !== first && has[p])];
+}
+
+// After an API failure, skip that provider for 2 minutes so agents move on instantly instead of each waiting.
+const downUntil: Partial<Record<Provider, number>> = {};
 
 export async function* streamModel(req: LLMRequest): AsyncGenerator<string> {
-  if (Date.now() < downUntil) throw new Error("Model marked down after a recent failure");
-  try {
-    yield* streamProvider(req);
-  } catch (err) {
-    // Trip only on API errors (rate limits, auth, outages), not on one slow answer.
-    if (!(err instanceof Error && /timed out|didn't respond|abort/i.test(err.message + String(err.cause ?? "")))) downUntil = Date.now() + 120_000;
-    throw err;
+  let last: unknown = new Error("No AI provider configured");
+  for (const p of chain()) {
+    if (Date.now() < (downUntil[p] ?? 0)) continue;
+    let yielded = false;
+    try {
+      for await (const chunk of streamProvider(req, p)) {
+        yielded = true;
+        yield chunk;
+      }
+      return;
+    } catch (err) {
+      last = err;
+      if (yielded) throw err; // can't restart a half-streamed answer
+      // Trip only on API errors (rate limits, auth, outages), not on one slow answer.
+      if (!(err instanceof Error && /timed out|didn't respond|abort/i.test(err.message + String(err.cause ?? "")))) downUntil[p] = Date.now() + 120_000;
+    }
   }
+  throw last;
 }
 
 // Streams text chunks from whichever provider is configured.
-async function* streamProvider(req: LLMRequest): AsyncGenerator<string> {
+async function* streamProvider(req: LLMRequest, p: Provider): AsyncGenerator<string> {
   const system = req.json ? `${req.system}\nRespond with one JSON object only, no prose, no code fences.` : req.system;
-  const p = provider();
   if (p === "openrouter" || p === "groq") {
     const cfg = COMPAT[p];
     const keys = cfg.keys();
     if (!keys.length) throw new Error(`No ${p} key`);
     // Free accounts have daily caps: on a rate-limit or auth error, move to the next account's key and retry.
-    for (let attempt = 0; attempt < keys.length; attempt++) {
+    const models = p === "groq" ? [req.model || cfg.model, ...cfg.fallbacks] : [req.model || cfg.model];
+    let mi = 0;
+    for (let attempt = 0; attempt < keys.length + models.length; attempt++) {
       const key = keys[keyIndex[p] % keys.length];
       const call = timedFetch(cfg.url, {
         method: "POST",
         headers: { "content-type": "application/json", authorization: `Bearer ${key}`, "x-title": "Sombra" },
         body: JSON.stringify({
-          model: req.model || cfg.model,
+          model: models[mi],
           // Thinking off: 5s answers instead of 30-60s, and the agents' prompts are narrow enough not to need it.
           ...(p === "openrouter" ? { models: [req.model || cfg.model, ...cfg.fallbacks], reasoning: { enabled: false } } : {}),
           max_tokens: Math.max(req.maxTokens ?? 1024, 1500),
@@ -119,8 +142,12 @@ async function* streamProvider(req: LLMRequest): AsyncGenerator<string> {
       });
       try {
         const res = await call.res;
-        if ([401, 402, 403, 429].includes(res.status) && attempt < keys.length - 1) {
+        if ([401, 402, 403, 429].includes(res.status) && keyIndex[p] % keys.length < keys.length - 1) {
           keyIndex[p]++;
+          continue;
+        }
+        if ([400, 404].includes(res.status) && mi < models.length - 1) {
+          mi++;
           continue;
         }
         if (!res.ok || !res.body) throw new Error(`${p} ${res.status}: ${await res.text()}`);
