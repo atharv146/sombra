@@ -48,6 +48,7 @@ export interface RuleViolation {
   crewId: string;
   time?: string;
   message: string; // plain English, cites the subsection
+  short?: string; // 2-4 words for the rule-by-crew grid
 }
 
 export interface ShiftBlock {

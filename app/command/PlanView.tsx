@@ -12,6 +12,13 @@ const ampm = (m: number) => {
   const mm = m % 60 ? `:${String(m % 60).padStart(2, "0")}` : "";
   return `${((h + 11) % 12) + 1}${mm}${h < 12 ? "am" : "pm"}`;
 };
+const RULE_ROWS: { label: string; cite: string; rules: string[] }[] = [
+  { label: "10-min cool-down every 2 h above 95°F", cite: "§3395(e)", rules: ["cooldown_2h"] },
+  { label: "New workers kept out of deadly heat", cite: "§3395(g)", rules: ["acclimatization_14d"] },
+  { label: "Shade for the whole crew", cite: "§3395(d)", rules: ["shade_80"] },
+  { label: "1 quart of water per worker per hour", cite: "§3395(c)", rules: ["water_quart_hour"] },
+  { label: "N95 masks in wildfire smoke", cite: "§5141.1", rules: ["smoke_151", "smoke_500"] },
+];
 const TICKS = [4, 6, 8, 10, 12, 14, 16, 18].map((h) => h * 60);
 
 // Each crew's day drawn over its field's hourly heat: you can see work blocks running into red, or ending before it.
@@ -159,12 +166,36 @@ export function PlanView({
         </div>
       </div>
 
-      {plan.violations.length > 0 && (
-        <ul className="mt-3 flex flex-col gap-1 text-sm text-[#8c1d17]">
-          {plan.violations.map((v, i) => (
-            <li key={i}>· {v.message}</li>
-          ))}
-        </ul>
+      {tone === "before" && plan.violations.length > 0 && (
+        <div className="mt-4 overflow-x-auto">
+          <table className="w-full min-w-[480px] text-sm">
+            <thead>
+              <tr className="text-left text-xs text-[var(--muted)]">
+                <th className="pb-1 font-medium">California heat law</th>
+                {plan.crews.map((p) => (
+                  <th key={p.crewId} className="pb-1 font-medium">{crews.find((c) => c.id === p.crewId)?.name}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {RULE_ROWS.filter((row) => row.rules.some((r) => plan.violations.some((v) => v.rule === r))).map((row) => (
+                <tr key={row.label} className="border-t border-[var(--line)]">
+                  <td className="py-1.5 pr-3">
+                    {row.label} <span className="text-xs text-[var(--muted)]">{row.cite}</span>
+                  </td>
+                  {plan.crews.map((p) => {
+                    const v = plan.violations.find((x) => x.crewId === p.crewId && row.rules.includes(x.rule));
+                    return (
+                      <td key={p.crewId} className={`py-1.5 pr-3 ${v ? "font-semibold text-[#8c1d17]" : "text-[#2f5a2b]"}`} title={v?.message}>
+                        {v ? `✗ ${v.short ?? "broken"}` : "✓"}
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </section>
   );

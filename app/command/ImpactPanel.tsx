@@ -1,6 +1,6 @@
 "use client";
 
-import { changes, impactOf } from "@/lib/impact";
+import { impactOf } from "@/lib/impact";
 import type { Crew, Field, HourlyRisk, ShiftPlan } from "@/lib/types";
 
 // The "why it matters" panel: the usual day vs Sombra's day, in numbers anyone can read.
@@ -46,11 +46,7 @@ export function ImpactPanel({ before, after, crews, fields, risks }: { before: S
           ))}
         </tbody>
       </table>
-      <ul className="mt-4 flex flex-col gap-1 text-sm">
-        {changes(before, after, crews, fields).map((line) => (
-          <li key={line}>· {line}</li>
-        ))}
-      </ul>
+
     </section>
   );
 }

@@ -61,6 +61,7 @@ export function checkPlan(plan: ShiftPlan, crews: Crew[], risks: HourlyRisk[]): 
             crewId: crew.id,
             time: toHHMM(m),
             message: `${crew.name} works over 2 hours without a 10-minute cool-down at ${r.tempF}°F (§3395(e)(6)).`,
+            short: `no break at ${r.tempF}°F`,
           });
         }
         if (crew.newWorkers > 0 && r.band === "extreme" && !acclimFlagged) {
@@ -70,6 +71,7 @@ export function checkPlan(plan: ShiftPlan, crews: Crew[], risks: HourlyRisk[]): 
             crewId: crew.id,
             time: toHHMM(m),
             message: `${crew.name} has ${crew.newWorkers} workers in their first 14 days working at WBGT ${r.wbgtF}°F. §3395(g) requires close observation; Sombra keeps new workers out of extreme hours.`,
+            short: `${crew.newWorkers} new in deadly heat`,
           });
         }
         if (r.aqi !== undefined && r.aqi > RULES.smokeAqiRequired) {
@@ -83,13 +85,14 @@ export function checkPlan(plan: ShiftPlan, crews: Crew[], risks: HourlyRisk[]): 
       return out;
     }));
     if (smoke >= RULES.smokeAqi && !p.respirators) {
-      out.push({ rule: "smoke_151", crewId: crew.id, message: `${crew.name} works in wildfire smoke at AQI ${smoke}; N95 respirators must be provided (§5141.1).` });
+      out.push({ rule: "smoke_151", crewId: crew.id, message: `${crew.name} works in wildfire smoke at AQI ${smoke}; N95 respirators must be provided (§5141.1).`, short: `AQI ${smoke}, no masks` });
     }
     if (maxTemp >= RULES.shadeF && p.shadeUnits < need.shadeUnits) {
       out.push({
         rule: "shade_80",
         crewId: crew.id,
         message: `${crew.name} needs ${need.shadeUnits} shade canopies for ${crew.size} workers at ${maxTemp}°F; plan has ${p.shadeUnits} (§3395(d)).`,
+        short: `${p.shadeUnits} of ${need.shadeUnits} tents`,
       });
     }
     if (p.waterGallons < need.waterGallons) {
@@ -97,6 +100,7 @@ export function checkPlan(plan: ShiftPlan, crews: Crew[], risks: HourlyRisk[]): 
         rule: "water_quart_hour",
         crewId: crew.id,
         message: `${crew.name} needs ${need.waterGallons} gal of water (1 qt per worker per hour); plan has ${p.waterGallons} (§3395(c)).`,
+        short: `${p.waterGallons} of ${need.waterGallons} gal`,
       });
     }
   }
