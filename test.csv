@@ -1,0 +1,41 @@
+text,label,lang
+My buddy is very thirsty and tired.,warning,en
+I think I have gotten a heat rash after working in the sun.,warning,en
+I've worked really hard and I'm sweating a lot with heavy cramps.,warning,en
+ਮੈਨੂੰ ਬਹੁਤ ਪਿਆਸ ਲੱਗੀ ਹੈ ਅਤੇ ਮੈਨੂੰ ਪਸੀਨਾ ਆ ਰਿਹਾ ਹੈ।,warning,pa
+ਮੇਰੇ ਦੋਸਤ ਨੂੰ ਕੰਮ ਕਰਨ ਤੋਂ ਬਾਅਦ ਗਰਮੀ ਵਿੱਚ ਕੜਵੱਲ ਆਉਂਦੀ ਹੈ,warning,pa
+ਉਹ ਬਹੁਤ ਥੱਕਿਆ ਹੋਇਆ ਹੈ ਅਤੇ ਉਸ ਨੂੰ ਗਰਮੀ ਕਾਰਨ ਧੱਫੜ ਨਿਕਲ ਆਏ ਹਨ।,warning,pa
+¡Podría darme un calambre debido a que estoy sudando!,warning,es
+Parece que mi amiga tiene una erupción de calor,warning,es
+Te ves muy sediento y cansado,warning,es
+"Man, I'm tired after that harvest! I may have heat rashes too.",warning,en
+I just have normal tiredness because its a litle hot.,ok,en
+When is our next break?,ok,en
+I'm feeling fine and I am ready to work some more!,ok,en
+ਕੀ ਮੈਨੂੰ ਥੋੜ੍ਹਾ ਪਾਣੀ ਮਿਲ ਸਕਦਾ ਹੈ?,ok,pa
+"ਮੈਂ ਅਤੇ ਮੇਰਾ ਦੋਸਤ ਥੋੜ੍ਹੇ ਥੱਕੇ ਹੋਏ ਹਾਂ, ਪਰ ਅਸੀਂ ਠੀਕ-ਠਾਕ ਹਾਂ।",ok,pa
+ਕੀ ਮੈਨੂੰ ਥੋੜ੍ਹਾ ਆਰਾਮ ਮਿਲ ਸਕਦਾ ਹੈ? ਮੈਂ ਥੋੜ੍ਹਾ ਥੱਕ ਗਿਆ ਹਾਂ।,ok,pa
+Bebe un poco de agua y siéntate para el descanso.,ok,es
+"Tío, te ves con muchísima energía.",ok,es
+Podemos sentarnos después de que coseches ese maíz.,ok,es
+"ਠੀਕ ਹੈ, ਚਲੋ ਵਾਪਸ ਕੰਮ 'ਤੇ ਲੱਗਦੇ ਹਾਂ, ਕਿਉਂਕਿ ਅਸੀਂ ਠੀਕ ਹਾਂ।",ok,pa
+Help! My friend is having a seizure! He needs water.,emergency,en
+I'm confused. I stopped sweatng but my body temperature is s,emergency,en
+His speech is really slurred and he has really dry skin thats hot,emergency,en
+"ਮਦਦ ਕਰੋ, ਮੇਰੇ ਸਰੀਰ ਦਾ ਤਾਪਮਾਨ ਲਗਾਤਾਰ ਵਧ ਰਿਹਾ ਹੈ।",emergency,pa
+ਉਸ ਦੀ ਚਮੜੀ ਬਹੁਤ ਖੁਸ਼ਕ ਅਤੇ ਗਰਮ ਹੈ।,emergency,pa
+"ਉਸਨੂੰ ਦੌਰਾ ਪੈ ਰਿਹਾ ਹੈ, ਭੱਜੋ, ਉਸਦੇ ਲਈ ਪਾਣੀ ਲੈ ਕੇ ਆਓ!",emergency,pa
+"¡Llévenselo, creo que está teniendo una convulsión!",emergency,es
+"Ya no está sudando, pero habla de forma slurred.",emergency,es
+Tienes la piel muy seca y con costras.,emergency,es
+La temperatura corporal de mi amigo está subiendo rápidame,emergency,es
+"Man, I'm really dizzy and my heart's beating really hard.",heat_exhaustion,en
+My partner is about to vomit. Yuck!,heat_exhaustion,en
+Dude your skin is pale and you look really weak.,heat_exhaustion,en
+ਉਸ ਦੀ ਚਮੜੀ ਭੂਤ ਵਾਂਗ ਫਿੱਕੀ ਹੈ।,heat_exhaustion,pa
+"ਮੈਨੂੰ ਮਦਦ ਚਾਹੀਦੀ ਹੈ, ਮੈਨੂੰ ਬਹੁਤ ਚੱਕਰ ਆ ਰਹੇ ਹਨ।",heat_exhaustion,pa
+"ਬੈਠ ਜਾਓ, ਤੁਸੀਂ ਬਹੁਤ ਕਮਜ਼ੋਰ ਹੋ ਅਤੇ ਤੁਹਾਡੀ ਨਬਜ਼ ਬਹੁਤ ਤੇਜ਼ ਚੱਲ ਰਹੀ ਹੈ।",heat_exhaustion,pa
+Me siento muy nauseabundo,heat_exhaustion,es
+Necesita más apoyo; se ve muy pálido y débil.,heat_exhaustion,es
+Siento que el corazón se me sale del pecho.,heat_exhaustion,es
+Estoy muy agotado debido al calor y me siento débil.,heat_exhaustion,es
