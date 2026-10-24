@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import { QRCodeSVG } from "qrcode.react";
 import type { AgentEvent, AgentId, Crew, Field, HourlyRisk, ShiftPlan, TriageLabel } from "@/lib/types";
 import { AlertFeed } from "./AlertFeed";
+import { RadioBox } from "./RadioBox";
 import { AgentPanel, type AgentCard } from "./AgentPanel";
 import { PlanView } from "./PlanView";
 import { BAND_COLOR } from "./bands";
@@ -257,6 +258,7 @@ export function Command({ fields, replayDate }: { fields: Field[]; replayDate: s
           <>
             <h2 className="font-display text-2xl">Crew check-ins</h2>
             <AlertFeed planId={final.id} crews={crews} onAlert={onAlert} />
+            <RadioBox planId={final.id} crews={crews} />
           </>
         )}
         <h2 className="font-display text-2xl">Agents</h2>

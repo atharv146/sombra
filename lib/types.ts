@@ -74,6 +74,7 @@ export interface ShiftPlan {
   violations: RuleViolation[]; // must be empty before the plan can be sent
   briefings: Partial<Record<Lang, string>>; // what the phone reads aloud
   summary: string;
+  crewInfo?: Crew[]; // names, sizes and pay rates, for the phone page
 }
 
 export type AgentId = "cielo" | "ley" | "cuadrilla" | "voz" | "critico" | "medic";
@@ -104,7 +105,20 @@ export interface CheckIn {
   workerId: string; // no names stored
   lang: Lang;
   transcript: string;
+  english?: string; // translation for the crew boss
   triage: TriageResult;
   medic?: { label: TriageLabel; steps: string[] }; // LLM second opinion + first aid
   at: string; // ISO
+}
+
+// Crew radio: boss <-> workers, every message stored with all three translations.
+export interface RadioMessage {
+  id: string;
+  planId: string;
+  from: "boss" | "worker";
+  crewId?: string; // boss messages without crewId go to every crew
+  workerId?: string;
+  lang: Lang; // language it was said in
+  text: Record<Lang, string>;
+  at: string;
 }

@@ -78,6 +78,7 @@ export function AlertFeed({ planId, crews, onAlert }: { planId: string; crews: C
               </span>
             </div>
             <p className="mt-2 font-display text-lg leading-snug">“{c.transcript}”</p>
+            {c.english && c.lang !== "en" && <p className="text-sm">→ {c.english}</p>}
             <p className="mt-2 font-mono text-[11px] text-[var(--muted)]">
               {c.triage.model} → {c.triage.label}
               {score !== undefined ? ` ${score.toFixed(2)}` : ""}

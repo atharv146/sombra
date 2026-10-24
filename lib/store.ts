@@ -1,7 +1,7 @@
 // Plan + check-in storage. Uses Upstash Redis over REST when its env vars exist (Vercel → Storage → Upstash),
 // otherwise in-memory, which is fine for `next dev` on one machine.
 import "server-only";
-import type { CheckIn, ShiftPlan } from "./types";
+import type { CheckIn, RadioMessage, ShiftPlan } from "./types";
 
 const URL = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
 const TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
@@ -45,4 +45,21 @@ export async function listCheckIns(planId: string): Promise<CheckIn[]> {
   if (!URL) return mem.checkins.filter((c) => c.planId === planId);
   const raw = await redis<string[]>("LRANGE", `checkins:${planId}`, 0, -1);
   return raw.map((r) => JSON.parse(r) as CheckIn);
+}
+
+const memRadio: RadioMessage[] = ((globalThis as unknown as { __sombraRadio?: RadioMessage[] }).__sombraRadio ??= []);
+
+export async function addMessage(m: RadioMessage): Promise<void> {
+  if (!URL) {
+    memRadio.push(m);
+    return;
+  }
+  await redis("RPUSH", `radio:${m.planId}`, JSON.stringify(m));
+  await redis("EXPIRE", `radio:${m.planId}`, TTL);
+}
+
+export async function listMessages(planId: string): Promise<RadioMessage[]> {
+  if (!URL) return memRadio.filter((m) => m.planId === planId);
+  const raw = await redis<string[]>("LRANGE", `radio:${planId}`, 0, -1);
+  return raw.map((r) => JSON.parse(r) as RadioMessage);
 }

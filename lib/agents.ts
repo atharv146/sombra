@@ -107,6 +107,7 @@ export async function runSwarm(input: SwarmInput, emit: Emit): Promise<ShiftPlan
     violations: [],
     briefings: {},
     summary: "Your usual schedule",
+    crewInfo: crews,
   };
   plan.violations = checkPlan(plan, crews, risks);
   emit({ type: "plan", plan, revision: 0 });
