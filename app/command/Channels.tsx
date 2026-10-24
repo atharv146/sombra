@@ -40,7 +40,12 @@ export function Channels({
   const [sel, setSel] = useState(crews[0]?.id ?? "");
   const [medic, setMedic] = useState<Record<string, Medic>>({});
   const [text, setText] = useState("");
-  const [busy, setBusy] = useState<"" | "chat" | "alert">("");
+  const [busy, setBusy] = useState<"" | RadioMessage["kind"]>("");
+  const [, tick] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => tick((n) => n + 1), 30_000); // refresh "no reply yet" ages
+    return () => clearInterval(id);
+  }, []);
   const [pending, setPending] = useState<RadioMessage | null>(null);
   const listRef = useRef<HTMLOListElement>(null);
   const seen = useRef(new Set<string>());
@@ -82,7 +87,7 @@ export function Channels({
   }, [planId, onAlert, sel]);
 
   // The sent message shows at once (as "sending") and stays in the thread with its timestamp.
-  async function send(kind: "chat" | "alert", crewId?: string) {
+  async function send(kind: RadioMessage["kind"], crewId?: string) {
     if (kind === "chat" && !text.trim()) return;
     const draft = kind === "chat" ? text : "";
     const temp: RadioMessage = {
@@ -92,7 +97,7 @@ export function Channels({
       crewId,
       lang: "en",
       kind,
-      text: { en: draft || "Heat alert", es: "", pa: "" },
+      text: { en: draft || (kind === "checkin" ? "How do you feel? (sent to every phone in this crew)" : "Heat alert"), es: "", pa: "" },
       at: new Date().toISOString(),
     };
     setPending(temp);
@@ -161,8 +166,8 @@ export function Channels({
         {thread.map((m) => {
           if (m.from === "boss")
             return (
-              <li key={m.id} className={`self-end max-w-[85%] rounded-xl px-3 py-2 text-sm ${m.kind === "alert" ? "bg-[#b3261e] text-white" : "bg-[var(--ink)] text-[var(--bg)]"}`}>
-                <p>{m.kind === "alert" ? "🚨 " : ""}{m.text.en}</p>
+              <li key={m.id} className={`self-end max-w-[85%] rounded-xl px-3 py-2 text-sm ${m.kind === "alert" ? "bg-[#b3261e] text-white" : m.kind === "checkin" ? "bg-[#2f6f8f] text-white" : "bg-[var(--ink)] text-[var(--bg)]"}`}>
+                <p>{m.text.en}</p>
                 <p className="mt-1 text-[11px] opacity-70">
                   You · {time(m.at)} · {m.crewId ? "this crew" : "all crews"} · {m.id.startsWith("pending") ? "translating and sending…" : "delivered in Spanish and Punjabi"}
                 </p>
@@ -180,6 +185,11 @@ export function Channels({
                 <span className="text-[var(--muted)]">
                   worker {m.workerId} · {time(m.at)}
                 </span>
+                {m.intent !== "other" && !thread.some((x) => x.from === "boss" && x.at > m.at) && Date.now() - +new Date(m.at) > 120_000 && (
+                  <span className="rounded-full bg-[#f3e2b8] px-2 py-0.5 font-semibold text-[#6b4e10]">
+                    No reply yet · {Math.round((Date.now() - +new Date(m.at)) / 60_000)} min
+                  </span>
+                )}
               </div>
               <p className="mt-1 font-medium">{m.text.en}</p>
               {m.original && m.original !== m.text.en && <p className="text-[var(--muted)]">“{m.original}”</p>}
@@ -225,6 +235,9 @@ export function Channels({
         />
         <button disabled={!!busy} className="rounded-full bg-[var(--ink)] px-4 text-sm text-[var(--bg)] disabled:opacity-60">
           {busy === "chat" ? "Translating…" : "Send"}
+        </button>
+        <button type="button" onClick={() => send("checkin", sel)} disabled={!!busy} className="rounded-full border border-[#2f6f8f] px-3 text-xs font-semibold text-[#2f6f8f]" title="Every phone in this crew asks the worker how they feel">
+          Ask how they feel
         </button>
         <button type="button" onClick={() => send("alert", sel)} disabled={!!busy} className="rounded-full border border-[#b3261e] px-3 text-xs font-semibold text-[#b3261e]">
           Alert crew

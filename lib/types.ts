@@ -128,7 +128,7 @@ export interface RadioMessage {
   lang: string; // language it was said in (any language for workers)
   original?: string; // exactly what the worker said
   text: Record<Lang, string>;
-  kind: "chat" | "alert"; // alert = full-screen heat alarm on phones
+  kind: "chat" | "alert" | "checkin"; // alert = full-screen heat alarm; checkin = "how do you feel?" prompt
   intent?: "health" | "request" | "question" | "other";
   triage?: TriageResult; // our model, on worker messages
   autoReply?: Record<Lang, string>; // Sombra's instant, specific reply to the worker while the boss reads it

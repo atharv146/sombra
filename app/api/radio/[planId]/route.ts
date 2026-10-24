@@ -2,6 +2,12 @@ import { addMessage, listMessages } from "@/lib/store";
 import { translateAll } from "@/lib/translate";
 import type { Lang, RadioMessage } from "@/lib/types";
 
+const CHECKIN: Record<Lang, string> = {
+  en: "Cool-down check: how do you feel? Tap a button or speak.",
+  es: "Revisión de descanso: ¿cómo te sientes? Toca un botón o habla.",
+  pa: "ਆਰਾਮ ਵੇਲੇ ਜਾਂਚ: ਤੁਸੀਂ ਕਿਵੇਂ ਮਹਿਸੂਸ ਕਰ ਰਹੇ ਹੋ? ਬਟਨ ਦਬਾਓ ਜਾਂ ਬੋਲੋ।",
+};
+
 const HEAT_ALERT: Record<Lang, string> = {
   en: "HEAT ALERT: Stop work now. Go to the shade and drink water. Tell your crew boss if anyone feels sick.",
   es: "ALERTA DE CALOR: Dejen de trabajar ahora. Vayan a la sombra y tomen agua. Avisen al mayordomo si alguien se siente mal.",
@@ -16,9 +22,9 @@ export async function GET(_req: Request, ctx: RouteContext<"/api/radio/[planId]"
 // The crew boss sends a message; it's stored in Spanish, Punjabi and English.
 export async function POST(request: Request, ctx: RouteContext<"/api/radio/[planId]">) {
   const { planId } = await ctx.params;
-  const b = (await request.json()) as { text?: string; lang?: Lang; crewId?: string; kind?: "chat" | "alert" };
-  const kind = b.kind === "alert" ? "alert" : "chat";
-  if (!b.text?.trim() && kind !== "alert") return Response.json({ error: "Empty message" }, { status: 400 });
+  const b = (await request.json()) as { text?: string; lang?: Lang; crewId?: string; kind?: RadioMessage["kind"] };
+  const kind = b.kind === "alert" || b.kind === "checkin" ? b.kind : "chat";
+  if (!b.text?.trim() && kind === "chat") return Response.json({ error: "Empty message" }, { status: 400 });
   const lang = b.lang ?? "en";
   const msg: RadioMessage = {
     id: Math.random().toString(36).slice(2, 10),
@@ -28,7 +34,7 @@ export async function POST(request: Request, ctx: RouteContext<"/api/radio/[plan
     lang,
     kind,
     // The standard heat alert is pre-written in every language, so it never depends on the AI.
-    text: b.text?.trim() ? await translateAll(b.text.slice(0, 500), lang) : HEAT_ALERT,
+    text: kind === "checkin" ? CHECKIN : b.text?.trim() ? await translateAll(b.text.slice(0, 500), lang) : HEAT_ALERT,
     at: new Date().toISOString(),
   };
   await addMessage(msg);

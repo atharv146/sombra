@@ -3,11 +3,12 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { QRCodeSVG } from "qrcode.react";
-import type { AgentEvent, AgentId, Crew, Field, HourlyRisk, ShiftPlan, TriageLabel } from "@/lib/types";
+import type { AgentEvent, AgentId, Crew, Field, HourlyRisk, RadioMessage, ShiftPlan, TriageLabel } from "@/lib/types";
 import { Channels } from "./Channels";
 import { unlockAudio } from "@/lib/alarm";
 import { ImpactPanel } from "./ImpactPanel";
 import { PlayDay } from "./PlayDay";
+import { complianceCsv } from "@/lib/compliance";
 import { SCENARIOS, scenarioFor } from "@/lib/scenarios";
 import { AgentPanel, type AgentCard } from "./AgentPanel";
 import { PlanView } from "./PlanView";
@@ -67,6 +68,17 @@ export function Command({ fields }: { fields: Field[] }) {
       })
       .catch(() => {});
   }, []);
+  async function downloadLog() {
+    if (!final) return;
+    const msgs = (await fetch(`/api/radio/${final.id}`).then((r) => r.json()).catch(() => [])) as RadioMessage[];
+    const blob = new Blob([complianceCsv(final, draft, crews, fields, msgs)], { type: "text/csv" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `sombra-compliance-${final.date}.csv`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
   async function endDay() {
     await fetch("/api/crew/latest", { method: "DELETE" });
     setDraft(null);
@@ -381,9 +393,14 @@ export function Command({ fields }: { fields: Field[] }) {
           <div className="flex items-baseline justify-between">
             <h2 className="font-display text-2xl">Worker phones</h2>
             {final && (
-              <button onClick={endDay} className="text-xs font-semibold text-[#b3261e] underline">
-                End day
-              </button>
+              <span className="flex gap-3">
+                <button onClick={downloadLog} className="text-xs font-semibold underline" title="Schedule, water, shade, fixes, alerts and worker reports as a CSV for your Cal/OSHA records">
+                  Compliance log
+                </button>
+                <button onClick={endDay} className="text-xs font-semibold text-[#b3261e] underline">
+                  End day
+                </button>
+              </span>
             )}
           </div>
           {!final ? (

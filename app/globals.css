@@ -136,3 +136,9 @@ body {
 .play-event {
   animation: card-in 300ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
+
+/* Worker chat: a quiet messaging-app wallpaper (sun, drop, leaf line drawings) behind the thread */
+.chat-bg {
+  background-color: #ebe2d2;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' fill='none' stroke='%23b9a98f' stroke-width='1.2' stroke-linecap='round' opacity='0.55'%3E%3Ccircle cx='22' cy='22' r='6'/%3E%3Cpath d='M22 9v4M22 31v4M9 22h4M31 22h4M13 13l3 3M28 28l3 3M31 13l-3 3M16 28l-3 3'/%3E%3Cpath d='M86 30c0-8 7-14 7-14s7 6 7 14a7 7 0 0 1-14 0z'/%3E%3Cpath d='M30 92c10-14 26-14 34-6-12 2-22 8-34 6zM30 92l22-8'/%3E%3Cpath d='M84 86h18M88 80h10M90 92h6'/%3E%3C/svg%3E");
+}
