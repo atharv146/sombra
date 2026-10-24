@@ -89,3 +89,14 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .agent-card, .agent-pip, .field-dot { animation: none !important; }
 }
+
+/* Worker check-in alerts */
+.alert-card {
+  animation: card-in 420ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.field-dot[data-alert] {
+  --dot: #b3261e !important;
+  width: 22px;
+  height: 22px;
+  animation: ring 0.8s ease-out infinite;
+}

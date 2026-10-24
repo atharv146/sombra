@@ -7,7 +7,7 @@ import type { Field, HourlyRisk } from "@/lib/types";
 import { BAND_COLOR } from "./bands";
 
 // Fields as pulsing dots colored by heat band at the selected hour.
-export function FieldMap({ fields, risks, hour }: { fields: Field[]; risks: HourlyRisk[]; hour: number }) {
+export function FieldMap({ fields, risks, hour, alerts = {} }: { fields: Field[]; risks: HourlyRisk[]; hour: number; alerts?: Record<string, string> }) {
   const el = useRef<HTMLDivElement>(null);
   const map = useRef<MLMap | null>(null);
   const markers = useRef<Record<string, { marker: Marker; dot: HTMLDivElement }>>({});
@@ -53,8 +53,10 @@ export function FieldMap({ fields, risks, hour }: { fields: Field[]; risks: Hour
       m.dot.style.setProperty("--dot", r ? BAND_COLOR[r.band] : "#8a8278");
       m.dot.dataset.band = r?.band ?? "none";
       m.dot.title = r ? `${r.tempF}°F · WBGT ${r.wbgtF}°F` : "";
+      if (alerts[f.id]) m.dot.dataset.alert = alerts[f.id];
+      else delete m.dot.dataset.alert;
     }
-  }, [fields, risks, hour]);
+  }, [fields, risks, hour, alerts]);
 
   return <div ref={el} className="h-full w-full" />;
 }

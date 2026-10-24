@@ -40,11 +40,35 @@ async function* sseJSON(body: ReadableStream) {
   }
 }
 
-// Streams text chunks from whichever provider is configured.
+// Fails fast instead of hanging: 15s to get response headers, 60s for the whole reply.
+function timedFetch(url: string, init: RequestInit) {
+  const ac = new AbortController();
+  const hard = setTimeout(() => ac.abort(new Error("Model timed out")), 60_000);
+  const first = setTimeout(() => ac.abort(new Error("Model didn't respond in 15s")), 15_000);
+  return {
+    res: fetch(url, { ...init, signal: ac.signal }).finally(() => clearTimeout(first)),
+    done: () => clearTimeout(hard),
+  };
+}
+
+// After a failure, skip the model for 2 minutes so every agent falls back instantly instead of each timing out.
+let downUntil = 0;
+
 export async function* streamModel(req: LLMRequest): AsyncGenerator<string> {
+  if (Date.now() < downUntil) throw new Error("Model marked down after a recent failure");
+  try {
+    yield* streamProvider(req);
+  } catch (err) {
+    downUntil = Date.now() + 120_000;
+    throw err;
+  }
+}
+
+// Streams text chunks from whichever provider is configured.
+async function* streamProvider(req: LLMRequest): AsyncGenerator<string> {
   const system = req.json ? `${req.system}\nRespond with one JSON object only, no prose, no code fences.` : req.system;
   if (provider() === "claude") {
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
+    const call = timedFetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
         "content-type": "application/json",
@@ -59,14 +83,19 @@ export async function* streamModel(req: LLMRequest): AsyncGenerator<string> {
         messages: [{ role: "user", content: req.prompt }],
       }),
     });
-    if (!res.ok || !res.body) throw new Error(`Claude ${res.status}: ${await res.text()}`);
-    for await (const evt of sseJSON(res.body)) {
-      if (evt.type === "content_block_delta" && evt.delta?.type === "text_delta") yield evt.delta.text;
+    try {
+      const res = await call.res;
+      if (!res.ok || !res.body) throw new Error(`Claude ${res.status}: ${await res.text()}`);
+      for await (const evt of sseJSON(res.body)) {
+        if (evt.type === "content_block_delta" && evt.delta?.type === "text_delta") yield evt.delta.text;
+      }
+    } finally {
+      call.done();
     }
     return;
   }
 
-  const res = await fetch(
+  const call = timedFetch(
     `https://generativelanguage.googleapis.com/v1beta/models/${req.model || GEMINI_MODEL}:streamGenerateContent?alt=sse`,
     {
       method: "POST",
@@ -81,11 +110,16 @@ export async function* streamModel(req: LLMRequest): AsyncGenerator<string> {
       }),
     },
   );
-  if (!res.ok || !res.body) throw new Error(`Gemini ${res.status}: ${await res.text()}`);
-  for await (const evt of sseJSON(res.body)) {
-    const parts: { text?: string; thought?: boolean }[] = evt.candidates?.[0]?.content?.parts ?? [];
-    const text = parts.filter((p) => !p.thought).map((p) => p.text ?? "").join("");
-    if (text) yield text;
+  try {
+    const res = await call.res;
+    if (!res.ok || !res.body) throw new Error(`Gemini ${res.status}: ${await res.text()}`);
+    for await (const evt of sseJSON(res.body)) {
+      const parts: { text?: string; thought?: boolean }[] = evt.candidates?.[0]?.content?.parts ?? [];
+      const text = parts.filter((p) => !p.thought).map((p) => p.text ?? "").join("");
+      if (text) yield text;
+    }
+  } finally {
+    call.done();
   }
 }
 

@@ -1,9 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { QRCodeSVG } from "qrcode.react";
-import type { AgentEvent, AgentId, Crew, Field, HourlyRisk, ShiftPlan } from "@/lib/types";
+import type { AgentEvent, AgentId, Crew, Field, HourlyRisk, ShiftPlan, TriageLabel } from "@/lib/types";
+import { AlertFeed } from "./AlertFeed";
 import { AgentPanel, type AgentCard } from "./AgentPanel";
 import { PlanView } from "./PlanView";
 import { BAND_COLOR } from "./bands";
@@ -41,6 +42,13 @@ export function Command({ fields, replayDate }: { fields: Field[]; replayDate: s
   const [hour, setHour] = useState(14);
   const [running, setRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [alerts, setAlerts] = useState<Record<string, TriageLabel>>({});
+  const [lastRun, setLastRun] = useState<{ at: number; e: AgentEvent }[] | null>(null);
+  const [replaying, setReplaying] = useState(false);
+  const onAlert = useCallback(
+    (crewId: string, label: TriageLabel) => setAlerts((a) => ({ ...a, [crewId]: label })),
+    [],
+  );
 
   const patch = (id: AgentId, f: (c: AgentCard) => AgentCard) =>
     setCards((cs) => (cs.some((c) => c.id === id) ? cs.map((c) => (c.id === id ? f(c) : c)) : [...cs, f({ ...AGENT_META[id], status: "idle", text: "" })]));
@@ -62,14 +70,45 @@ export function Command({ fields, replayDate }: { fields: Field[]; replayDate: s
     }
   }
 
+  // ?demo=1: replay a recorded real run at its original pace, for when wifi or the model API fails.
+  async function replay() {
+    setReplaying(true);
+    const events = (await fetch("/demo/run.json").then((r) => r.json())) as { at: number; e: AgentEvent }[];
+    const finalPlan = [...events].reverse().find((x) => x.e.type === "plan")?.e;
+    if (finalPlan?.type === "plan") {
+      fetch("/api/demo", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ kind: "restore", plan: finalPlan.plan }) }).catch(() => {});
+    }
+    let prev = 0;
+    for (const { at, e } of events) {
+      await new Promise((r) => setTimeout(r, Math.min(at - prev, 1200)));
+      prev = at;
+      handle(e);
+    }
+  }
+
+  async function saveDemo() {
+    const res = await fetch("/api/demo", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ kind: "record", events: lastRun }) });
+    setError(res.ok ? null : "Couldn't save the demo run");
+    setLastRun(null);
+  }
+
   async function run() {
     setRunning(true);
     setError(null);
     setCards(fresh());
     setDraft(null);
     setFinal(null);
+    setAlerts({});
+    setReplaying(false);
     const today = new Date().toLocaleDateString("en-CA", { timeZone: "America/Los_Angeles" });
+    const t0 = performance.now();
+    const log: { at: number; e: AgentEvent }[] = [];
+    const take = (e: AgentEvent) => {
+      log.push({ at: Math.round(performance.now() - t0), e });
+      handle(e);
+    };
     try {
+      if (new URLSearchParams(window.location.search).has("demo")) return await replay();
       const res = await fetch("/api/plan", {
         method: "POST",
         headers: { "content-type": "application/json" },
@@ -84,8 +123,9 @@ export function Command({ fields, replayDate }: { fields: Field[]; replayDate: s
         buf += value;
         const parts = buf.split("\n\n");
         buf = parts.pop() ?? "";
-        for (const p of parts) if (p.startsWith("data: ")) handle(JSON.parse(p.slice(6)));
+        for (const p of parts) if (p.startsWith("data: ")) take(JSON.parse(p.slice(6)));
       }
+      setLastRun(log);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
@@ -121,7 +161,7 @@ export function Command({ fields, replayDate }: { fields: Field[]; replayDate: s
         </header>
 
         <div className="relative h-[340px] overflow-hidden rounded-xl border border-[var(--line)]">
-          <FieldMap fields={fields} risks={risks} hour={hour} />
+          <FieldMap fields={fields} risks={risks} hour={hour} alerts={Object.fromEntries(Object.entries(alerts).flatMap(([crewId, label]) => { const c = crews.find((x) => x.id === crewId); return c && label !== "ok" ? [[c.fieldId, label]] : []; }))} />
         </div>
 
         {risks.length > 0 && (
@@ -189,6 +229,12 @@ export function Command({ fields, replayDate }: { fields: Field[]; replayDate: s
               {running ? "Agents working…" : "Plan a safe day"}
             </button>
             {error && <p className="text-sm text-[#b3261e]">Something failed: {error}</p>}
+            {replaying && <p className="text-xs text-[var(--muted)]">Demo mode: replaying a recorded real run.</p>}
+            {lastRun && process.env.NODE_ENV === "development" && (
+              <button onClick={saveDemo} className="self-start text-xs underline">
+                Save this run as the demo recording
+              </button>
+            )}
           </div>
         </section>
 
@@ -197,6 +243,12 @@ export function Command({ fields, replayDate }: { fields: Field[]; replayDate: s
       </div>
 
       <aside className="flex flex-col gap-4 lg:sticky lg:top-6 lg:self-start">
+        {final && final.violations.length === 0 && (
+          <>
+            <h2 className="font-display text-2xl">Crew check-ins</h2>
+            <AlertFeed planId={final.id} crews={crews} onAlert={onAlert} />
+          </>
+        )}
         <h2 className="font-display text-2xl">Agents</h2>
         <AgentPanel cards={cards} />
         {final && final.violations.length === 0 && crewUrl && (
@@ -212,7 +264,7 @@ export function Command({ fields, replayDate }: { fields: Field[]; replayDate: s
           </section>
         )}
         <p className="text-[11px] text-[var(--muted)]">
-          Weather: Open-Meteo (CC BY 4.0). Map © OpenStreetMap contributors, OpenFreeMap. Rules: Cal/OSHA §3395, §5141.1.
+          Weather: Open-Meteo (CC BY 4.0). Map © OpenStreetMap contributors, OpenFreeMap. Rules: Cal/OSHA §3395, §5141.1. <a href="/about" className="underline">How it works &amp; credits</a>
         </p>
       </aside>
     </div>
