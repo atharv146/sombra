@@ -4,7 +4,7 @@ import "server-only";
 import type { CheckIn, ShiftPlan } from "./types";
 
 const g = globalThis as unknown as { __sombra?: { plans: Map<string, ShiftPlan>; checkins: CheckIn[] } };
-const db = (g.__sombra ??= { plans: new Map(), checkins: [] });
+const db = (g.__sombra ??= { plans: new Map<string, ShiftPlan>(), checkins: [] as CheckIn[] });
 
 export async function savePlan(plan: ShiftPlan): Promise<void> {
   db.plans.set(plan.id, plan);

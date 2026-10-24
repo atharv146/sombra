@@ -1,0 +1,5 @@
+[
+  { "id": "french-camp", "name": "French Camp tomatoes", "crop": "processing tomatoes", "lat": 37.884, "lon": -121.262, "shade": "none" },
+  { "id": "ripon", "name": "Ripon almond orchard", "crop": "almonds", "lat": 37.735, "lon": -121.15, "shade": "orchard" },
+  { "id": "linden", "name": "Linden cherry orchard", "crop": "cherries", "lat": 38.02, "lon": -121.09, "shade": "partial" }
+]
