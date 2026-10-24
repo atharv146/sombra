@@ -111,14 +111,18 @@ export interface CheckIn {
   at: string; // ISO
 }
 
-// Crew radio: boss <-> workers, every message stored with all three translations.
+// Crew channel message: boss <-> one crew (or all crews), stored with all three translations.
 export interface RadioMessage {
   id: string;
   planId: string;
   from: "boss" | "worker";
   crewId?: string; // boss messages without crewId go to every crew
   workerId?: string;
-  lang: Lang; // language it was said in
+  lang: string; // language it was said in (any language for workers)
+  original?: string; // exactly what the worker said
   text: Record<Lang, string>;
+  kind: "chat" | "alert"; // alert = full-screen heat alarm on phones
+  intent?: "health" | "request" | "question" | "other";
+  triage?: TriageResult; // our model, on worker messages
   at: string;
 }

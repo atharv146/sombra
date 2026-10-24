@@ -2,46 +2,53 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
-import { canListen, listen, speak, voiceFor } from "@/lib/speech";
+import { alarm, unlockAudio } from "@/lib/alarm";
+import { canListen, listen, speakAny, startRecording } from "@/lib/speech";
 import { toMin } from "@/lib/rules";
-import type { CheckIn, Lang, RadioMessage, ShiftPlan, TriageLabel } from "@/lib/types";
+import type { Lang, RadioMessage, ShiftPlan, TriageLabel } from "@/lib/types";
 
 // UI text per language. Punjabi strings should be checked by a Punjabi speaker.
 const T = {
   es: {
     today: "Tu día", listen: "Escuchar", work: "Trabajo", meal: "Comida", cooldown: "Descanso pagado", travel: "Traslado",
-    radio: "Mensajes del mayordomo", none: "Sin mensajes todavía", ask: "¿Cómo te sientes?", tap: "Toca y habla",
-    listening: "Escuchando…", type: "O escribe aquí", send: "Enviar", sent: "Enviado a tu mayordomo", noVoice: "Este teléfono no tiene voz en este idioma.",
-    loading: "Cargando tu plan…", missing: "No encontramos este plan. Pide un código nuevo a tu mayordomo.", crew: "Tu cuadrilla",
-    result: {
+    thread: "Mensajes con tu mayordomo", none: "Sin mensajes todavía", ask: "¿Cómo te sientes?", hint: "Habla en cualquier idioma",
+    tap: "Toca para hablar", stop: "Toca para enviar", sending: "Enviando…", type: "O escribe aquí", send: "Enviar",
+    you: "Tú", boss: "Mayordomo", loading: "Cargando tu plan…", missing: "No encontramos este plan. Pide un código nuevo a tu mayordomo.",
+    crew: "Tu cuadrilla", enable: "Toca aquí para activar alertas con sonido", alertTitle: "ALERTA DE CALOR", safe: "Entendido, voy a la sombra",
+    sent: "Enviado a tu mayordomo. Te responde aquí.", heard: "No te escuché. Intenta otra vez o escribe.",
+    reply: {
       ok: "Gracias. Sigue tomando agua cada 15 minutos.",
-      warning: "Toma un descanso pagado en la sombra ahora y toma agua.",
-      heat_exhaustion: "Para de trabajar. Ve a la sombra. Tu mayordomo ya sabe.",
-      emergency: "Avísale a tu mayordomo ahora. Llama al 911.",
+      warning: "Toma un descanso pagado en la sombra ahora y toma agua. Tu mayordomo ya sabe.",
+      heat_exhaustion: "Para de trabajar. Ve a la sombra y toma agua despacio. Tu mayordomo ya viene.",
+      emergency: "Emergencia: avisamos a tu mayordomo. Llama al 911.",
     },
   },
   pa: {
     today: "ਤੁਹਾਡਾ ਦਿਨ", listen: "ਸੁਣੋ", work: "ਕੰਮ", meal: "ਖਾਣਾ", cooldown: "ਤਨਖਾਹ ਵਾਲਾ ਆਰਾਮ", travel: "ਸਫ਼ਰ",
-    radio: "ਸੁਪਰਵਾਈਜ਼ਰ ਦੇ ਸੁਨੇਹੇ", none: "ਅਜੇ ਕੋਈ ਸੁਨੇਹਾ ਨਹੀਂ", ask: "ਤੁਸੀਂ ਕਿਵੇਂ ਮਹਿਸੂਸ ਕਰ ਰਹੇ ਹੋ?", tap: "ਦਬਾਓ ਅਤੇ ਬੋਲੋ",
-    listening: "ਸੁਣ ਰਿਹਾ ਹੈ…", type: "ਜਾਂ ਇੱਥੇ ਲਿਖੋ", send: "ਭੇਜੋ", sent: "ਸੁਪਰਵਾਈਜ਼ਰ ਨੂੰ ਭੇਜਿਆ", noVoice: "ਇਸ ਫ਼ੋਨ ਵਿੱਚ ਪੰਜਾਬੀ ਆਵਾਜ਼ ਨਹੀਂ ਹੈ।",
-    loading: "ਯੋਜਨਾ ਲੋਡ ਹੋ ਰਹੀ ਹੈ…", missing: "ਇਹ ਯੋਜਨਾ ਨਹੀਂ ਮਿਲੀ। ਸੁਪਰਵਾਈਜ਼ਰ ਤੋਂ ਨਵਾਂ ਕੋਡ ਮੰਗੋ।", crew: "ਤੁਹਾਡਾ ਕਰੂ",
-    result: {
+    thread: "ਸੁਪਰਵਾਈਜ਼ਰ ਨਾਲ ਸੁਨੇਹੇ", none: "ਅਜੇ ਕੋਈ ਸੁਨੇਹਾ ਨਹੀਂ", ask: "ਤੁਸੀਂ ਕਿਵੇਂ ਮਹਿਸੂਸ ਕਰ ਰਹੇ ਹੋ?", hint: "ਕਿਸੇ ਵੀ ਭਾਸ਼ਾ ਵਿੱਚ ਬੋਲੋ",
+    tap: "ਬੋਲਣ ਲਈ ਦਬਾਓ", stop: "ਭੇਜਣ ਲਈ ਦਬਾਓ", sending: "ਭੇਜ ਰਿਹਾ ਹੈ…", type: "ਜਾਂ ਇੱਥੇ ਲਿਖੋ", send: "ਭੇਜੋ",
+    you: "ਤੁਸੀਂ", boss: "ਸੁਪਰਵਾਈਜ਼ਰ", loading: "ਯੋਜਨਾ ਲੋਡ ਹੋ ਰਹੀ ਹੈ…", missing: "ਇਹ ਯੋਜਨਾ ਨਹੀਂ ਮਿਲੀ। ਸੁਪਰਵਾਈਜ਼ਰ ਤੋਂ ਨਵਾਂ ਕੋਡ ਮੰਗੋ।",
+    crew: "ਤੁਹਾਡਾ ਕਰੂ", enable: "ਆਵਾਜ਼ ਵਾਲੇ ਅਲਰਟ ਚਾਲੂ ਕਰਨ ਲਈ ਇੱਥੇ ਦਬਾਓ", alertTitle: "ਗਰਮੀ ਦੀ ਚੇਤਾਵਨੀ", safe: "ਸਮਝ ਗਿਆ, ਛਾਂ ਵਿੱਚ ਜਾ ਰਿਹਾ ਹਾਂ",
+    sent: "ਸੁਪਰਵਾਈਜ਼ਰ ਨੂੰ ਭੇਜਿਆ। ਜਵਾਬ ਇੱਥੇ ਆਵੇਗਾ।", heard: "ਸੁਣਿਆ ਨਹੀਂ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ ਜਾਂ ਲਿਖੋ।",
+    reply: {
       ok: "ਧੰਨਵਾਦ। ਹਰ 15 ਮਿੰਟ ਪਾਣੀ ਪੀਂਦੇ ਰਹੋ।",
-      warning: "ਹੁਣੇ ਛਾਂ ਵਿੱਚ ਤਨਖਾਹ ਵਾਲਾ ਆਰਾਮ ਕਰੋ ਅਤੇ ਪਾਣੀ ਪੀਓ।",
-      heat_exhaustion: "ਕੰਮ ਬੰਦ ਕਰੋ। ਛਾਂ ਵਿੱਚ ਜਾਓ। ਸੁਪਰਵਾਈਜ਼ਰ ਨੂੰ ਪਤਾ ਹੈ।",
-      emergency: "ਹੁਣੇ ਸੁਪਰਵਾਈਜ਼ਰ ਨੂੰ ਦੱਸੋ। 911 'ਤੇ ਕਾਲ ਕਰੋ।",
+      warning: "ਹੁਣੇ ਛਾਂ ਵਿੱਚ ਤਨਖਾਹ ਵਾਲਾ ਆਰਾਮ ਕਰੋ ਅਤੇ ਪਾਣੀ ਪੀਓ। ਸੁਪਰਵਾਈਜ਼ਰ ਨੂੰ ਪਤਾ ਹੈ।",
+      heat_exhaustion: "ਕੰਮ ਬੰਦ ਕਰੋ। ਛਾਂ ਵਿੱਚ ਜਾਓ ਅਤੇ ਹੌਲੀ ਹੌਲੀ ਪਾਣੀ ਪੀਓ। ਸੁਪਰਵਾਈਜ਼ਰ ਆ ਰਿਹਾ ਹੈ।",
+      emergency: "ਐਮਰਜੈਂਸੀ: ਸੁਪਰਵਾਈਜ਼ਰ ਨੂੰ ਦੱਸ ਦਿੱਤਾ ਹੈ। 911 'ਤੇ ਕਾਲ ਕਰੋ।",
     },
   },
   en: {
-    today: "Your day", listen: "Listen", work: "Work", meal: "Meal", cooldown: "Paid break", travel: "Travel",
-    radio: "Messages from your crew boss", none: "No messages yet", ask: "How do you feel?", tap: "Tap and speak",
-    listening: "Listening…", type: "Or type here", send: "Send", sent: "Sent to your crew boss", noVoice: "This phone has no voice for this language.",
-    loading: "Loading your plan…", missing: "We couldn't find this plan. Ask your crew boss for a new code.", crew: "Your crew",
-    result: {
+    today: "Your day", listen: "Listen", work: "Work", meal: "Lunch", cooldown: "Paid break", travel: "Travel",
+    thread: "Messages with your crew boss", none: "No messages yet", ask: "How do you feel?", hint: "Speak in any language",
+    tap: "Tap to talk", stop: "Tap to send", sending: "Sending…", type: "Or type here", send: "Send",
+    you: "You", boss: "Crew boss", loading: "Loading your plan…", missing: "We couldn't find this plan. Ask your crew boss for a new code.",
+    crew: "Your crew", enable: "Tap here to turn on alerts with sound", alertTitle: "HEAT ALERT", safe: "Got it, going to the shade",
+    sent: "Sent to your crew boss. They'll reply here.", heard: "Didn't catch that. Try again or type.",
+    reply: {
       ok: "Thanks. Keep drinking water every 15 minutes.",
-      warning: "Take a paid break in the shade now and drink water.",
-      heat_exhaustion: "Stop working. Go to the shade. Your crew boss knows.",
-      emergency: "Tell your crew boss now. Call 911.",
+      warning: "Take a paid break in the shade now and drink water. Your crew boss knows.",
+      heat_exhaustion: "Stop working. Go to the shade and sip water slowly. Your crew boss is coming.",
+      emergency: "Emergency: your crew boss has been told. Call 911.",
     },
   },
 } satisfies Record<Lang, unknown>;
@@ -51,8 +58,13 @@ const LANGS: { id: Lang; label: string }[] = [
   { id: "pa", label: "ਪੰਜਾਬੀ" },
   { id: "en", label: "English" },
 ];
-
 const TONE: Record<TriageLabel, string> = { ok: "#3f6b3a", warning: "#b7862a", heat_exhaustion: "#c85f22", emergency: "#b3261e" };
+const time = (iso: string) => new Date(iso).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+const ampm = (hhmm: string) => {
+  const m = toMin(hhmm);
+  const h = Math.floor(m / 60);
+  return `${((h + 11) % 12) + 1}:${String(m % 60).padStart(2, "0")}${h < 12 ? "am" : "pm"}`;
+};
 
 function stored(key: string, fallback: string) {
   try {
@@ -72,15 +84,19 @@ export function CrewView() {
   const [plan, setPlan] = useState<ShiftPlan | null>(null);
   const [missing, setMissing] = useState(false);
   const [lang, setLangState] = useState<Lang>("es");
-  const [crewId, setCrewId] = useState<string>("");
+  const [crewId, setCrewId] = useState("");
   const [workerId, setWorkerId] = useState("w-anon");
-  const [radio, setRadio] = useState<RadioMessage[]>([]);
-  const [listening, setListening] = useState(false);
+  const [msgs, setMsgs] = useState<RadioMessage[]>([]);
+  const [rec, setRec] = useState<null | { stop: () => Promise<Blob> }>(null);
+  const [busy, setBusy] = useState(false);
   const [typed, setTyped] = useState("");
-  const [last, setLast] = useState<CheckIn | null>(null);
-  const [hasVoice, setHasVoice] = useState(true);
+  const [note, setNote] = useState("");
+  const [whisper, setWhisper] = useState(false);
+  const [armed, setArmed] = useState(false);
+  const [takeover, setTakeover] = useState<RadioMessage | null>(null);
   const [now, setNow] = useState(0);
-  const heard = useRef(new Set<string>());
+  const seen = useRef(new Set<string>());
+  const loaded = useRef(false);
   const t = T[lang];
 
   useEffect(() => {
@@ -93,6 +109,10 @@ export function CrewView() {
     setWorkerId(id);
     const d = new Date();
     setNow(d.getHours() * 60 + d.getMinutes());
+    fetch("/api/transcribe")
+      .then((r) => r.json())
+      .then((x) => setWhisper(!!x.enabled))
+      .catch(() => {});
     fetch(`/api/crew/${planId}`)
       .then((r) => (r.ok ? r.json() : Promise.reject()))
       .then((p: ShiftPlan) => {
@@ -102,64 +122,101 @@ export function CrewView() {
       .catch(() => setMissing(true));
   }, [planId]);
 
+  // Poll this crew's channel. New boss messages are read aloud; heat alerts take over the screen with an alarm.
   useEffect(() => {
-    const check = () => setHasVoice(!!voiceFor(lang));
-    check();
-    window.speechSynthesis?.addEventListener?.("voiceschanged", check);
-    return () => window.speechSynthesis?.removeEventListener?.("voiceschanged", check);
-  }, [lang]);
-
-  // Poll the crew radio; read new boss messages aloud in my language.
-  useEffect(() => {
+    if (!crewId) return;
     let alive = true;
     const tick = async () => {
       try {
         const list = (await fetch(`/api/radio/${planId}`, { cache: "no-store" }).then((r) => r.json())) as RadioMessage[];
         if (!alive) return;
-        const mine = list.filter((m) => !m.crewId || m.crewId === crewId);
-        const fresh = mine.filter((m) => !heard.current.has(m.id));
-        const first = heard.current.size === 0;
-        fresh.forEach((m) => heard.current.add(m.id));
-        if (!first && fresh.length) speak(fresh[fresh.length - 1].text[lang], lang);
-        setRadio(mine);
+        const mine = list.filter((m) => (m.from === "boss" && (!m.crewId || m.crewId === crewId)) || (m.from === "worker" && m.workerId === workerId));
+        for (const m of mine) {
+          if (seen.current.has(m.id)) continue;
+          seen.current.add(m.id);
+          if (!loaded.current || m.from !== "boss") continue;
+          if (m.kind === "alert") {
+            setTakeover(m);
+            alarm(4);
+            setTimeout(() => speakAny(m.text[lang], lang), 2200);
+          } else speakAny(m.text[lang], lang);
+        }
+        loaded.current = true;
+        setMsgs(mine);
       } catch {}
     };
     tick();
-    const id = setInterval(tick, 3000);
+    const id = setInterval(tick, 2000);
     return () => {
       alive = false;
       clearInterval(id);
     };
-  }, [planId, crewId, lang]);
+  }, [planId, crewId, workerId, lang]);
 
   function setLang(l: Lang) {
+    unlockAudio();
     setLangState(l);
     store("sombra-lang", l);
   }
 
-  async function checkIn(text: string) {
+  async function sendText(text: string) {
     if (!text.trim() || !plan) return;
-    const res = await fetch("/api/checkin", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ planId, crewId, workerId, lang, transcript: text }),
-    });
-    if (res.ok) {
-      const c = (await res.json()) as CheckIn;
-      setLast(c);
-      speak(t.result[c.triage.label], lang);
+    setBusy(true);
+    setNote("");
+    try {
+      const res = await fetch("/api/checkin", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ planId, crewId, workerId, lang, transcript: text }),
+      });
+      if (!res.ok) return;
+      const m = (await res.json()) as RadioMessage;
+      seen.current.add(m.id);
+      setMsgs((x) => [...x, m]);
       setTyped("");
+      speakAny(m.intent === "health" && m.triage ? t.reply[m.triage.label] : t.sent, lang);
+    } finally {
+      setBusy(false);
     }
   }
 
   async function talk() {
-    setListening(true);
+    unlockAudio();
+    setNote("");
+    if (rec) {
+      // Second tap: stop, transcribe, send.
+      setRec(null);
+      setBusy(true);
+      try {
+        const audio = await rec.stop();
+        const form = new FormData();
+        form.append("audio", audio);
+        const r = await fetch("/api/transcribe", { method: "POST", body: form }).then((x) => x.json());
+        if (r.text) await sendText(r.text);
+        else setNote(t.heard);
+      } catch {
+        setNote(t.heard);
+      } finally {
+        setBusy(false);
+      }
+      return;
+    }
+    if (whisper) {
+      try {
+        setRec(await startRecording());
+      } catch {
+        setNote(t.heard);
+      }
+      return;
+    }
+    // No server transcription configured: the browser's own recognition.
+    setBusy(true);
     try {
-      await checkIn(await listen(lang));
+      await sendText(await listen(lang));
     } catch {
-      // No recognition on this phone or nothing heard: the text box below still works.
+      setNote(t.heard);
     } finally {
-      setListening(false);
+      setBusy(false);
     }
   }
 
@@ -170,9 +227,27 @@ export function CrewView() {
   const info = plan.crewInfo?.find((c) => c.id === mine?.crewId);
   const rate = info?.pieceRateUsdPerHour ?? 22;
   const briefing = plan.briefings[lang] ?? plan.briefings.en ?? "";
+  const canTalk = whisper || canListen();
 
   return (
-    <main className="mx-auto flex w-full max-w-md flex-col gap-6 px-4 pb-16 pt-5 text-[var(--ink)]">
+    <main className="mx-auto flex w-full max-w-md flex-col gap-5 px-4 pb-16 pt-5 text-[var(--ink)]" onClick={() => !armed && (unlockAudio(), setArmed(true))}>
+      {takeover && (
+        <div className="alert-banner fixed inset-0 z-50 flex flex-col items-center justify-center gap-6 bg-[#b3261e] p-8 text-center text-white">
+          <p className="text-sm font-bold tracking-[0.3em]">{t.alertTitle}</p>
+          <p className="font-display text-4xl leading-tight">{takeover.text[lang]}</p>
+          <p className="text-sm opacity-80">{time(takeover.at)}</p>
+          <button onClick={() => setTakeover(null)} className="w-full rounded-2xl bg-white py-5 text-xl font-bold text-[#b3261e]">
+            {t.safe}
+          </button>
+        </div>
+      )}
+
+      {!armed && (
+        <button onClick={() => (unlockAudio(), setArmed(true))} className="rounded-xl bg-[var(--ink)] px-4 py-3 text-left text-sm text-[var(--bg)]">
+          🔔 {t.enable}
+        </button>
+      )}
+
       <header className="flex items-center justify-between">
         <span className="font-display text-3xl">Sombra</span>
         <div className="flex rounded-full border border-[var(--line)] p-1">
@@ -187,32 +262,30 @@ export function CrewView() {
       {plan.crews.length > 1 && (
         <div className="flex flex-wrap items-center gap-2 text-sm">
           <span className="text-[var(--muted)]">{t.crew}:</span>
-          {plan.crews.map((c) => {
-            const name = plan.crewInfo?.find((x) => x.id === c.crewId)?.name ?? c.crewId;
-            return (
-              <button
-                key={c.crewId}
-                onClick={() => {
-                  setCrewId(c.crewId);
-                  store(`sombra-crew-${planId}`, c.crewId);
-                }}
-                className={`rounded-full border px-3 py-1.5 ${c.crewId === mine?.crewId ? "border-[var(--ink)] bg-[var(--card)] font-semibold" : "border-[var(--line)]"}`}
-              >
-                {name}
-              </button>
-            );
-          })}
+          {plan.crews.map((c) => (
+            <button
+              key={c.crewId}
+              onClick={() => {
+                setCrewId(c.crewId);
+                store(`sombra-crew-${planId}`, c.crewId);
+                seen.current.clear();
+                loaded.current = false;
+              }}
+              className={`rounded-full border px-3 py-1.5 ${c.crewId === mine?.crewId ? "border-[var(--ink)] bg-[var(--card)] font-semibold" : "border-[var(--line)]"}`}
+            >
+              {plan.crewInfo?.find((x) => x.id === c.crewId)?.name ?? c.crewId}
+            </button>
+          ))}
         </div>
       )}
 
-      <section className="rounded-2xl bg-[var(--card)] p-5 shadow-[0_1px_0_var(--line)]">
+      <section className="rounded-2xl bg-[var(--card)] p-5">
         <div className="flex items-center justify-between">
           <h1 className="font-display text-4xl leading-none">{t.today}</h1>
-          <button onClick={() => speak(briefing, lang)} className="rounded-full bg-[var(--accent)] px-5 py-3 text-lg font-semibold text-white">
+          <button onClick={() => speakAny(briefing, lang)} className="rounded-full bg-[var(--accent)] px-5 py-3 text-lg font-semibold text-white">
             ▶ {t.listen}
           </button>
         </div>
-        {!hasVoice && <p className="mt-2 text-sm text-[var(--muted)]">{t.noVoice}</p>}
         <p className="mt-3 text-lg leading-snug">{briefing}</p>
         <ol className="mt-4 flex flex-col">
           {mine?.blocks.map((b, i) => {
@@ -220,12 +293,12 @@ export function CrewView() {
             const pay = b.kind === "cooldown" ? ((toMin(b.end) - toMin(b.start)) / 60) * rate : 0;
             return (
               <li key={i} className={`flex items-baseline justify-between gap-3 border-t border-[var(--line)] py-3 ${active ? "-mx-2 rounded-lg bg-[var(--track)] px-2" : ""}`}>
-                <span className="font-mono text-lg tabular-nums">
-                  {b.start}–{b.end}
+                <span className="text-lg tabular-nums">
+                  {ampm(b.start)} – {ampm(b.end)}
                 </span>
                 <span className={`text-right text-lg ${b.kind === "cooldown" ? "font-semibold text-[#2f6f8f]" : ""}`}>
                   {t[b.kind]}
-                  {b.kind === "cooldown" && <span className="block text-sm">${pay.toFixed(2)}</span>}
+                  {b.kind === "cooldown" && <span className="block text-sm">+${pay.toFixed(2)}</span>}
                 </span>
               </li>
             );
@@ -235,55 +308,67 @@ export function CrewView() {
 
       <section className="flex flex-col items-center gap-3 rounded-2xl bg-[var(--card)] p-5 text-center">
         <h2 className="font-display text-3xl">{t.ask}</h2>
-        {canListen() && (
-          <button
-            onClick={talk}
-            disabled={listening}
-            className={`mic h-36 w-36 rounded-full text-lg font-semibold text-white ${listening ? "is-listening" : ""}`}
-            aria-label={t.tap}
-          >
-            {listening ? t.listening : t.tap}
+        <p className="-mt-2 text-sm text-[var(--muted)]">{t.hint}</p>
+        {canTalk && (
+          <button onClick={talk} disabled={busy} className={`mic h-36 w-36 rounded-full text-lg font-semibold text-white disabled:opacity-60 ${rec ? "is-listening" : ""}`}>
+            {busy ? t.sending : rec ? t.stop : t.tap}
           </button>
         )}
+        {note && <p className="text-sm text-[#b3261e]">{note}</p>}
         <form
           className="flex w-full gap-2"
           onSubmit={(e) => {
             e.preventDefault();
-            checkIn(typed);
+            sendText(typed);
           }}
         >
           <input value={typed} onChange={(e) => setTyped(e.target.value)} placeholder={t.type} className="min-w-0 flex-1 rounded-xl border border-[var(--line)] bg-transparent px-3 py-3 text-lg" />
-          <button className="rounded-xl bg-[var(--ink)] px-4 text-[var(--bg)]">{t.send}</button>
+          <button disabled={busy} className="rounded-xl bg-[var(--ink)] px-4 text-[var(--bg)] disabled:opacity-60">
+            {t.send}
+          </button>
         </form>
-        {last && (
-          <div className="w-full rounded-xl p-4 text-left text-white" style={{ background: TONE[last.triage.label] }}>
-            <p className="text-xl font-semibold leading-snug">{t.result[last.triage.label]}</p>
-            <p className="mt-2 text-sm opacity-90">
-              “{last.transcript}” · {t.sent}
-            </p>
-            {last.triage.label === "emergency" && (
-              <a href="tel:911" className="mt-3 block rounded-lg bg-white py-3 text-center text-lg font-bold text-[#b3261e]">
-                911
-              </a>
-            )}
-          </div>
-        )}
       </section>
 
       <section className="rounded-2xl bg-[var(--card)] p-5">
-        <h2 className="font-display text-2xl">{t.radio}</h2>
-        {radio.length === 0 ? (
+        <h2 className="font-display text-2xl">{t.thread}</h2>
+        {msgs.length === 0 ? (
           <p className="mt-2 text-[var(--muted)]">{t.none}</p>
         ) : (
           <ol className="mt-3 flex flex-col gap-3">
-            {[...radio].reverse().map((m) => (
-              <li key={m.id} className="flex items-start justify-between gap-3">
-                <p className="text-lg leading-snug">{m.text[lang]}</p>
-                <button onClick={() => speak(m.text[lang], lang)} className="shrink-0 rounded-full border border-[var(--line)] px-3 py-1.5" aria-label={t.listen}>
-                  ▶
-                </button>
-              </li>
-            ))}
+            {[...msgs].reverse().map((m) =>
+              m.from === "boss" ? (
+                <li key={m.id} className={`rounded-xl p-3 ${m.kind === "alert" ? "bg-[#b3261e] text-white" : "bg-[var(--track)]"}`}>
+                  <div className="flex items-start justify-between gap-3">
+                    <p className="text-lg leading-snug">{m.text[lang]}</p>
+                    <button onClick={() => speakAny(m.text[lang], lang)} className="shrink-0 rounded-full border border-current px-3 py-1.5" aria-label={t.listen}>
+                      ▶
+                    </button>
+                  </div>
+                  <p className="mt-1 text-xs opacity-70">
+                    {t.boss} · {time(m.at)}
+                  </p>
+                </li>
+              ) : (
+                <li key={m.id} className="ml-8 rounded-xl border border-[var(--line)] p-3">
+                  <p className="text-lg leading-snug">{m.original}</p>
+                  {m.intent === "health" && m.triage ? (
+                    <p className="mt-2 rounded-lg px-3 py-2 text-sm font-semibold text-white" style={{ background: TONE[m.triage.label] }}>
+                      {t.reply[m.triage.label]}
+                    </p>
+                  ) : (
+                    <p className="mt-1 text-sm text-[var(--muted)]">{t.sent}</p>
+                  )}
+                  {m.triage?.label === "emergency" && (
+                    <a href="tel:911" className="mt-2 block rounded-lg bg-[#b3261e] py-3 text-center text-lg font-bold text-white">
+                      911
+                    </a>
+                  )}
+                  <p className="mt-1 text-xs text-[var(--muted)]">
+                    {t.you} · {time(m.at)}
+                  </p>
+                </li>
+              ),
+            )}
           </ol>
         )}
       </section>

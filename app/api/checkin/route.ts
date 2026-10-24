@@ -1,25 +1,30 @@
-import { addCheckIn } from "@/lib/store";
-import { translateAll } from "@/lib/translate";
+import { addMessage } from "@/lib/store";
+import { understand } from "@/lib/translate";
 import { classify } from "@/lib/triage";
-import type { CheckIn, Lang } from "@/lib/types";
+import type { RadioMessage } from "@/lib/types";
 
-// A worker's spoken check-in: our model triages it, the boss gets it in English.
+// A worker message to their crew boss: our model triages it, the AI routes and translates it.
 export async function POST(request: Request) {
-  const b = (await request.json()) as { planId: string; crewId: string; workerId: string; lang: Lang; transcript: string };
-  if (!b.transcript?.trim()) return Response.json({ error: "Empty check-in" }, { status: 400 });
-  const triage = classify(b.transcript);
-  const english = b.lang === "en" ? b.transcript : (await translateAll(b.transcript, b.lang)).en;
-  const checkIn: CheckIn = {
+  const b = (await request.json()) as { planId: string; crewId: string; workerId: string; lang: string; transcript: string };
+  const said = b.transcript?.trim().slice(0, 500);
+  if (!said) return Response.json({ error: "Empty message" }, { status: 400 });
+  const triage = classify(said);
+  const { intent, text } = await understand(said);
+  const msg: RadioMessage = {
     id: Math.random().toString(36).slice(2, 10),
     planId: b.planId,
+    from: "worker",
     crewId: b.crewId,
     workerId: b.workerId.slice(0, 12),
     lang: b.lang,
-    transcript: b.transcript.slice(0, 500),
-    english,
+    original: said,
+    text,
+    kind: "chat",
+    // Our model always runs; anything it flags counts as health even if the router missed it.
+    intent: triage.label !== "ok" ? "health" : intent,
     triage,
     at: new Date().toISOString(),
   };
-  await addCheckIn(checkIn);
-  return Response.json(checkIn);
+  await addMessage(msg);
+  return Response.json(msg);
 }

@@ -1,11 +1,11 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { QRCodeSVG } from "qrcode.react";
 import type { AgentEvent, AgentId, Crew, Field, HourlyRisk, ShiftPlan, TriageLabel } from "@/lib/types";
-import { AlertFeed } from "./AlertFeed";
-import { RadioBox } from "./RadioBox";
+import { Channels } from "./Channels";
+import { unlockAudio } from "@/lib/alarm";
 import { ImpactPanel } from "./ImpactPanel";
 import { AgentPanel, type AgentCard } from "./AgentPanel";
 import { PlanView } from "./PlanView";
@@ -47,10 +47,24 @@ export function Command({ fields, replayDate }: { fields: Field[]; replayDate: s
   const [alerts, setAlerts] = useState<Record<string, TriageLabel>>({});
   const [lastRun, setLastRun] = useState<{ at: number; e: AgentEvent }[] | null>(null);
   const [replaying, setReplaying] = useState(false);
-  const onAlert = useCallback(
-    (crewId: string, label: TriageLabel) => setAlerts((a) => ({ ...a, [crewId]: label })),
-    [],
-  );
+  const [banner, setBanner] = useState<{ crewId: string; label: TriageLabel; text: string } | null>(null);
+  const onAlert = useCallback((crewId: string, label: TriageLabel, text: string) => {
+    setAlerts((a) => ({ ...a, [crewId]: label }));
+    if (label === "emergency" || label === "heat_exhaustion") setBanner({ crewId, label, text });
+  }, []);
+
+  // Load the day's weather as soon as the mode changes, so the map and heat strip work before planning.
+  useEffect(() => {
+    const today = new Date().toLocaleDateString("en-CA", { timeZone: "America/Los_Angeles" });
+    fetch(`/api/risks?mode=${mode}&date=${today}`)
+      .then((r) => (r.ok ? r.json() : []))
+      .then((r: HourlyRisk[]) => {
+        setRisks(r);
+        setDraft(null);
+        setFinal(null);
+      })
+      .catch(() => {});
+  }, [mode]);
 
   const patch = (id: AgentId, f: (c: AgentCard) => AgentCard) =>
     setCards((cs) => (cs.some((c) => c.id === id) ? cs.map((c) => (c.id === id ? f(c) : c)) : [...cs, f({ ...AGENT_META[id], status: "idle", text: "" })]));
@@ -95,6 +109,7 @@ export function Command({ fields, replayDate }: { fields: Field[]; replayDate: s
   }
 
   async function run() {
+    unlockAudio();
     setRunning(true);
     setError(null);
     setCards(fresh());
@@ -149,10 +164,30 @@ export function Command({ fields, replayDate }: { fields: Field[]; replayDate: s
     }
     return Object.fromEntries(Object.entries(out).map(([k, v]) => [k, v.join(" + ")]));
   }, [crews, final]);
-  const crewUrl = final && typeof window !== "undefined" ? `${window.location.origin}/crew/${final.id}` : "";
+  // Phones can't reach localhost, so QR codes made on a laptop point at the deployed site.
+  const base =
+    typeof window === "undefined"
+      ? ""
+      : window.location.hostname === "localhost" && process.env.NEXT_PUBLIC_SITE_URL
+        ? process.env.NEXT_PUBLIC_SITE_URL
+        : window.location.origin;
+  const crewUrl = final ? `${base}/crew/${final.id}` : "";
+  const fieldOf = Object.fromEntries(
+    (final?.crews ?? []).map((p) => [p.crewId, p.blocks.find((b) => b.kind === "work")?.fieldId ?? ""]),
+  );
 
   return (
     <div className="grid min-h-dvh grid-cols-1 gap-5 p-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(340px,1fr)] lg:p-6">
+      {banner && (
+        <div className="alert-banner fixed inset-x-0 top-0 z-50 flex items-center justify-between gap-4 bg-[#b3261e] px-5 py-4 text-white shadow-lg">
+          <p className="text-lg font-semibold">
+            {banner.label === "emergency" ? "EMERGENCY" : "Heat exhaustion"} · {crews.find((c) => c.id === banner.crewId)?.name}: “{banner.text}”
+          </p>
+          <button onClick={() => setBanner(null)} className="rounded-full bg-white px-4 py-2 text-sm font-bold text-[#b3261e]">
+            On it
+          </button>
+        </div>
+      )}
       <div className="flex flex-col gap-5">
         <header className="flex flex-wrap items-end justify-between gap-3">
           <div>
@@ -178,11 +213,14 @@ export function Command({ fields, replayDate }: { fields: Field[]; replayDate: s
         <div className="relative h-[420px] overflow-hidden rounded-xl border border-[var(--line)] lg:h-[500px]">
           <FieldMap fields={fields} risks={risks} hour={hour} crewLabels={crewLabels} alerts={Object.fromEntries(Object.entries(alerts).flatMap(([crewId, label]) => { const c = crews.find((x) => x.id === crewId); return c && label !== "ok" ? [[c.fieldId, label]] : []; }))} />
         </div>
+        <p className="-mt-3 text-xs text-[var(--muted)]">
+          Dots are the 3 fields, colored by heat danger at the hour you pick below. A pulsing ring means it&apos;s dangerous to work there at that hour; a large flashing red dot means a worker on that crew just reported feeling sick.
+        </p>
 
         {risks.length > 0 && (
           <section className="rounded-xl border border-[var(--line)] bg-[var(--card)] p-4">
             <div className="flex items-center justify-between text-sm">
-              <span className="font-semibold">Heat by hour (WBGT estimate)</span>
+              <span className="font-semibold">Heat danger by hour at each field</span>
               <span className="font-mono">{String(hour).padStart(2, "0")}:00</span>
             </div>
             <div className="mt-2 flex flex-col gap-1">
@@ -202,6 +240,9 @@ export function Command({ fields, replayDate }: { fields: Field[]; replayDate: s
                 </div>
               ))}
             </div>
+            <p className="mt-2 text-xs text-[var(--muted)]">
+              Each square is one hour, 4am to 7pm. Color is heat danger from temperature, humidity and sun (WBGT): green safe, yellow caution, orange high, red deadly for hard work. Drag the slider to move through the day; map dots change color and pulse when a field is dangerous at that hour.
+            </p>
             <input type="range" min={4} max={19} value={hour} onChange={(e) => setHour(Number(e.target.value))} className="mt-3 w-full" aria-label="Hour of day" />
           </section>
         )}
@@ -254,16 +295,15 @@ export function Command({ fields, replayDate }: { fields: Field[]; replayDate: s
         </section>
 
         {draft && final && risks.length > 0 && <ImpactPanel before={draft} after={final} crews={crews} fields={fields} risks={risks} />}
-        {draft && <PlanView plan={draft} crews={crews} label="Your usual day" />}
-        {final && <PlanView plan={final} crews={crews} label="Sombra's plan" />}
+        {draft && <PlanView plan={draft} crews={crews} label="Your usual day" risks={risks} fields={fields} tone="before" />}
+        {final && <PlanView plan={final} crews={crews} label="Sombra's plan" risks={risks} fields={fields} tone="after" />}
       </div>
 
       <aside className="flex flex-col gap-4 lg:sticky lg:top-6 lg:self-start">
         {final && final.violations.length === 0 && (
           <>
-            <h2 className="font-display text-2xl">Crew check-ins</h2>
-            <AlertFeed planId={final.id} crews={crews} onAlert={onAlert} />
-            <RadioBox planId={final.id} crews={crews} />
+            <h2 className="font-display text-2xl">Crew channels</h2>
+            <Channels planId={final.id} crews={crews} fields={fields} fieldOf={fieldOf} onAlert={onAlert} />
           </>
         )}
         <h2 className="font-display text-2xl">Agents</h2>

@@ -127,3 +127,9 @@ body {
 @keyframes mic {
   to { box-shadow: 0 0 0 28px rgba(180, 83, 42, 0); }
 }
+.alert-banner {
+  animation: banner 1s ease-in-out infinite alternate;
+}
+@keyframes banner {
+  to { background: #7f1a14; }
+}

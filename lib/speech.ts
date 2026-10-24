@@ -54,3 +54,35 @@ export function listen(lang: Lang): Promise<string> {
     r.start();
   });
 }
+
+// Read aloud in any language: the phone's own voice if it has one, otherwise server audio (/api/tts).
+let player: HTMLAudioElement | null = null;
+export function speakAny(text: string, lang: string) {
+  if (!text) return;
+  const l = (["es", "pa", "en"].includes(lang) ? lang : "en") as Lang;
+  if (l !== "pa" && voiceFor(l)) return speak(text, l);
+  window.speechSynthesis?.cancel();
+  player?.pause();
+  player = new Audio(`/api/tts?lang=${l}&text=${encodeURIComponent(text)}`);
+  void player.play().catch(() => {});
+}
+
+// Push-to-talk recording for server transcription (Whisper). Call stop() to get the audio.
+export async function startRecording(): Promise<{ stop: () => Promise<Blob> }> {
+  const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  const type = ["audio/webm", "audio/mp4", "audio/ogg"].find((t) => MediaRecorder.isTypeSupported(t)) ?? "";
+  const rec = new MediaRecorder(stream, type ? { mimeType: type } : undefined);
+  const chunks: Blob[] = [];
+  rec.ondataavailable = (e) => e.data.size && chunks.push(e.data);
+  rec.start();
+  return {
+    stop: () =>
+      new Promise((resolve) => {
+        rec.onstop = () => {
+          stream.getTracks().forEach((t) => t.stop());
+          resolve(new Blob(chunks, { type: rec.mimeType }));
+        };
+        rec.stop();
+      }),
+  };
+}
