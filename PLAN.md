@@ -75,12 +75,18 @@ After changing a Vercel variable: **Deployments → ⋯ → Redeploy**.
 **Ship**
 - ⬜ Repo public + README · ⬜ 2-minute video (film Play the day with a phone going off) · ⬜ 5 slides · ⬜ Devpost on main + AI/ML tracks by 6:15
 
-### Demo script (90 seconds of the 2 minutes)
-1. Laptop on `/command`. "Rosa runs three crews outside Manteca. July 11 hit 114°F."
-2. Click **Plan a safe day**. Point at Crítico rejecting the usual day, then the scorecard: deadly heat → 0, $219 in paid breaks.
-3. Hand a judge the phone (`/crew/latest`, tap "turn on alerts", pick Español). They press the mic and say "me siento mareado". The laptop banner and alarm go off; Medic's first aid appears.
-4. Type "Water truck at the north gate" to their crew; the phone reads it in Spanish.
-5. Press **▶ Play the day**. At 1pm the judge's phone goes full-screen red.
+### Demo script (3 minutes, then 2 minutes of questions)
+Before you start: live site open on the laptop with a plan already made (Jul 11, 2024), one phone on `/crew/latest` with alerts turned on, a second phone ready for a judge.
+
+| Time | Say | Do |
+|---|---|---|
+| 0:00–0:20 | "Farmworkers die of heat at about 20× the rate of other workers. Piece-rate pay means a break costs them money. Rosa runs 3 crews outside Manteca." | Point at the big date and temperature |
+| 0:20–1:00 | "Five AI agents read the forecast and California heat law. Crítico rejects her usual day; the plan is rebuilt." | Scroll: scorecard (deadly heat → 0, paid breaks), rule grid ✗ → What changes table |
+| 1:00–1:50 | "Every worker gets it on their phone, in their language, out loud." | Hand a judge the phone: Español, Listen, then tap **I feel sick** or say "me siento mareado". The laptop banner and alarm go off; Medic + our model label appear |
+| 1:50–2:30 | "And it runs the whole day." | **▶ Play the day**: counters tick, the cool-down check-in arrives, then at 1pm both phones go full-screen red |
+| 2:30–3:00 | "Our own model, trained and tested on sentences we wrote by hand. AI drafts, plain code enforces the law, and nothing is stored past 2 days." | Flash `/about` (model card), Compliance log download |
+
+**Questions to expect:** what if the AI is wrong (rules engine decides, Medic can only raise severity, safety keywords) · privacy (worker IDs only, no audio stored, 2-day expiry) · no smartphone (one-tap buttons, read-aloud, next step is SMS) · cost (free-tier AI plus rules fallback).
 
 ---
 
