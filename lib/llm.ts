@@ -19,12 +19,15 @@ const COMPAT = {
   openrouter: {
     url: "https://openrouter.ai/api/v1/chat/completions",
     key: () => process.env.OPENROUTER_API_KEY,
-    model: process.env.OPENROUTER_MODEL || "google/gemma-4-31b-it:free",
+    model: process.env.OPENROUTER_MODEL || "nvidia/nemotron-3-ultra-550b-a55b:free",
+    // Tried in order if the first is rate-limited (free models share upstream pools).
+    fallbacks: ["nvidia/nemotron-3.5-lightning:free", "google/gemma-4-31b-it:free"],
   },
   groq: {
     url: "https://api.groq.com/openai/v1/chat/completions",
     key: () => process.env.GROQ_API_KEY,
     model: process.env.GROQ_MODEL || "openai/gpt-oss-120b",
+    fallbacks: [] as string[],
   },
 };
 
@@ -78,7 +81,8 @@ export async function* streamModel(req: LLMRequest): AsyncGenerator<string> {
   try {
     yield* streamProvider(req);
   } catch (err) {
-    downUntil = Date.now() + 120_000;
+    // Trip only on API errors (rate limits, auth, outages), not on one slow answer.
+    if (!(err instanceof Error && /timed out|didn't respond|abort/i.test(err.message + String(err.cause ?? "")))) downUntil = Date.now() + 120_000;
     throw err;
   }
 }
@@ -98,7 +102,9 @@ async function* streamProvider(req: LLMRequest): AsyncGenerator<string> {
       },
       body: JSON.stringify({
         model: req.model || cfg.model,
-        max_tokens: req.maxTokens ?? 1024,
+        // Thinking off: 5s answers instead of 30-60s, and the agents' prompts are narrow enough not to need it.
+        ...(p === "openrouter" ? { models: [req.model || cfg.model, ...cfg.fallbacks], reasoning: { enabled: false } } : {}),
+        max_tokens: Math.max(req.maxTokens ?? 1024, 1500), // reasoning models spend part of the budget thinking
         stream: true,
         messages: [
           { role: "system", content: system },

@@ -137,6 +137,16 @@ export function Command({ fields, replayDate }: { fields: Field[]; replayDate: s
     () => fields.map((f) => ({ f, hours: risks.filter((r) => r.fieldId === f.id) })),
     [fields, risks],
   );
+  // Which crews work each field: Sombra's plan once it exists, otherwise the crew editor.
+  const crewLabels = useMemo(() => {
+    const out: Record<string, string[]> = {};
+    for (const c of crews) {
+      const p = final?.crews.find((x) => x.crewId === c.id);
+      const fieldId = p?.blocks.find((b) => b.kind === "work")?.fieldId ?? c.fieldId;
+      (out[fieldId] ??= []).push(c.name);
+    }
+    return Object.fromEntries(Object.entries(out).map(([k, v]) => [k, v.join(" + ")]));
+  }, [crews, final]);
   const crewUrl = final && typeof window !== "undefined" ? `${window.location.origin}/crew/${final.id}` : "";
 
   return (
@@ -160,8 +170,8 @@ export function Command({ fields, replayDate }: { fields: Field[]; replayDate: s
           </div>
         </header>
 
-        <div className="relative h-[340px] overflow-hidden rounded-xl border border-[var(--line)]">
-          <FieldMap fields={fields} risks={risks} hour={hour} alerts={Object.fromEntries(Object.entries(alerts).flatMap(([crewId, label]) => { const c = crews.find((x) => x.id === crewId); return c && label !== "ok" ? [[c.fieldId, label]] : []; }))} />
+        <div className="relative h-[420px] overflow-hidden rounded-xl border border-[var(--line)] lg:h-[500px]">
+          <FieldMap fields={fields} risks={risks} hour={hour} crewLabels={crewLabels} alerts={Object.fromEntries(Object.entries(alerts).flatMap(([crewId, label]) => { const c = crews.find((x) => x.id === crewId); return c && label !== "ok" ? [[c.fieldId, label]] : []; }))} />
         </div>
 
         {risks.length > 0 && (

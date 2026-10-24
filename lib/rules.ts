@@ -95,22 +95,27 @@ export function checkPlan(plan: ShiftPlan, crews: Crew[], risks: HourlyRisk[]): 
   return out;
 }
 
-// The crew lead's usual day: one long block with a meal, no cool-downs. Sombra audits this.
-export function usualPlan(crews: Crew[], start: string, end: string): CrewPlan[] {
+// One crew's day at one field: a work block, a 30-minute meal in the middle, a work block. No cool-downs yet.
+export function dayPlan(crew: Crew, fieldId: string, start: string, end: string): CrewPlan {
   const s = toMin(start);
   const e = toMin(end);
   const meal = s + Math.round((e - s) / 2 / 30) * 30;
-  return crews.map((c) => ({
-    crewId: c.id,
+  return {
+    crewId: crew.id,
     blocks: [
-      { start: toHHMM(s), end: toHHMM(meal), kind: "work", fieldId: c.fieldId },
+      { start: toHHMM(s), end: toHHMM(meal), kind: "work", fieldId },
       { start: toHHMM(meal), end: toHHMM(meal + 30), kind: "meal" },
-      { start: toHHMM(meal + 30), end: toHHMM(e), kind: "work", fieldId: c.fieldId },
+      { start: toHHMM(meal + 30), end: toHHMM(e), kind: "work", fieldId },
     ],
-    waterGallons: Math.ceil(c.size * 2),
+    waterGallons: Math.ceil(crew.size * 2),
     shadeUnits: 1,
     notes: [],
-  }));
+  };
+}
+
+// The crew lead's usual day: one long block with a meal, no cool-downs. Sombra audits this.
+export function usualPlan(crews: Crew[], start: string, end: string): CrewPlan[] {
+  return crews.map((c) => dayPlan(c, c.fieldId, start, end));
 }
 
 // Safety net: if the agents' revision still breaks a rule, fix it in code so a non-compliant plan can't ship.
@@ -132,8 +137,15 @@ export function autoFix(plan: ShiftPlan, crews: Crew[], risks: HourlyRisk[]): Sh
         const r = riskAt(risks, fieldId, cur);
         if (crew.newWorkers > 0 && r?.band === "extreme") break; // end the day before extreme hours
         const hot = (r?.tempF ?? 0) >= RULES.highHeatF;
+        if (hot && sinceRest >= RULES.cooldownEveryMin) {
+          // Already at the 2-hour limit when the heat arrives: cool down before working on.
+          blocks.push({ start: toHHMM(cur), end: toHHMM(cur + RULES.cooldownMin), kind: "cooldown", paid: true });
+          cur += RULES.cooldownMin;
+          sinceRest = 0;
+          continue;
+        }
         const nextHour = (Math.floor(cur / 60) + 1) * 60; // step at most an hour so every hour's band is checked
-        const room = hot ? Math.max(RULES.cooldownEveryMin - sinceRest, 10) : nextHour - cur;
+        const room = hot ? RULES.cooldownEveryMin - sinceRest : nextHour - cur;
         const stop = Math.min(end, cur + room, nextHour);
         blocks.push({ ...b, start: toHHMM(cur), end: toHHMM(stop), fieldId });
         sinceRest += stop - cur;

@@ -1,7 +1,7 @@
 // The Sombra swarm. Agents are config + a prompt; runSwarm() orchestrates them and emits AgentEvents.
 import "server-only";
-import { modelName, parseJSON, streamModel } from "./llm";
-import { autoFix, checkPlan, usualPlan } from "./rules";
+import { callModel, modelName, parseJSON, streamModel } from "./llm";
+import { autoFix, checkPlan, dayPlan, RULES, toMin, usualPlan } from "./rules";
 import { savePlan } from "./store";
 import { fetchRisks } from "./weather";
 import type { AgentEvent, AgentId, Crew, CrewPlan, Field, HourlyRisk, Lang, RuleViolation, ShiftPlan } from "./types";
@@ -92,7 +92,7 @@ export async function runSwarm(input: SwarmInput, emit: Emit): Promise<ShiftPlan
     emit,
     "cielo",
     `You are Cielo, the weather scout for a Central Valley farm labor crew. ${voice}`,
-    `Hourly conditions on ${input.date} (${input.mode === "replay" ? "real archived heat-wave data" : "today's live forecast"}):\n${table}\n\nIn 3 short lines: when each field becomes dangerous, the worst hour, and which field stays coolest and why.`,
+    `Hourly conditions on ${input.date} (${input.mode === "replay" ? "real archived heat-wave data" : "today's live forecast"}):\n${table}\n\nIn 3 short lines (under 20 words each, use field names, not ids): when each field becomes dangerous, the worst hour, and which field stays coolest and why.`,
     300,
     skyFallback(risks, fields),
   );
@@ -137,36 +137,58 @@ export async function runSwarm(input: SwarmInput, emit: Emit): Promise<ShiftPlan
 
   // 3. Cuadrilla rewrites the day.
   if (rejected) {
-    const draft = await run(
-      emit,
-      "cuadrilla",
-      `You are Cuadrilla, the crew planner. You rebuild a farm crew's day to be safe and still productive. ${voice}`,
-      `Crews: ${JSON.stringify(crews)}\nFields: ${JSON.stringify(fields)}\nUsual schedule:\n${planText(plan.crews, crews)}\nConditions:\n${table}\nProblems:\n${violationText(plan.violations)}\nCritic:\n${critique.text}\n${input.note ? `Crew lead's note: ${input.note}\n` : ""}
-Rules you must meet: at 95°F+ a 10-minute paid "cooldown" block at least every 2 hours of work; water >= workers x work hours / 4 gallons; 1 shade canopy per 10 workers; crews with new workers must not work "extreme" WBGT hours. You may start as early as 04:30, move crews to cooler or shaded fields, and end early. Keep roughly the same total work hours where it's safe.
-
-First write 3 short lines explaining your changes. Then write ${SPLIT} on its own line, then one JSON object:
-{"summary": "one sentence", "crews": [{"crewId": "...", "blocks": [{"start":"HH:MM","end":"HH:MM","kind":"work|cooldown|meal|travel","fieldId":"... (work only)","paid": true}], "waterGallons": 0, "shadeUnits": 0, "notes": ["..."]}]}`,
-      2000,
-      "Adding paid 10-minute cool-downs every 2 hours in the heat, sizing water and shade, and ending new workers' day before extreme hours.",
-    );
+    // Cuadrilla answers in JSON (reasoning models ramble otherwise); its "why" lines go to the card.
+    type Decision = { why?: string[]; summary?: string; crews: { crewId: string; fieldId: string; start: string; end: string }[] };
+    emit({ type: "agent_start", agent: "cuadrilla", model: modelName() });
+    let parsed: Decision | null = null;
     try {
-      const parsed = parseJSON<{ summary: string; crews: CrewPlan[] }>(draft.json || draft.text);
-      plan = { ...plan, crews: parsed.crews, summary: parsed.summary };
-    } catch {
+      parsed = parseJSON<Decision>(
+        await callModel({
+          system: `You are Cuadrilla, the crew planner. You decide each crew's field and hours so the day is safe and still productive.`,
+          prompt:
+      `Options (latest safe end for each crew at each field):\n${crewOptions(crews, risks, fields)}\nUsual shift: ${input.start}-${input.end} (${(toMin(input.end) - toMin(input.start) - 30) / 60} work hours).\nCritic said:\n${critique.text}\n${input.note ? `Crew lead's note: ${input.note}\n` : ""}
+Pick a field and hours for each crew. Start as early as 04:30 to recover hours. Prefer shaded fields for crews with new workers. Two crews may share a field. The rules engine adds the paid cool-downs, water and shade, so don't plan those.
+
+Reply with JSON only, no working shown:
+{"why": ["3 lines for the crew boss, under 20 words each"], "summary": "one sentence", "crews": [{"crewId": "c1", "fieldId": "french-camp", "start": "04:30", "end": "12:30"}]}`,
+          json: true,
+          maxTokens: 2500,
+        }),
+      );
+      emit({ type: "agent_delta", agent: "cuadrilla", text: (parsed.why ?? []).join("\n") });
+    } catch (err) {
+      console.error("[cuadrilla]", err);
+      emit({ type: "agent_delta", agent: "cuadrilla", text: "Model unavailable, using the rules engine.\nStarting early, ending new workers' day before extreme heat." });
+    }
+    let decided = 0;
+    if (parsed) {
+      const hhmm = /^\d{2}:\d{2}$/;
+      const d0 = parsed;
+      plan = {
+        ...plan,
+        summary: d0.summary || plan.summary,
+        crews: crews.map((c) => {
+          const d = d0.crews?.find((x) => x.crewId === c.id);
+          const ok =
+            d && fields.some((f) => f.id === d.fieldId) && hhmm.test(d.start) && hhmm.test(d.end) &&
+            toMin(d.start) >= toMin("04:30") && toMin(d.end) - toMin(d.start) >= 120;
+          if (!ok) return dayPlan(c, c.fieldId, input.start, input.end);
+          decided++;
+          return dayPlan(c, d.fieldId, d.start, d.end);
+        }),
+      };
+    } else {
       plan = { ...plan, summary: "Rebuilt by the rules engine" };
     }
-    let violations = checkPlan(plan, crews, risks);
-    let patched = 0;
-    if (violations.length) {
-      patched = violations.length;
-      plan = autoFix(plan, crews, risks);
-      violations = checkPlan(plan, crews, risks);
-    }
+    // The agent picks fields and hours; code inserts cool-downs and sizes water and shade, then re-checks.
+    plan = autoFix(plan, crews, risks);
+    const violations = checkPlan(plan, crews, risks);
+    const cooldowns = plan.crews.reduce((n, p) => n + p.blocks.filter((b) => b.kind === "cooldown").length, 0);
     plan.violations = violations;
     emit({
       type: "agent_done",
       agent: "cuadrilla",
-      summary: patched ? `New plan; rules engine patched ${patched} leftover issue${patched > 1 ? "s" : ""}` : "New plan passes every rule",
+      summary: `${decided ? `Chose fields and hours for ${decided} crew${decided > 1 ? "s" : ""}` : "Kept usual hours"}; rules engine added ${cooldowns} paid cool-downs`,
     });
     emit({ type: "plan", plan, revision: 1 });
   }
@@ -236,4 +258,18 @@ function templateBriefings(plan: ShiftPlan, crews: Crew[]): Partial<Record<Lang,
     es: `${line("es")} Tome agua cada 15 minutos. Si siente mareo, dolor de cabeza, náusea o confusión, avise al mayordomo de inmediato.`,
     en: `${line("en")} Drink water every 15 minutes. If you feel dizzy, a headache, nausea or confusion, tell the mayordomo right away.`,
   };
+}
+
+function crewOptions(crews: Crew[], risks: HourlyRisk[], fields: Field[]) {
+  const firstExtreme = (fieldId: string) => risks.find((r) => r.fieldId === fieldId && r.band === "extreme")?.time.slice(11, 16);
+  return crews
+    .map((c) => {
+      const opts = fields.map((f) => {
+        const ex = firstExtreme(f.id);
+        const limit = c.newWorkers > 0 && ex ? `by ${ex}` : "any time";
+        return `${f.id} (${f.shade} shade) ${limit}`;
+      });
+      return `${c.name} [${c.id}] ${c.size} workers, ${c.newWorkers} new: ${opts.join(", ")}`;
+    })
+    .join("\n");
 }

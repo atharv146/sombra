@@ -100,3 +100,14 @@ body {
   height: 22px;
   animation: ring 0.8s ease-out infinite;
 }
+.field-label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 13px;
+}
+.field-sub {
+  display: block;
+  font: 500 11px/1 var(--font-geist-mono), monospace;
+  color: var(--muted);
+}
