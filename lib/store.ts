@@ -21,14 +21,22 @@ async function redis<T>(...cmd: (string | number)[]): Promise<T> {
 const g = globalThis as unknown as { __sombra?: { plans: Map<string, ShiftPlan>; checkins: CheckIn[] } };
 const mem = (g.__sombra ??= { plans: new Map<string, ShiftPlan>(), checkins: [] as CheckIn[] });
 
+// Every saved plan also becomes "latest", so a phone can open /crew/latest without scanning a QR code.
 export async function savePlan(plan: ShiftPlan): Promise<void> {
-  if (URL) await redis("SET", `plan:${plan.id}`, JSON.stringify(plan), "EX", TTL);
-  else mem.plans.set(plan.id, plan);
+  if (URL) {
+    await redis("SET", `plan:${plan.id}`, JSON.stringify(plan), "EX", TTL);
+    await redis("SET", "plan:latest", plan.id, "EX", TTL);
+  } else {
+    mem.plans.set(plan.id, plan);
+    mem.plans.set("latest", plan);
+  }
 }
 
 export async function getPlan(id: string): Promise<ShiftPlan | null> {
   if (!URL) return mem.plans.get(id) ?? null;
-  const raw = await redis<string | null>("GET", `plan:${id}`);
+  const key = id === "latest" ? await redis<string | null>("GET", "plan:latest") : id;
+  if (!key) return null;
+  const raw = await redis<string | null>("GET", `plan:${key}`);
   return raw ? (JSON.parse(raw) as ShiftPlan) : null;
 }
 

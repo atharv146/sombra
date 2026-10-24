@@ -135,7 +135,7 @@ export function autoFix(plan: ShiftPlan, crews: Crew[], risks: HourlyRisk[]): Sh
       const end = toMin(b.end);
       while (cur < end) {
         const r = riskAt(risks, fieldId, cur);
-        if (crew.newWorkers > 0 && r?.band === "extreme") break; // end the day before extreme hours
+        if (r?.band === "extreme") break; // Sombra policy: no hard work in deadly (extreme WBGT) heat, for any crew
         const hot = (r?.tempF ?? 0) >= RULES.highHeatF;
         if (hot && sinceRest >= RULES.cooldownEveryMin) {
           // Already at the 2-hour limit when the heat arrives: cool down before working on.

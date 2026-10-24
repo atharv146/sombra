@@ -179,7 +179,13 @@ Reply with JSON only, no working shown:
         }),
       };
     } else {
-      plan = { ...plan, summary: "Rebuilt by the rules engine" };
+      // No model: start at 4:30 to win back the hours lost to the heat; the rules engine ends the day before deadly heat.
+      const hours = toMin(input.end) - toMin(input.start);
+      plan = {
+        ...plan,
+        summary: "Rebuilt by the rules engine: earlier start, done before deadly heat",
+        crews: crews.map((c) => dayPlan(c, c.fieldId, "04:30", `${String(Math.floor((270 + hours) / 60)).padStart(2, "0")}:${String((270 + hours) % 60).padStart(2, "0")}`)),
+      };
     }
     // The agent picks fields and hours; code inserts cool-downs and sizes water and shade, then re-checks.
     plan = autoFix(plan, crews, risks);

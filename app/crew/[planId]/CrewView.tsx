@@ -80,7 +80,8 @@ function store(key: string, value: string) {
 }
 
 export function CrewView() {
-  const { planId } = useParams<{ planId: string }>();
+  const { planId: param } = useParams<{ planId: string }>();
+  const [planId, setPlanId] = useState(param);
   const [plan, setPlan] = useState<ShiftPlan | null>(null);
   const [missing, setMissing] = useState(false);
   const [lang, setLangState] = useState<Lang>("es");
@@ -113,14 +114,15 @@ export function CrewView() {
       .then((r) => r.json())
       .then((x) => setWhisper(!!x.enabled))
       .catch(() => {});
-    fetch(`/api/crew/${planId}`)
+    fetch(`/api/crew/${param}`)
       .then((r) => (r.ok ? r.json() : Promise.reject()))
       .then((p: ShiftPlan) => {
         setPlan(p);
-        setCrewId(stored(`sombra-crew-${planId}`, p.crews[0]?.crewId ?? ""));
+        setPlanId(p.id); // "/crew/latest" resolves to the newest plan's real id
+        setCrewId(stored(`sombra-crew-${p.id}`, p.crews[0]?.crewId ?? ""));
       })
       .catch(() => setMissing(true));
-  }, [planId]);
+  }, [param]);
 
   // Poll this crew's channel. New boss messages are read aloud; heat alerts take over the screen with an alarm.
   useEffect(() => {

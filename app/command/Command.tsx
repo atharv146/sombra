@@ -7,6 +7,7 @@ import type { AgentEvent, AgentId, Crew, Field, HourlyRisk, ShiftPlan, TriageLab
 import { Channels } from "./Channels";
 import { unlockAudio } from "@/lib/alarm";
 import { ImpactPanel } from "./ImpactPanel";
+import { PlayDay } from "./PlayDay";
 import { AgentPanel, type AgentCard } from "./AgentPanel";
 import { PlanView } from "./PlanView";
 import { BAND_COLOR } from "./bands";
@@ -47,6 +48,11 @@ export function Command({ fields, replayDate }: { fields: Field[]; replayDate: s
   const [alerts, setAlerts] = useState<Record<string, TriageLabel>>({});
   const [lastRun, setLastRun] = useState<{ at: number; e: AgentEvent }[] | null>(null);
   const [replaying, setReplaying] = useState(false);
+  const [playMin, setPlayMin] = useState<number | null>(null);
+  const onMinute = useCallback((m: number | null) => {
+    setPlayMin(m);
+    if (m !== null) setHour(Math.min(19, Math.floor(m / 60)));
+  }, []);
   const [banner, setBanner] = useState<{ crewId: string; label: TriageLabel; text: string } | null>(null);
   const onAlert = useCallback((crewId: string, label: TriageLabel, text: string) => {
     setAlerts((a) => ({ ...a, [crewId]: label }));
@@ -251,12 +257,13 @@ export function Command({ fields, replayDate }: { fields: Field[]; replayDate: s
           <h2 className="font-semibold">Tomorrow&apos;s crews</h2>
           <div className="mt-3 flex flex-col gap-2 text-sm">
             {crews.map((c, i) => (
-              <div key={c.id} className="grid grid-cols-[70px_1fr_80px_90px] items-center gap-2">
+              <div key={c.id} className="flex flex-wrap items-center gap-2">
                 <span className="font-semibold">{c.name}</span>
                 <select
                   value={c.fieldId}
+                  style={{ flexBasis: "11rem" }}
                   onChange={(e) => setCrews(crews.map((x, j) => (j === i ? { ...x, fieldId: e.target.value } : x)))}
-                  className="rounded border border-[var(--line)] bg-transparent px-2 py-1"
+                  className="min-w-0 flex-1 rounded border border-[var(--line)] bg-transparent px-2 py-1"
                 >
                   {fields.map((f) => (
                     <option key={f.id} value={f.id}>
@@ -294,9 +301,12 @@ export function Command({ fields, replayDate }: { fields: Field[]; replayDate: s
           </div>
         </section>
 
+        {draft && final && risks.length > 0 && final.violations.length === 0 && (
+          <PlayDay before={draft} after={final} crews={crews} fields={fields} risks={risks} planId={final.id} onMinute={onMinute} />
+        )}
         {draft && final && risks.length > 0 && <ImpactPanel before={draft} after={final} crews={crews} fields={fields} risks={risks} />}
-        {draft && <PlanView plan={draft} crews={crews} label="Your usual day" risks={risks} fields={fields} tone="before" />}
-        {final && <PlanView plan={final} crews={crews} label="Sombra's plan" risks={risks} fields={fields} tone="after" />}
+        {draft && <PlanView plan={draft} crews={crews} label="Your usual day" risks={risks} fields={fields} tone="before" nowMin={playMin} />}
+        {final && <PlanView plan={final} crews={crews} label="Sombra's plan" risks={risks} fields={fields} tone="after" nowMin={playMin} />}
       </div>
 
       <aside className="flex flex-col gap-4 lg:sticky lg:top-6 lg:self-start">

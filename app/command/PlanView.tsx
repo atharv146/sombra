@@ -15,7 +15,23 @@ const ampm = (m: number) => {
 const TICKS = [4, 6, 8, 10, 12, 14, 16, 18].map((h) => h * 60);
 
 // Each crew's day drawn over its field's hourly heat: you can see work blocks running into red, or ending before it.
-export function PlanView({ plan, crews, label, risks, fields, tone }: { plan: ShiftPlan; crews: Crew[]; label: string; risks: HourlyRisk[]; fields: Field[]; tone: "before" | "after" }) {
+export function PlanView({
+  plan,
+  crews,
+  label,
+  risks,
+  fields,
+  tone,
+  nowMin = null,
+}: {
+  plan: ShiftPlan;
+  crews: Crew[];
+  label: string;
+  risks: HourlyRisk[];
+  fields: Field[];
+  tone: "before" | "after";
+  nowMin?: number | null; // "Play the day" clock: draws a moving line
+}) {
   return (
     <section className={`rounded-xl border bg-[var(--card)] p-4 ${tone === "after" ? "border-[#3f6b3a]" : "border-[var(--line)]"}`}>
       <div className="flex flex-wrap items-baseline justify-between gap-2">
@@ -49,6 +65,7 @@ export function PlanView({ plan, crews, label, risks, fields, tone }: { plan: Sh
                     <div key={r.time} className="h-full flex-1" style={{ background: BAND_COLOR[r.band], opacity: 0.35 }} title={`${r.time.slice(11, 16)} ${r.tempF}°F`} />
                   ))}
                 </div>
+                {nowMin !== null && <div className="absolute inset-y-0 z-10 w-0.5 bg-[#b3261e]" style={{ left: `${pct(nowMin)}%` }} />}
                 {/* the schedule on top */}
                 {p.blocks.map((b, i) => {
                   const left = pct(toMin(b.start));
