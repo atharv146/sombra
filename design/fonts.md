@@ -1,0 +1,1 @@
+array regular, zodiac regular, general sans semibold

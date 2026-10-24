@@ -22,7 +22,8 @@ const keyIndex = { openrouter: 0, groq: 0 };
 const COMPAT = {
   openrouter: {
     url: "https://openrouter.ai/api/v1/chat/completions",
-    keys: () => splitKeys(process.env.OPENROUTER_API_KEYS || process.env.OPENROUTER_API_KEY),
+    // Every env var starting with OPENROUTER_API_KEY counts (…_KEYS, …_KEY_2, …_KEY_DARSHAN), comma lists included.
+    keys: () => [...new Set(Object.entries(process.env).filter(([k]) => k.startsWith("OPENROUTER_API_KEY")).flatMap(([, v]) => splitKeys(v)))],
     model: process.env.OPENROUTER_MODEL || "nvidia/nemotron-3-ultra-550b-a55b:free",
     // Tried in order if the first is rate-limited (free models share upstream pools).
     fallbacks: ["nvidia/nemotron-3.5-lightning:free", "google/gemma-4-31b-it:free"],

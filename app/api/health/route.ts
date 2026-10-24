@@ -10,7 +10,7 @@ export async function GET() {
   return Response.json({
     shared: !!(process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL),
     provider: process.env.LLM_PROVIDER ?? null,
-    openrouterKeys: keys(process.env.OPENROUTER_API_KEYS || process.env.OPENROUTER_API_KEY),
+    openrouterKeys: new Set(Object.entries(process.env).filter(([k]) => k.startsWith("OPENROUTER_API_KEY")).flatMap(([, v]) => (v ?? "").split(/[\s,]+/).filter(Boolean))).size,
     groq: keys(process.env.GROQ_API_KEY) > 0,
     lan: process.env.VERCEL ? null : (lan ?? null),
   });

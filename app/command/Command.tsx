@@ -255,8 +255,9 @@ export function Command({ fields }: { fields: Field[] }) {
               <button
                 key={x.id}
                 onClick={() => setScenarioId(x.id)}
-                title={x.detail}
-                className={`rounded-xl border px-3 py-1.5 text-left leading-tight ${scenarioId === x.id ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--bg)]" : "border-[var(--line)]"}`}
+                disabled={!!final && x.id !== scenarioId}
+                title={final && x.id !== scenarioId ? "End the day to plan a different one" : x.detail}
+                className={`rounded-xl border px-3 py-1.5 text-left leading-tight disabled:cursor-not-allowed disabled:opacity-35 ${scenarioId === x.id ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--bg)]" : "border-[var(--line)]"}`}
               >
                 <span className="block font-semibold">{x.label}</span>
                 <span className="block text-[11px] opacity-75">{x.detail.split(" + ")[0]}</span>
@@ -407,6 +408,7 @@ export function Command({ fields }: { fields: Field[] }) {
         {final && final.violations.length === 0 && (
           <>
             <h2 className="font-display text-2xl">Crew channels</h2>
+            <p className="-mt-2 text-xs text-[var(--muted)]">The day ({scenario.label}) is locked while this plan is active. Use End day to switch.</p>
             {final.createdAt && (
               <p className="-mt-2 text-xs text-[var(--muted)]">
                 Active plan since {new Date(final.createdAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}. Workers&apos; phones follow it automatically; planning again replaces it and clears these channels.

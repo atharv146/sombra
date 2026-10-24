@@ -29,6 +29,14 @@ export interface SwarmInput {
 type Emit = (e: AgentEvent) => void;
 const SPLIT = "###JSON";
 
+// Models sometimes add markdown, emoji or stray symbols; the cards show plain sentences only.
+const clean = (t: string) =>
+  t
+    .replace(/[*_#`>|~]+/g, "")
+    .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/gu, "")
+    .replace(/^[ \t]*[-•][ \t]*/gm, "")
+    .replace(/[ \t]{2,}/g, " ");
+
 // Streams an agent's visible reasoning; anything after ###JSON is hidden and returned as `json`.
 // If the model call fails, the agent says so and uses `fallback` (rules-based text) so the demo keeps going.
 async function run(emit: Emit, agent: AgentId, system: string, prompt: string, maxTokens = 700, fallback = "") {
@@ -41,7 +49,7 @@ async function run(emit: Emit, agent: AgentId, system: string, prompt: string, m
       const cut = all.indexOf(SPLIT);
       const visible = cut === -1 ? all.slice(0, Math.max(0, all.length - SPLIT.length)) : all.slice(0, cut);
       if (visible.length > shown) {
-        emit({ type: "agent_delta", agent, text: visible.slice(shown) });
+        emit({ type: "agent_delta", agent, text: clean(visible.slice(shown)) });
         shown = visible.length;
       }
     }
@@ -53,7 +61,7 @@ async function run(emit: Emit, agent: AgentId, system: string, prompt: string, m
   }
   const cut = all.indexOf(SPLIT);
   const text = (cut === -1 ? all : all.slice(0, cut)).trim();
-  if (cut === -1 && text.length > shown) emit({ type: "agent_delta", agent, text: text.slice(shown) });
+  if (cut === -1 && text.length > shown) emit({ type: "agent_delta", agent, text: clean(text.slice(shown)) });
   return { text, json: cut === -1 ? "" : all.slice(cut + SPLIT.length), failed: false };
 }
 
