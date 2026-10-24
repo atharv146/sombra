@@ -1,21 +1,12 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
+import { Noto_Sans_Gurmukhi } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-const display = Instrument_Serif({
-  variable: "--font-display",
-  weight: "400",
-  subsets: ["latin"],
+// Punjabi fallback: the brand fonts don't cover Gurmukhi.
+const gurmukhi = Noto_Sans_Gurmukhi({
+  variable: "--font-gurmukhi",
+  weight: ["400", "600"],
+  subsets: ["gurmukhi"],
 });
 
 export const metadata: Metadata = {
@@ -25,10 +16,14 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${display.variable} h-full antialiased`}
-    >
+    <html lang="en" className={`${gurmukhi.variable} h-full antialiased`}>
+      <head>
+        <link rel="preconnect" href="https://api.fontshare.com" />
+        <link
+          rel="stylesheet"
+          href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600&f[]=zodiak@400&f[]=array@400&display=swap"
+        />
+      </head>
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );

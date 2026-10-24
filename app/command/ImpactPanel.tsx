@@ -16,8 +16,23 @@ export function ImpactPanel({ before, after, crews, fields, risks }: { before: S
     { label: "Work hours per worker", before: `${a.workHoursPerWorker}`, after: `${b.workHoursPerWorker} (${kept}% kept)`, good: kept >= 80 },
     { label: "Paid cool-down wages", before: `$${a.paidBreakUsd}`, after: `$${b.paidBreakUsd}`, good: b.paidBreakUsd > a.paidBreakUsd },
   ].filter((r) => !(r.before === "$0" && r.after === "$0"));
+  const R1 = 52, R2 = 38, C1 = 2 * Math.PI * R1, C2 = 2 * Math.PI * R2;
+  const max = Math.max(a.extremeWorkerHours, 1);
   return (
-    <section className="rounded-xl border-2 border-[var(--ink)] bg-[var(--card)] p-5">
+    <section className="rounded-xl border border-[var(--ink)] bg-[var(--card)] p-5">
+      <div className="flex flex-wrap items-center gap-6">
+      <figure className="shrink-0" aria-label={`Deadly-heat worker-hours: usual day ${a.extremeWorkerHours}, Sombra ${b.extremeWorkerHours}`}>
+        <svg viewBox="0 0 128 128" className="h-32 w-32 -rotate-90">
+          <circle cx="64" cy="64" r={R1} fill="none" stroke="var(--track)" strokeWidth="10" />
+          <circle cx="64" cy="64" r={R1} fill="none" stroke="var(--heat-extreme)" strokeWidth="10" strokeDasharray={C1} strokeDashoffset={C1 * (1 - a.extremeWorkerHours / max)} className="ring" />
+          <circle cx="64" cy="64" r={R2} fill="none" stroke="var(--track)" strokeWidth="10" />
+          <circle cx="64" cy="64" r={R2} fill="none" stroke="var(--brand)" strokeWidth="10" strokeDasharray={C2} strokeDashoffset={C2 * (1 - b.extremeWorkerHours / max)} className="ring" />
+        </svg>
+        <figcaption className="mt-1 text-center text-[11px] text-[var(--muted)]">
+          <span className="text-[var(--heat-extreme)]">outer</span> usual · <span className="text-[var(--brand)]">inner</span> Sombra
+        </figcaption>
+      </figure>
+      <div className="min-w-0 flex-1">
       <p className="text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">What Sombra changed for {workers} workers</p>
       <p className="mt-1 font-display text-3xl leading-tight">
         {a.extremeWorkerHours > 0 ? (
@@ -28,6 +43,8 @@ export function ImpactPanel({ before, after, crews, fields, risks }: { before: S
           <>No extreme-heat hours today; the plan still meets every rule.</>
         )}
       </p>
+      </div>
+      </div>
       <table className="mt-4 w-full text-sm">
         <thead>
           <tr className="text-left text-xs text-[var(--muted)]">

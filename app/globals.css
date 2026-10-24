@@ -1,62 +1,129 @@
 @import "tailwindcss";
 
+/* Design tokens: everything visual comes from here (design/guidelines.md §5). */
 :root {
-  --bg: #f3eee4;
-  --card: #fbf8f2;
-  --ink: #1f1b16;
-  --muted: #6f665b;
-  --line: #ddd3c3;
-  --track: #ebe3d5;
-  --accent: #b4532a;
+  /* warm neutrals */
+  --bg: #f2ede3;
+  --card: #f8f5ee;
+  --ink: #1e1b16;
+  --muted: #645c51;
+  --line: #d6ccbb;
+  --track: #e8e0d1;
+  /* one brand color: shade */
+  --brand: #2b5d57;
+  --brand-ink: #f3efe6;
+  --accent: var(--brand);
+  /* data only: heat bands (HeatRisk-style order), alerts, status */
+  --heat-low: #4e8f4a;
+  --heat-moderate: #d9a514;
+  --heat-high: #d9661c;
+  --heat-extreme: #a3195b;
+  --alert: #b3261e;
+  --ok: #3f6b3a;
+  --cool: #2f6f8f;
+  /* type */
+  --font-ui: "General Sans", var(--font-gurmukhi), system-ui, sans-serif;
+  --font-display-face: "Zodiak", var(--font-gurmukhi), Georgia, serif;
+  --font-label: "Array", "General Sans", sans-serif;
+  /* shape and motion */
+  --radius: 6px;
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --dur-fast: 180ms;
+  --dur-story: 560ms;
 }
 
 @theme inline {
   --color-background: var(--bg);
   --color-foreground: var(--ink);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-display: var(--font-display);
+  --font-sans: var(--font-ui);
+  --font-mono: var(--font-ui);
+  --font-display: var(--font-display-face);
 }
 
 body {
   background: var(--bg);
   color: var(--ink);
-  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-family: var(--font-ui);
+  font-size: 15px;
 }
 
 .font-display {
-  font-family: var(--font-display), Georgia, serif;
-  letter-spacing: -0.01em;
+  font-family: var(--font-display-face);
+  font-weight: 400;
+  letter-spacing: -0.015em;
+}
+.font-label {
+  font-family: var(--font-label);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.font-mono,
+.tabular {
+  font-variant-numeric: tabular-nums;
 }
 
-/* Agent cards */
-.agent-card {
-  animation: card-in 420ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
-  border-left: 3px solid var(--agent);
-  transition: box-shadow 200ms ease, border-color 200ms ease;
+/* Laptop surfaces: flat, hairline borders, small radii (no soft cards, no shadows). */
+.cmd .rounded-xl,
+.cmd .rounded-lg,
+.cmd .rounded-2xl {
+  border-radius: var(--radius);
 }
-.agent-card[data-status="idle"] {
-  opacity: 0.55;
+.cmd [class*="shadow"] {
+  box-shadow: none;
 }
-.agent-card[data-status="thinking"] {
-  box-shadow: 0 0 0 1px var(--agent), 0 6px 24px -12px var(--agent);
+
+/* Unsafe hours on the usual day: hatched, so it reads without color too. */
+.hatch {
+  background-image: repeating-linear-gradient(135deg, rgba(163, 25, 91, 0.85) 0 3px, transparent 3px 7px);
 }
-.agent-pip {
-  width: 8px;
-  height: 8px;
-  border-radius: 999px;
-  background: var(--agent);
-  display: inline-block;
-  transform: translateY(-1px);
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
 }
-.agent-card[data-status="thinking"] .agent-pip {
-  animation: pulse 1s ease-in-out infinite;
+
+/* Agent Floor: motion only while an agent is really working */
+.agent-breathe {
+  animation: breathe 1.6s ease-in-out infinite;
+}
+@keyframes breathe {
+  50% { opacity: 0.6; }
+}
+.sun-run {
+  animation: sun 2.4s var(--ease) infinite;
+}
+@keyframes sun {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(180deg); }
+}
+.pen {
+  stroke-dasharray: 90;
+  animation: pen 1.2s var(--ease) both;
+}
+@keyframes pen {
+  from { stroke-dashoffset: 90; }
+  to { stroke-dashoffset: 0; }
+}
+.wave {
+  animation: wave 0.7s ease-in-out infinite alternate;
+}
+@keyframes wave {
+  from { transform: scaleY(0.4); }
+}
+.crew-dot {
+  animation: crew 1s ease-in-out infinite alternate;
+}
+@keyframes crew {
+  to { transform: translateX(4px); }
+}
+.drawer {
+  animation: card-in var(--dur-story) var(--ease) both;
 }
 @keyframes card-in {
   from { opacity: 0; transform: translateY(8px); }
-}
-@keyframes pulse {
-  50% { transform: translateY(-1px) scale(1.6); opacity: 0.5; }
 }
 
 /* Map markers */
@@ -87,7 +154,7 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .agent-card, .agent-pip, .field-dot { animation: none !important; }
+  *, *::before, *::after { animation-duration: 1ms !important; animation-iteration-count: 1 !important; transition-duration: 1ms !important; }
 }
 
 /* Worker check-in alerts */
@@ -141,4 +208,23 @@ body {
 .chat-bg {
   background-color: #ebe2d2;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' fill='none' stroke='%23b9a98f' stroke-width='1.2' stroke-linecap='round' opacity='0.55'%3E%3Ccircle cx='22' cy='22' r='6'/%3E%3Cpath d='M22 9v4M22 31v4M9 22h4M31 22h4M13 13l3 3M28 28l3 3M31 13l-3 3M16 28l-3 3'/%3E%3Cpath d='M86 30c0-8 7-14 7-14s7 6 7 14a7 7 0 0 1-14 0z'/%3E%3Cpath d='M30 92c10-14 26-14 34-6-12 2-22 8-34 6zM30 92l22-8'/%3E%3Cpath d='M84 86h18M88 80h10M90 92h6'/%3E%3C/svg%3E");
+}
+.cmd button.rounded-full,
+.cmd span.rounded-full {
+  border-radius: var(--radius);
+}
+.stamp {
+  border: 1.5px solid var(--alert);
+  color: var(--alert);
+  padding: 1px 8px;
+  font-family: var(--font-label);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: 11px;
+  transform: rotate(-2deg);
+  display: inline-block;
+  animation: card-in var(--dur-story) var(--ease) both;
+}
+.ring {
+  transition: stroke-dashoffset 900ms var(--ease);
 }

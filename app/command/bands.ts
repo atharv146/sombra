@@ -1,8 +1,16 @@
 import type { HourlyRisk } from "@/lib/types";
 
+// Heat bands: data colors only (tokens in globals.css), always paired with a word.
 export const BAND_COLOR: Record<HourlyRisk["band"], string> = {
-  low: "#7f9c76",
-  moderate: "#d9a640",
-  high: "#e0702f",
-  extreme: "#b3261e",
+  low: "var(--heat-low)",
+  moderate: "var(--heat-moderate)",
+  high: "var(--heat-high)",
+  extreme: "var(--heat-extreme)",
+};
+
+export const BAND_LABEL: Record<HourlyRisk["band"], string> = {
+  low: "Low",
+  moderate: "Caution",
+  high: "High",
+  extreme: "Deadly",
 };

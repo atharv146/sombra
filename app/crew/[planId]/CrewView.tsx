@@ -13,6 +13,7 @@ const T = {
     newPlan: "Tu mayordomo hizo un plan nuevo.", waiting: "No hay plan activo. Esperando a tu mayordomo…", micBlocked: "Permite el micrófono para este sitio en la configuración del navegador.", secs: "seg",
     quick: ["Estoy bien", "Necesito agua", "Me siento mal"], coolAsk: "Hora de tu descanso pagado. ¿Cómo te sientes?",
     privacy: "Privacidad",
+    nowL: "Ahora", nextL: "Sigue", inL: "en", untilL: "hasta", doneL: "Terminaste por hoy. Descansa y toma agua.", voiceNote: "Tu voz se convierte en texto y solo la ve tu mayordomo. Sombra ayuda, pero no reemplaza las reglas de seguridad.",
     today: "Tu día", listen: "Escuchar", work: "Trabajo", meal: "Comida", cooldown: "Descanso pagado", travel: "Traslado",
     thread: "Mensajes con tu mayordomo", none: "Sin mensajes todavía", ask: "¿Cómo te sientes?", hint: "Habla en cualquier idioma",
     tap: "Toca para hablar", stop: "Toca para enviar", sending: "Enviando…", type: "O escribe aquí", send: "Enviar",
@@ -30,6 +31,7 @@ const T = {
     newPlan: "ਸੁਪਰਵਾਈਜ਼ਰ ਨੇ ਨਵੀਂ ਯੋਜਨਾ ਬਣਾਈ ਹੈ।", waiting: "ਕੋਈ ਯੋਜਨਾ ਚਾਲੂ ਨਹੀਂ। ਸੁਪਰਵਾਈਜ਼ਰ ਦੀ ਉਡੀਕ…", micBlocked: "ਬ੍ਰਾਊਜ਼ਰ ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਇਸ ਸਾਈਟ ਲਈ ਮਾਈਕ੍ਰੋਫ਼ੋਨ ਦੀ ਇਜਾਜ਼ਤ ਦਿਓ।", secs: "ਸਕਿੰਟ",
     quick: ["ਮੈਂ ਠੀਕ ਹਾਂ", "ਮੈਨੂੰ ਪਾਣੀ ਚਾਹੀਦਾ", "ਮੈਨੂੰ ਠੀਕ ਨਹੀਂ ਲੱਗ ਰਿਹਾ"], coolAsk: "ਤਨਖਾਹ ਵਾਲੇ ਆਰਾਮ ਦਾ ਸਮਾਂ। ਤੁਸੀਂ ਕਿਵੇਂ ਮਹਿਸੂਸ ਕਰ ਰਹੇ ਹੋ?",
     privacy: "ਪਰਦੇਦਾਰੀ",
+    nowL: "ਹੁਣ", nextL: "ਅਗਲਾ", inL: "ਵਿੱਚ", untilL: "ਤੱਕ", doneL: "ਅੱਜ ਦਾ ਕੰਮ ਖ਼ਤਮ। ਆਰਾਮ ਕਰੋ ਅਤੇ ਪਾਣੀ ਪੀਓ।", voiceNote: "ਤੁਹਾਡੀ ਆਵਾਜ਼ ਲਿਖਤ ਬਣਦੀ ਹੈ ਅਤੇ ਸਿਰਫ਼ ਸੁਪਰਵਾਈਜ਼ਰ ਵੇਖਦਾ ਹੈ। Sombra ਮਦਦ ਕਰਦਾ ਹੈ, ਪਰ ਸੁਰੱਖਿਆ ਨਿਯਮਾਂ ਦੀ ਥਾਂ ਨਹੀਂ ਲੈਂਦਾ।",
     today: "ਤੁਹਾਡਾ ਦਿਨ", listen: "ਸੁਣੋ", work: "ਕੰਮ", meal: "ਖਾਣਾ", cooldown: "ਤਨਖਾਹ ਵਾਲਾ ਆਰਾਮ", travel: "ਸਫ਼ਰ",
     thread: "ਸੁਪਰਵਾਈਜ਼ਰ ਨਾਲ ਸੁਨੇਹੇ", none: "ਅਜੇ ਕੋਈ ਸੁਨੇਹਾ ਨਹੀਂ", ask: "ਤੁਸੀਂ ਕਿਵੇਂ ਮਹਿਸੂਸ ਕਰ ਰਹੇ ਹੋ?", hint: "ਕਿਸੇ ਵੀ ਭਾਸ਼ਾ ਵਿੱਚ ਬੋਲੋ",
     tap: "ਬੋਲਣ ਲਈ ਦਬਾਓ", stop: "ਭੇਜਣ ਲਈ ਦਬਾਓ", sending: "ਭੇਜ ਰਿਹਾ ਹੈ…", type: "ਜਾਂ ਇੱਥੇ ਲਿਖੋ", send: "ਭੇਜੋ",
@@ -47,6 +49,7 @@ const T = {
     newPlan: "Your crew boss made a new plan.", waiting: "No active plan. Waiting for your crew boss…", micBlocked: "Allow the microphone for this site in your browser settings.", secs: "sec",
     quick: ["I'm OK", "I need water", "I feel sick"], coolAsk: "Paid cool-down time. How do you feel?",
     privacy: "Privacy",
+    nowL: "Now", nextL: "Next", inL: "in", untilL: "until", doneL: "You're done for today. Rest and drink water.", voiceNote: "Your voice becomes text that only your crew boss sees. Sombra helps, but doesn't replace safety rules.",
     today: "Your day", listen: "Listen", work: "Work", meal: "Lunch", cooldown: "Paid break", travel: "Travel",
     thread: "Messages with your crew boss", none: "No messages yet", ask: "How do you feel?", hint: "Speak in any language",
     tap: "Tap to talk", stop: "Tap to send", sending: "Sending…", type: "Or type here", send: "Send",
@@ -309,6 +312,7 @@ export function CrewView() {
   }
 
   talkRef.current = talk;
+  const clock = now;
   if (missing) return <main className="p-6 text-xl">{t.waiting}</main>;
   if (!plan) return <main className="p-6 text-xl">{t.loading}</main>;
 
@@ -340,7 +344,7 @@ export function CrewView() {
 
       {!armed && (
         <button onClick={() => (unlockAudio(), setArmed(true))} className="rounded-xl bg-[var(--ink)] px-4 py-3 text-left text-sm text-[var(--bg)]">
-          🔔 {t.enable}
+          {t.enable}
         </button>
       )}
 
@@ -382,6 +386,37 @@ export function CrewView() {
             ▶ {t.listen}
           </button>
         </div>
+        {(() => {
+          // Past days (replays) show the day at 10:50am, labeled as an example time; live days use the real clock.
+          const now = plan.mode === "replay" ? 10 * 60 + 50 : clock;
+          const cur = mine?.blocks.find((b) => now >= toMin(b.start) && now < toMin(b.end));
+          const next = mine?.blocks.find((b) => toMin(b.start) > now);
+          const pay = (b: typeof cur) => (b && b.kind === "cooldown" ? ` +$${(((toMin(b.end) - toMin(b.start)) / 60) * rate).toFixed(2)}` : "");
+          const mins = next ? toMin(next.start) - now : 0;
+          return (
+            <div className="mt-3 rounded-xl bg-[var(--ink)] p-4 text-[var(--bg)]">
+              {plan.mode === "replay" && <p className="mb-1 text-xs opacity-70">{plan.date} · 10:50am (example time)</p>}
+              {cur || next ? (
+                <>
+                  {cur && (
+                    <p className="text-2xl font-semibold leading-tight">
+                      {t.nowL}: {t[cur.kind]} {t.untilL} {ampm(cur.end)}
+                      {pay(cur)}
+                    </p>
+                  )}
+                  {next && (
+                    <p className={cur ? "mt-1 text-lg opacity-80" : "text-2xl font-semibold leading-tight"}>
+                      {t.nextL}: {t[next.kind]}
+                      {pay(next)} {t.inL} {mins >= 60 ? `${Math.floor(mins / 60)} h ${mins % 60} min` : `${mins} min`}
+                    </p>
+                  )}
+                </>
+              ) : (
+                <p className="text-xl font-semibold">{t.doneL}</p>
+              )}
+            </div>
+          );
+        })()}
         <p className="mt-3 text-lg leading-snug">{briefing}</p>
         <ol className="mt-4 flex flex-col">
           {mine?.blocks.map((b, i) => {
@@ -431,6 +466,7 @@ export function CrewView() {
             </button>
           ))}
         </div>
+        <p className="text-xs leading-snug text-[var(--muted)]">{t.voiceNote}</p>
         <form
           className="flex w-full gap-2"
           onSubmit={(e) => {

@@ -51,8 +51,11 @@ export function PlanView({
     <section className={`rounded-xl border bg-[var(--card)] p-4 ${tone === "after" ? "border-[#3f6b3a]" : "border-[var(--line)]"}`}>
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h3 className="font-display text-2xl">{label}</h3>
-        <span className={`text-sm font-semibold ${plan.violations.length ? "text-[#b3261e]" : "text-[#3f6b3a]"}`}>
-          {plan.violations.length ? `Breaks ${plan.violations.length} heat-law rules` : "Meets every Cal/OSHA heat rule"}
+        <span className="flex items-center gap-3">
+          {tone === "before" && plan.violations.length > 0 && <span className="stamp">Rejected by Crítico</span>}
+          <span className={`text-sm font-semibold ${plan.violations.length ? "text-[var(--alert)]" : "text-[var(--ok)]"}`}>
+            {plan.violations.length ? `Breaks ${plan.violations.length} heat-law rules` : "Meets every Cal/OSHA heat rule"}
+          </span>
         </span>
       </div>
       {tone === "after" && <p className="mt-1 text-sm">{plan.summary}</p>}
@@ -125,7 +128,16 @@ export function PlanView({
                     <div key={r.time} className="h-full flex-1" style={{ background: BAND_COLOR[r.band], opacity: 0.35 }} title={`${r.time.slice(11, 16)} ${r.tempF}°F`} />
                   ))}
                 </div>
-                {nowMin !== null && <div className="absolute inset-y-0 z-10 w-0.5 bg-[#b3261e]" style={{ left: `${pct(nowMin)}%` }} />}
+                {nowMin !== null && <div className="absolute inset-y-0 z-10 w-0.5 bg-[var(--ink)]" style={{ left: `${pct(nowMin)}%` }} />}
+                {/* deadly hours that the schedule works through: hatched on top of the work block */}
+                {p.blocks
+                  .filter((b) => b.kind === "work")
+                  .flatMap((b) => hours.filter((r) => r.band === "extreme" && Number(r.time.slice(11, 13)) * 60 >= toMin(b.start) - 59 && Number(r.time.slice(11, 13)) * 60 < toMin(b.end)).map((r) => ({ r, b })))
+                  .map(({ r, b }) => {
+                    const h0 = Math.max(Number(r.time.slice(11, 13)) * 60, toMin(b.start));
+                    const h1 = Math.min(Number(r.time.slice(11, 13)) * 60 + 60, toMin(b.end));
+                    return <div key={r.time + b.start} className="hatch absolute top-1.5 z-[5] h-6 rounded-sm" title="Working in deadly heat" style={{ left: `${pct(h0)}%`, width: `${pct(h1) - pct(h0)}%` }} />;
+                  })}
                 {/* the schedule on top */}
                 {p.blocks.map((b, i) => {
                   const left = pct(toMin(b.start));
@@ -162,7 +174,8 @@ export function PlanView({
           <span><i className="mr-1 inline-block h-2.5 w-4 rounded-sm bg-[var(--ink)] align-middle" />work</span>
           <span><i className="mr-1 inline-block h-2.5 w-4 rounded-sm bg-[#2f6f8f] align-middle" />paid 10-min cool-down in shade</span>
           <span><i className="mr-1 inline-block h-2.5 w-4 rounded-sm border border-[var(--line)] bg-[#efe6d6] align-middle" />lunch</span>
-          <span><i className="mr-1 inline-block h-2.5 w-4 rounded-sm align-middle" style={{ background: BAND_COLOR.extreme, opacity: 0.5 }} />background = heat at that field (red = deadly)</span>
+          <span><i className="mr-1 inline-block h-2.5 w-4 rounded-sm align-middle" style={{ background: BAND_COLOR.extreme, opacity: 0.5 }} />background = heat at that field</span>
+          <span><i className="hatch mr-1 inline-block h-2.5 w-4 rounded-sm align-middle" />working in deadly heat</span>
         </div>
       </div>
 

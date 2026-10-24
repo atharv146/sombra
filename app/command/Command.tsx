@@ -10,9 +10,15 @@ import { ImpactPanel } from "./ImpactPanel";
 import { PlayDay } from "./PlayDay";
 import { complianceCsv } from "@/lib/compliance";
 import { SCENARIOS, scenarioFor } from "@/lib/scenarios";
-import { AgentPanel, type AgentCard } from "./AgentPanel";
+import { type AgentCard } from "./AgentPanel";
+import { AgentFloor } from "./AgentFloor";
 import { PlanView } from "./PlanView";
-import { BAND_COLOR } from "./bands";
+import { BAND_COLOR, BAND_LABEL } from "./bands";
+
+const ampm = (iso: string) => {
+  const h = Number(iso.slice(11, 13));
+  return `${((h + 11) % 12) + 1}${h < 12 ? "am" : "pm"}`;
+};
 
 const FieldMap = dynamic(() => import("./FieldMap").then((m) => m.FieldMap), { ssr: false });
 
@@ -225,6 +231,15 @@ export function Command({ fields }: { fields: Field[] }) {
     }
     return Object.fromEntries(Object.entries(out).map(([k, v]) => [k, v.join(" + ")]));
   }, [crews, final]);
+  // The hero line: peak temperature and the deadly-heat window across the fields.
+  const hero = useMemo(() => {
+    if (!risks.length) return null;
+    const peak = risks.reduce((a, b) => (b.tempF > a.tempF ? b : a));
+    const deadly = risks.filter((r) => r.band === "extreme").map((r) => r.time).sort();
+    const smoke = Math.max(0, ...risks.map((r) => r.aqi ?? 0));
+    return { peak, from: deadly[0], to: deadly.length ? deadly[deadly.length - 1].slice(0, 11) + String(Number(deadly[deadly.length - 1].slice(11, 13)) + 1).padStart(2, "0") + ":00" : undefined, smoke: smoke >= 151 ? smoke : 0 };
+  }, [risks]);
+
   // Phones can't open "localhost". On a laptop dev server, point them at the laptop's Wi-Fi address instead
   // (same server, so same plan); if there isn't one, fall back to the deployed site.
   const local = typeof window !== "undefined" && window.location.hostname === "localhost";
@@ -242,7 +257,7 @@ export function Command({ fields }: { fields: Field[] }) {
   );
 
   return (
-    <div className="grid min-h-dvh grid-cols-1 gap-5 p-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(340px,1fr)] lg:p-6">
+    <div className="cmd grid min-h-dvh grid-cols-1 gap-5 p-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(380px,1fr)] lg:p-6">
       {banner && (
         <div className="alert-banner fixed inset-x-0 top-0 z-50 flex items-center justify-between gap-4 bg-[#b3261e] px-5 py-4 text-white shadow-lg">
           <p className="text-lg font-semibold">
@@ -254,12 +269,20 @@ export function Command({ fields }: { fields: Field[] }) {
         </div>
       )}
       <div className="flex flex-col gap-5">
-        <header className="flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <h1 className="font-display text-5xl leading-none">Sombra</h1>
-            <p className="mt-2 max-w-xl text-[15px] leading-snug">
-              {scenario.smokeAqi ? "Drill: wildfire smoke rolls over Manteca on a hot day." : scenario.date ? `${scenario.label}: ${scenario.detail.toLowerCase()} outside Manteca.` : "Today's live forecast for Manteca."} Enter tomorrow&apos;s crews and Sombra&apos;s AI agents rebuild the day so nobody
-              works through deadly heat, prove it follows California&apos;s heat law, and talk to every worker in Spanish or Punjabi.
+        <header className="flex flex-col gap-4">
+          <div className="flex items-baseline justify-between gap-3">
+            <p className="font-label text-xs text-[var(--muted)]">Sombra · heat and smoke safety for Central Valley farm crews</p>
+            <nav className="flex gap-4 text-sm">
+              <a href="/about" className="underline">How it works</a>
+              <a href="/privacy" className="underline">Privacy &amp; data safety</a>
+            </nav>
+          </div>
+          <div className="flex flex-wrap items-end gap-x-6 gap-y-2">
+            <p className="font-display tabular text-[88px] leading-[0.85]">{hero ? `${hero.peak.tempF}°` : "··"}</p>
+            <p className="max-w-md pb-1 text-[17px] leading-snug">
+              {hero
+                ? `${scenario.label}${scenario.smokeAqi ? " smoke drill" : ""}: peaks at ${hero.peak.tempF}°F at ${ampm(hero.peak.time)}. ${hero.from ? `Deadly heat from ${ampm(hero.from)} to ${ampm(hero.to!)}.` : "No deadly-heat hours."}${hero.smoke ? ` Smoke up to AQI ${hero.smoke}.` : ""} Sombra rebuilds the day so nobody works through it, and tells every worker in their language.`
+                : "Loading the forecast…"}
             </p>
           </div>
           <div className="flex flex-wrap gap-2 text-sm" role="tablist" aria-label="Day to plan">
@@ -306,6 +329,14 @@ export function Command({ fields }: { fields: Field[] }) {
                     ))}
                   </div>
                 </div>
+              ))}
+            </div>
+            <div className="mt-2 flex flex-wrap gap-3 text-xs">
+              {(["low", "moderate", "high", "extreme"] as const).map((b) => (
+                <span key={b} className="flex items-center gap-1">
+                  <i className="inline-block h-2.5 w-4" style={{ background: BAND_COLOR[b] }} />
+                  {BAND_LABEL[b]}
+                </span>
               ))}
             </div>
             <p className="mt-2 text-xs text-[var(--muted)]">
@@ -389,6 +420,7 @@ export function Command({ fields }: { fields: Field[] }) {
       </div>
 
       <aside className="flex flex-col gap-4 lg:sticky lg:top-6 lg:self-start">
+        <AgentFloor cards={cards} risks={risks} draft={draft} final={final} alerts={alerts} />
         <section className="rounded-xl border-2 border-[var(--ink)] bg-[var(--card)] p-4">
           <div className="flex items-baseline justify-between">
             <h2 className="font-display text-2xl">Worker phones</h2>
@@ -434,8 +466,7 @@ export function Command({ fields }: { fields: Field[] }) {
             <Channels key={final.id} planId={final.id} crews={crews} fields={fields} fieldOf={fieldOf} onAlert={onAlert} />
           </>
         )}
-        <h2 className="font-display text-2xl">Agents</h2>
-        <AgentPanel cards={cards} />
+
 
         <p className="text-[11px] text-[var(--muted)]">
           Weather: Open-Meteo (CC BY 4.0). Map © OpenStreetMap contributors, OpenFreeMap. Rules: Cal/OSHA §3395, §5141.1. <a href="/about" className="underline">How it works &amp; credits</a> · <a href="/privacy" className="underline">Privacy &amp; data safety</a>

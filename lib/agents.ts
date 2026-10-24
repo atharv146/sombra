@@ -33,6 +33,8 @@ const SPLIT = "###JSON";
 const clean = (t: string) =>
   t
     .replace(/[*_#`>|~]+/g, "")
+    .replace(/\s*[—–]\s*/g, ", ")
+    .replace(/VERDICT:\s*(REJECT|APPROVE)\.?/gi, "")
     .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/gu, "")
     .replace(/^[ \t]*[-•][ \t]*/gm, "")
     .replace(/[ \t]{2,}/g, " ");
