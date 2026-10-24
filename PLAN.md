@@ -8,14 +8,17 @@
 
 ---
 
-## 0. Do these in the next 15 minutes
+## 0. Who does what (read this first)
 
-1. **Check the deadline.** Devpost says **8:00pm EDT, which is 5:00pm here**, not 6:15. Ask on Discord. Until they answer, plan to **submit a draft by 4:45pm**. Devpost lets you edit until the deadline, so submitting early costs nothing.
-2. **AI/ML track rules:** done. Section 4 shows how we meet each one. Submit to the main track **and** the AI/ML track.
-3. **Lock the team.** Push this repo to GitHub, invite partners, and assign roles from section 5.
-4. **Use Opus, not Sonnet, as the builder.** Sonnet is fine for small mechanical edits only. If Opus usage gets tight after 1pm, switch to Sonnet for polish, not for core logic.
+**Deadline: Devpost submitted by 6:15pm** (the real deadline is 6:30; the extra 15 minutes are buffer).
 
----
+| | **Atharv** | **Darshan** |
+|---|---|---|
+| Tools | Claude Code (Opus for hard parts, Sonnet for polish) plus a cloud Claude Code session for the phone page | **No Claude Code.** gemini.google.com, Google Colab (its built-in Gemini helps with errors), Google Slides, and the GitHub website for uploads |
+| Owns | All app code: `app/**`, `lib/**`, deploys, merging | The AI model's data and training, facts and sources, slides, video, Devpost story |
+| Step-by-step guide | Section 5A below | **[`ml/README.md`](ml/README.md)**, plus section 5B below |
+
+Darshan never edits app code, so we can't have merge conflicts. He uploads files to a `darshan` branch through the GitHub website, and Atharv merges them.
 
 ## 1. Why this idea wins (from past winners)
 
@@ -36,8 +39,8 @@
 
 ## 2. The demo (2 minutes, rehearse this exact flow)
 
-1. **(15s) Person.** "Rosa runs a 38-person crew picking tomatoes outside Manteca. On a 106° day she has to schedule shade, water, rest breaks and start times by law, for workers who speak three languages. Farmworkers die of heat at about 20 times the rate of other workers." *(Partner C verifies this figure and cites the source.)*
-2. **(40s) Command center.** Choose the **July heat-wave replay**. Rosa types or says: *"Mañana: 3 crews, tomatoes at French Camp, cherries at Linden, 6 new workers."*
+1. **(15s) Person.** "Rosa runs a 38-person crew picking tomatoes outside Manteca. On a 114° day she has to schedule shade, water, rest breaks and start times by law, for workers who speak three languages. Farmworkers die of heat at about 20 times the rate of other workers." *(Darshan verifies this figure in docs/facts.md.)*
+2. **(40s) Command center.** Choose the **July 11, 2024 heat-wave replay** (114°F in Manteca, real archived weather). Rosa enters her 3 crews (6 new workers on Crew 2) and her usual 6am–2:30pm shift, then clicks **Plan a safe day**.
    - The map fills with fields. A timeline from 5am to 7pm turns red in the afternoon.
    - Five agent cards stream live.
    - **The Critic rejects the first plan:** "Crew 2 has 6 workers on their 2nd day (acclimatization) picking at 1pm at 101°F. That violates §3395(g)." The Planner revises it live.
@@ -80,7 +83,7 @@ store: Upstash Redis (Vercel Marketplace, free) · fallback: plan encoded in the
 
 **Today is a mild October day**, so live weather won't look dangerous. Build two modes: **Live** (today) and **Replay** (a real July 2024 heat-wave day pulled from the Open-Meteo historical archive). The replay data is real, just from a past date, so say that out loud in the demo.
 
-**Rules to encode** (Partner C checks each against the text on dir.ca.gov by 11:30):
+**Rules to encode** (Darshan checks each against dir.ca.gov in docs/facts.md):
 - 80°F and above: shade up and water available (§3395(c)–(d)). Water is 1 quart per worker per hour.
 - 95°F and above: high-heat procedures, a pre-shift meeting, and for agriculture a 10-minute cool-down rest every 2 hours (§3395(e)).
 - New workers (first 14 days) and heat waves: close observation (§3395(g)).
@@ -112,11 +115,10 @@ store: Upstash Redis (Vercel Marketplace, free) · fallback: plan encoded in the
 
 Beyond those rules, AI/ML judges usually reward a model the team trained and evaluated itself. So we have three layers, and every one shows up in the UI:
 
-1. **Our own trained model: a multilingual heat-illness triage classifier** (Partner A).
+1. **Our own trained model: a multilingual heat-illness triage classifier** (Darshan, see [`ml/README.md`](ml/README.md)).
    - **Labels:** `ok`, `warning` (cramps, heavy sweating, thirst), `heat_exhaustion` (dizzy, headache, nausea, weak), `emergency` (confused, fainted, stopped sweating, hot dry skin, slurred speech). Symptom lists come from CDC/NIOSH.
-   - **Data:** about 800 utterances in Spanish, Punjabi, English and Spanglish. Generate them with Claude from the symptom lists and hand-check 50. **The test set is written by teammates, not generated**, so the evaluation is honest.
-   - **Model v1 (guaranteed in 45 min):** character n-gram TF-IDF plus logistic regression in scikit-learn. Export the weights to `public/model/triage.json` and run inference in TypeScript (a dot product and softmax).
-   - **Model v2 (if time):** multilingual sentence embeddings (`paraphrase-multilingual-MiniLM-L12-v2`) plus logistic regression. Report both models in a comparison table.
+   - **Data:** about 400 sentences in Spanish, Punjabi, English and Spanglish. Generate them with Claude from the symptom lists and hand-check 50. **The test set is written by teammates, not generated**, so the evaluation is honest.
+   - **Model v1 (guaranteed in about 1 hour, all in Colab):** character n-gram TF-IDF plus logistic regression in scikit-learn. Export the weights to `public/model/triage.json` and run inference in TypeScript (a dot product and softmax).
    - **Metric that matters:** recall on `emergency`. Lower the threshold until no emergency is missed, and show the confusion matrix on the model card.
    - **Safety floor:** emergency keywords always escalate, whatever the model says.
 2. **Physics model:** WBGT from temperature, humidity, solar radiation and wind (Liljegren or a simplified approximation). It explains why a humid 92° can be worse than a dry 97°.
@@ -126,47 +128,39 @@ Beyond those rules, AI/ML judges usually reward a model the team trained and eva
 
 ---
 
-## 5. Team roles (nobody touches anyone else's files)
+## 5A. Atharv: what to do and when
 
-| Person | Owns (files) | Tools | Deliverable by 1:00 gate |
-|---|---|---|---|
-| **Atharv: driver and integrator** | `app/command/**`, `app/api/plan/**`, `lib/llm.ts`, `lib/agents/**`, `lib/types.ts`, the map | Claude Code on **Opus**, local | Prompt to plan on the map, ugly, end to end |
-| **Partner A: ML** | `ml/**` (notebook + data), `lib/triage.ts`, `lib/heat.ts`, `public/model/**`, `app/about/model/**` | Colab or local Python, any Claude/Gemini chat; or a cloud Claude Code session on the $100 credit, scoped to these paths | `triage.json` v1 and a `classify(text)` function that passes 5 sample sentences |
-| **Partner B: worker phone** | `app/crew/**`, `app/api/checkin/**`, `lib/speech.ts` | A second Claude Code session (cloud or worktree) using the credits | `/crew/demo` shows a hardcoded plan, reads it aloud in Spanish, and records voice to `/api/checkin` |
-| **Partner C: story, data, rules, pitch** | `lib/rules.ts` (thresholds only), `data/fields.json`, `data/replay-*.json`, `docs/**`, slides, video, Devpost, n8n | Browser, free Claude, Godly, Cmd+Shift+5 | Rule text checked, 3 real field coordinates, a replay-date JSON, the "who it helps" story and stats with sources |
+| Time | Do | Done when |
+|---|---|---|
+| Now | Get a working AI key: a new Gemini key in a **new** AI Studio project (the current one has $0 prepaid credit), or an Anthropic key with `LLM_PROVIDER=claude`. Invite Darshan: `gh repo edit atharv146/sombra --add-collaborator HIS_USERNAME` | The swarm on `/command` shows real agent text |
+| 11:00–1:00 | Check in on the cloud session building `/crew` (branch `crew`). Tune the agent prompts against real output. Move `lib/store.ts` to Upstash Redis, because Vercel needs shared storage for the QR code link to work | Plan → QR → phone works on localhost |
+| 1:00–1:30 | Merge `crew`, then deploy to Vercel with the env vars set. Lunch. Check `/usage` | A live URL that works on your phone |
+| 1:30–3:00 | Merge Darshan's model (`triage.json` → `public/model/`). Build the check-in alert feed on `/command`, the Medic agent, the `/about/model` page (metrics + `confusion.png`) and `/credits` | A judge's spoken check-in turns a worker red on the laptop |
+| 3:00–4:30 | **Switch to Sonnet.** Design pass with the taste skill and Playwright screenshots. Add `?demo=1`, which replays a recorded run if the wifi dies | **4:30 feature freeze** |
+| 4:30–5:30 | Bugs only. Final deploy. **Make the repo public.** Run the full demo 3 times on the live URL | Nothing breaks 3 times in a row |
+| 5:30–6:15 | Devpost "How we built it", "Built with" and the AI/ML section. Darshan submits | **6:15 submitted** |
+| 6:15–6:30 | Rehearse the 2-minute pitch together | |
 
-**Our actual team is 2 people:**
-- **Atharv** owns his files from the table above.
-- **A cloud Claude Code session** on the $100 credits does Partner B's work (`/crew`), with Atharv steering it.
-- **The teammate** takes Partners A and C, using no Claude Code: Colab with its built-in Gemini, plus free Claude chat. If they don't know Python, they only make the dataset and the hand-written test set, and the cloud session does the training.
-- **Cut:** n8n and model v2.
+**Model use:** Opus only for the agent engine, merges and bugs Sonnet fails twice. Sonnet for design, copy and Playwright loops. The app's own AI calls are billed to the API key, not your Claude plan.
 
-**Unique angle from ag-labor apps (FieldClock, Hectre):** piece-rate workers skip breaks because a break costs them money. California requires paid rest and recovery periods for piece-rate workers (Labor Code 226.2; the teammate verifies this). The phone shows **"Descanso pagado: $X"** ("Paid break: $X") during every cool-down.
+## 5B. Darshan: what to do and when (no Claude Code)
 
-**The contract that keeps everyone unblocked:** at 11:00 Atharv commits `lib/types.ts` (`Field`, `Crew`, `HourlyRisk`, `ShiftPlan`, `AgentEvent`, `CheckIn`, `TriageResult`). Everyone builds against these types with fake data until the real pieces land.
+| Time | Do | Hand off |
+|---|---|---|
+| 11:00–11:45 | **[`ml/README.md`](ml/README.md) steps 1–2:** make `train.csv` with Gemini; write `test.csv` (40 sentences) **yourself** | |
+| 11:45–12:15 | **Steps 3–4:** train in Colab with [`ml/train_colab.py`](ml/train_colab.py), upload 4 files to the `darshan` branch | Text Atharv the accuracy and emergency recall |
+| 12:15–1:00 | **Step 5:** `docs/facts.md`. Check every number against a source | Upload to the `darshan` branch |
+| 1:00–1:30 | Lunch. Open the live URL on your phone, scan the QR code, and try it | Text Atharv anything broken |
+| 1:30–2:00 | Draft Devpost: Inspiration, What it does, Challenges, What's next. Use Gemini to help, but edit it so it sounds like us | Google Doc shared with Atharv |
+| 2:00–2:30 | **Go to the 2pm ML workshop.** Write down the words organizers use for good ML and add them to the model card text | Notes |
+| 2:30–3:30 | Model card text: dataset (how it was made, sizes), the model (TF-IDF character n-grams + logistic regression), metrics, mistakes it makes, limits. Also the credits list (PLAN.md section 4) | Google Doc |
+| 3:30–4:30 | 5 slides in Google Slides: Rosa's problem, live demo (just a title), how it works (agents + our model), impact + facts, privacy and safety | Slides link |
+| 4:30–5:30 | Test everything on your phone and log bugs. Then record the 2-minute demo video with Cmd+Shift+5, following section 2 | Video uploaded to YouTube as unlisted |
+| 5:30–6:15 | Fill in Devpost, upload screenshots and the video, select **main track + AI/ML track**, and **submit by 6:15** | Submitted |
 
-**Git:** one branch per person, small commits, and Atharv merges at 1:00, 3:00 and 4:15. Nobody else edits `package.json`. Tell Atharv and he adds the dependency.
+**Darshan's helpers:** Gemini for writing and for fixing Colab errors, Google for sources, and free Claude chat only for proofreading if Gemini is struggling.
 
-**Sponsor shot:** Partner C builds one n8n workflow: "plan approved" webhook, then a Telegram/Discord message to the crew channel. It takes about 30 minutes and lets us enter for a "best use of n8n" prize if there is one.
-
-**2pm ML workshop:** send Partner C (or A, if their model is done) for 20 minutes. Write down any words the organizers use for what "good ML" means and reuse them on the model card.
-
----
-
-## 6. Timeline (assumes a 5:00pm PT deadline)
-
-| Time | Atharv | A (ML) | B (phone) | C (story) | Gate |
-|---|---|---|---|---|---|
-| 10:45–11:00 | Push repo, Opus plan mode with the kickoff prompt below | Set up Colab, start generating data | Start the `/crew` skeleton | Discord deadline question, rule text check | Roles locked |
-| 11:00 | Commit `lib/types.ts` | | | | Contract is in |
-| 11:00–1:00 | Agent engine (SSE), `/api/plan`, map, Live/Replay toggle | Model v1 trained, `triage.json` exported, `lib/heat.ts` | TTS in Spanish and Punjabi, voice record, check-in route | Fields, replay JSON, story, stats, slide outline | **1:00: one full flow works** |
-| 1:00–1:20 | Lunch. **Deploy to Vercel.** Check `/usage` | Lunch | Lunch | Lunch, screenshot the flow | Live URL |
-| 1:20–3:15 | Critic-and-revise loop, QR code, alerts feed, design pass (Godly refs + Playwright) | Model v2, confusion matrix, `/about/model` | Phone polish, real phone tests on iPhone and Android | n8n, slides, attend the ML workshop | **3:15: feature freeze** |
-| 3:15–4:00 | Bugs only, `?demo=1` cache, final deploy | Model-card text for Devpost | Test the full loop on 3 phones | Record the 2-minute video | Video done |
-| 4:00–4:45 | Devpost technical sections | Devpost AI/ML section | Screenshots | Devpost story sections, **submit** | **4:45: submitted** |
-| 4:45–6:30 | Rehearse 3 times. If the deadline turns out later, polish only, and redeploy only after checking the build | | | | Under 2 minutes |
-
-**If you're behind at 1:00:** cut the phone voice check-in to a typed check-in, and cut model v2. Never cut the Critic rejection, the replay mode or demo mode.
+**Cut list if behind:** model v2 (never needed), n8n, the Punjabi test sentences. Never cut: the hand-written test set, the Critic rejection, the replay mode, demo mode.
 
 ---
 
