@@ -57,10 +57,14 @@ export function Command({ fields }: { fields: Field[] }) {
     if (m !== null) setHour(Math.min(19, Math.floor(m / 60)));
   }, []);
   const [shared, setShared] = useState<boolean | null>(null);
+  const [lan, setLan] = useState<string | null>(null);
   useEffect(() => {
     fetch("/api/health")
       .then((r) => r.json())
-      .then((h) => setShared(!!h.shared))
+      .then((h) => {
+        setShared(!!h.shared);
+        setLan(h.lan ?? null);
+      })
       .catch(() => {});
   }, []);
   async function endDay() {
@@ -209,13 +213,17 @@ export function Command({ fields }: { fields: Field[] }) {
     }
     return Object.fromEntries(Object.entries(out).map(([k, v]) => [k, v.join(" + ")]));
   }, [crews, final]);
-  // Phones can't reach localhost, so QR codes made on a laptop point at the deployed site.
+  // Phones can't open "localhost". On a laptop dev server, point them at the laptop's Wi-Fi address instead
+  // (same server, so same plan); if there isn't one, fall back to the deployed site.
+  const local = typeof window !== "undefined" && window.location.hostname === "localhost";
   const base =
     typeof window === "undefined"
       ? ""
-      : window.location.hostname === "localhost" && process.env.NEXT_PUBLIC_SITE_URL
-        ? process.env.NEXT_PUBLIC_SITE_URL
-        : window.location.origin;
+      : local && lan
+        ? `http://${lan}:${window.location.port || "3000"}`
+        : local && shared && process.env.NEXT_PUBLIC_SITE_URL
+          ? process.env.NEXT_PUBLIC_SITE_URL
+          : window.location.origin;
   const crewUrl = final ? `${base}/crew/${final.id}` : "";
   const fieldOf = Object.fromEntries(
     (final?.crews ?? []).map((p) => [p.crewId, p.blocks.find((b) => b.kind === "work")?.fieldId ?? ""]),
@@ -379,7 +387,7 @@ export function Command({ fields }: { fields: Field[] }) {
           </div>
           {!final ? (
             <p className="mt-1 text-sm text-[var(--muted)]">Plan a safe day first. Then workers scan the code here to get their crew&apos;s schedule.</p>
-          ) : shared === false ? (
+          ) : local && !lan && shared === false ? (
             <p className="mt-1 text-sm text-[#b3261e]">
               This laptop is running locally, so phones can&apos;t see its plans. For phone testing use <b>{process.env.NEXT_PUBLIC_SITE_URL ?? "the live site"}</b>.
             </p>
@@ -389,7 +397,9 @@ export function Command({ fields }: { fields: Field[] }) {
               <div className="text-sm">
                 <p>Scan with a phone camera, or type:</p>
                 <p className="mt-1 break-all font-mono text-xs">{base.replace(/^https?:\/\//, "")}/crew/latest</p>
-                <p className="mt-1 text-xs text-[var(--muted)]">Phones follow whichever plan is active. End day clears them.</p>
+                <p className="mt-1 text-xs text-[var(--muted)]">
+                  {local && lan ? "Phone must be on the same Wi-Fi as this laptop. " : ""}Phones follow whichever plan is active. End day clears them.
+                </p>
               </div>
             </div>
           )}
