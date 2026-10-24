@@ -6,6 +6,7 @@ import { QRCodeSVG } from "qrcode.react";
 import type { AgentEvent, AgentId, Crew, Field, HourlyRisk, ShiftPlan, TriageLabel } from "@/lib/types";
 import { AlertFeed } from "./AlertFeed";
 import { RadioBox } from "./RadioBox";
+import { ImpactPanel } from "./ImpactPanel";
 import { AgentPanel, type AgentCard } from "./AgentPanel";
 import { PlanView } from "./PlanView";
 import { BAND_COLOR } from "./bands";
@@ -156,7 +157,10 @@ export function Command({ fields, replayDate }: { fields: Field[]; replayDate: s
         <header className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <h1 className="font-display text-5xl leading-none">Sombra</h1>
-            <p className="mt-1 text-sm text-[var(--muted)]">Heat and smoke safety command center for Central Valley farm crews</p>
+            <p className="mt-2 max-w-xl text-[15px] leading-snug">
+              On July 11, 2024 it hit 114°F outside Manteca. Enter tomorrow&apos;s crews and Sombra&apos;s AI agents rebuild the day so nobody
+              works through deadly heat, prove it follows California&apos;s heat law, and talk to every worker in Spanish or Punjabi.
+            </p>
           </div>
           <div className="flex rounded-full border border-[var(--line)] p-1 text-sm">
             {(["replay", "live"] as const).map((m) => (
@@ -249,6 +253,7 @@ export function Command({ fields, replayDate }: { fields: Field[]; replayDate: s
           </div>
         </section>
 
+        {draft && final && risks.length > 0 && <ImpactPanel before={draft} after={final} crews={crews} fields={fields} risks={risks} />}
         {draft && <PlanView plan={draft} crews={crews} label="Your usual day" />}
         {final && <PlanView plan={final} crews={crews} label="Sombra's plan" />}
       </div>
