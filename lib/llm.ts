@@ -12,7 +12,7 @@ export interface LLMRequest {
 }
 
 const CLAUDE_MODEL = process.env.CLAUDE_MODEL || "claude-sonnet-5-5";
-const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3.8-flash";
 
 function provider(): Provider {
   if (process.env.LLM_PROVIDER === "gemini" || !process.env.ANTHROPIC_API_KEY) return "gemini";
@@ -23,7 +23,24 @@ export function modelName(): string {
   return provider() === "claude" ? CLAUDE_MODEL : GEMINI_MODEL;
 }
 
-// Streams text chunks. Gemini is called non-streaming and yielded as one chunk.
+// Reads an SSE response body and yields each `data:` payload as parsed JSON.
+async function* sseJSON(body: ReadableStream) {
+  const reader = body.pipeThrough(new TextDecoderStream()).getReader();
+  let buf = "";
+  for (;;) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    buf += value;
+    const lines = buf.split("\n");
+    buf = lines.pop() ?? "";
+    for (const line of lines) {
+      const l = line.trim();
+      if (l.startsWith("data: ")) yield JSON.parse(l.slice(6));
+    }
+  }
+}
+
+// Streams text chunks from whichever provider is configured.
 export async function* streamModel(req: LLMRequest): AsyncGenerator<string> {
   const system = req.json ? `${req.system}\nRespond with one JSON object only, no prose, no code fences.` : req.system;
   if (provider() === "claude") {
@@ -43,25 +60,14 @@ export async function* streamModel(req: LLMRequest): AsyncGenerator<string> {
       }),
     });
     if (!res.ok || !res.body) throw new Error(`Claude ${res.status}: ${await res.text()}`);
-    const reader = res.body.pipeThrough(new TextDecoderStream()).getReader();
-    let buf = "";
-    for (;;) {
-      const { value, done } = await reader.read();
-      if (done) break;
-      buf += value;
-      const lines = buf.split("\n");
-      buf = lines.pop() ?? "";
-      for (const line of lines) {
-        if (!line.startsWith("data: ")) continue;
-        const evt = JSON.parse(line.slice(6));
-        if (evt.type === "content_block_delta" && evt.delta?.type === "text_delta") yield evt.delta.text;
-      }
+    for await (const evt of sseJSON(res.body)) {
+      if (evt.type === "content_block_delta" && evt.delta?.type === "text_delta") yield evt.delta.text;
     }
     return;
   }
 
   const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${req.model || GEMINI_MODEL}:generateContent`,
+    `https://generativelanguage.googleapis.com/v1beta/models/${req.model || GEMINI_MODEL}:streamGenerateContent?alt=sse`,
     {
       method: "POST",
       headers: { "content-type": "application/json", "x-goog-api-key": process.env.GEMINI_API_KEY! },
@@ -75,9 +81,12 @@ export async function* streamModel(req: LLMRequest): AsyncGenerator<string> {
       }),
     },
   );
-  if (!res.ok) throw new Error(`Gemini ${res.status}: ${await res.text()}`);
-  const data = await res.json();
-  yield data.candidates?.[0]?.content?.parts?.map((p: { text?: string }) => p.text ?? "").join("") ?? "";
+  if (!res.ok || !res.body) throw new Error(`Gemini ${res.status}: ${await res.text()}`);
+  for await (const evt of sseJSON(res.body)) {
+    const parts: { text?: string; thought?: boolean }[] = evt.candidates?.[0]?.content?.parts ?? [];
+    const text = parts.filter((p) => !p.thought).map((p) => p.text ?? "").join("");
+    if (text) yield text;
+  }
 }
 
 export async function callModel(req: LLMRequest): Promise<string> {

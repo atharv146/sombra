@@ -29,23 +29,31 @@ type Emit = (e: AgentEvent) => void;
 const SPLIT = "###JSON";
 
 // Streams an agent's visible reasoning; anything after ###JSON is hidden and returned as `json`.
-async function run(emit: Emit, agent: AgentId, system: string, prompt: string, maxTokens = 700) {
+// If the model call fails, the agent says so and uses `fallback` (rules-based text) so the demo keeps going.
+async function run(emit: Emit, agent: AgentId, system: string, prompt: string, maxTokens = 700, fallback = "") {
   emit({ type: "agent_start", agent, model: modelName() });
   let all = "";
   let shown = 0;
-  for await (const chunk of streamModel({ system, prompt, maxTokens })) {
-    all += chunk;
-    const cut = all.indexOf(SPLIT);
-    const visible = cut === -1 ? all.slice(0, Math.max(0, all.length - SPLIT.length)) : all.slice(0, cut);
-    if (visible.length > shown) {
-      emit({ type: "agent_delta", agent, text: visible.slice(shown) });
-      shown = visible.length;
+  try {
+    for await (const chunk of streamModel({ system, prompt, maxTokens })) {
+      all += chunk;
+      const cut = all.indexOf(SPLIT);
+      const visible = cut === -1 ? all.slice(0, Math.max(0, all.length - SPLIT.length)) : all.slice(0, cut);
+      if (visible.length > shown) {
+        emit({ type: "agent_delta", agent, text: visible.slice(shown) });
+        shown = visible.length;
+      }
     }
+  } catch (err) {
+    console.error(`[${agent}]`, err);
+    const text = `Model unavailable, using the rules engine.\n${fallback}`.trim();
+    emit({ type: "agent_delta", agent, text: (shown ? "\n" : "") + text });
+    return { text, json: "", failed: true };
   }
   const cut = all.indexOf(SPLIT);
   const text = (cut === -1 ? all : all.slice(0, cut)).trim();
   if (cut === -1 && text.length > shown) emit({ type: "agent_delta", agent, text: text.slice(shown) });
-  return { text, json: cut === -1 ? "" : all.slice(cut + SPLIT.length) };
+  return { text, json: cut === -1 ? "" : all.slice(cut + SPLIT.length), failed: false };
 }
 
 function riskTable(risks: HourlyRisk[], fields: Field[]) {
@@ -86,6 +94,7 @@ export async function runSwarm(input: SwarmInput, emit: Emit): Promise<ShiftPlan
     `You are Cielo, the weather scout for a Central Valley farm labor crew. ${voice}`,
     `Hourly conditions on ${input.date} (${input.mode === "replay" ? "real archived heat-wave data" : "today's live forecast"}):\n${table}\n\nIn 3 short lines: when each field becomes dangerous, the worst hour, and which field stays coolest and why.`,
     300,
+    skyFallback(risks, fields),
   );
   emit({ type: "agent_done", agent: "cielo", summary: "Heat windows mapped for every field" });
 
@@ -109,6 +118,7 @@ export async function runSwarm(input: SwarmInput, emit: Emit): Promise<ShiftPlan
       `You are Ley, a Cal/OSHA compliance checker. Only restate the violations you are given, citing the subsection shown. Never invent legal requirements. ${voice}`,
       `Violations found by the rules engine in the usual schedule:\n${violationText(plan.violations)}\n\nExplain them in at most 4 lines, most dangerous first.`,
       300,
+      violationText(plan.violations),
     ).then((r) => {
       emit({ type: "agent_done", agent: "ley", summary: `${plan.violations.length} rule violations in the usual schedule` });
       return r;
@@ -119,6 +129,7 @@ export async function runSwarm(input: SwarmInput, emit: Emit): Promise<ShiftPlan
       `You are Crítico, a skeptical safety officer. Your job is to find how this plan could put a worker in the hospital. ${voice}`,
       `Schedule:\n${planText(plan.crews, crews)}\n\nConditions:\n${table}\n\nRules engine violations:\n${violationText(plan.violations)}\n\nName the 2-3 most dangerous problems in one line each, then end with exactly "VERDICT: REJECT" or "VERDICT: APPROVE".`,
       300,
+      plan.violations.length ? `The usual day breaks ${plan.violations.length} rules.` : "No rule violations.",
     ),
   ]);
   const rejected = plan.violations.length > 0 || /VERDICT:\s*REJECT/i.test(critique.text);
@@ -136,6 +147,7 @@ Rules you must meet: at 95°F+ a 10-minute paid "cooldown" block at least every 
 First write 3 short lines explaining your changes. Then write ${SPLIT} on its own line, then one JSON object:
 {"summary": "one sentence", "crews": [{"crewId": "...", "blocks": [{"start":"HH:MM","end":"HH:MM","kind":"work|cooldown|meal|travel","fieldId":"... (work only)","paid": true}], "waterGallons": 0, "shadeUnits": 0, "notes": ["..."]}]}`,
       2000,
+      "Adding paid 10-minute cool-downs every 2 hours in the heat, sizing water and shade, and ending new workers' day before extreme hours.",
     );
     try {
       const parsed = parseJSON<{ summary: string; crews: CrewPlan[] }>(draft.json || draft.text);
@@ -167,6 +179,7 @@ First write 3 short lines explaining your changes. Then write ${SPLIT} on its ow
       `You are Crítico, a skeptical safety officer. ${voice}`,
       `Revised schedule:\n${planText(plan.crews, crews)}\nRules engine violations: ${violationText(plan.violations)}\nIn 2 lines: what's still the riskiest moment, and what the crew boss should watch for. End with "VERDICT: APPROVE" if there are no violations, else "VERDICT: REJECT".`,
       200,
+      plan.violations.length ? "Still breaks a rule." : "Every rule passes. Watch new workers closely after 11am.",
     ).then(() =>
       emit({
         type: "agent_done",
@@ -186,11 +199,41 @@ First write 3 short lines explaining your changes. Then write ${SPLIT} on its ow
   try {
     plan.briefings = parseJSON<Partial<Record<Lang, string>>>(briefing.json || briefing.text);
   } catch {
-    plan.briefings = {};
+    plan.briefings = templateBriefings(plan, crews);
   }
   emit({ type: "agent_done", agent: "voz", summary: `Briefings ready in ${Object.keys(plan.briefings).length} languages` });
 
   await savePlan(plan);
   emit({ type: "plan", plan, revision: 2 });
   return plan;
+}
+
+// Rules-based fallbacks, used only when the model call fails.
+function skyFallback(risks: HourlyRisk[], fields: Field[]) {
+  return fields
+    .map((f) => {
+      const rows = risks.filter((r) => r.fieldId === f.id);
+      const danger = rows.find((r) => r.band === "high" || r.band === "extreme");
+      const peak = rows.reduce((a, b) => (b.tempF > a.tempF ? b : a), rows[0]);
+      return `${f.name}: ${danger ? `dangerous from ${danger.time.slice(11, 16)}` : "no dangerous hours"}, peak ${peak?.tempF}°F at ${peak?.time.slice(11, 16)}.`;
+    })
+    .join("\n");
+}
+
+function templateBriefings(plan: ShiftPlan, crews: Crew[]): Partial<Record<Lang, string>> {
+  const line = (lang: "es" | "en") =>
+    plan.crews
+      .map((p) => {
+        const c = crews.find((x) => x.id === p.crewId);
+        const start = p.blocks[0]?.start;
+        const cools = p.blocks.filter((b) => b.kind === "cooldown").map((b) => b.start).join(", ");
+        return lang === "es"
+          ? `${c?.name}: entrada a las ${start}.${cools ? ` Descansos pagados a las ${cools}.` : ""}`
+          : `${c?.name}: start at ${start}.${cools ? ` Paid cool-down breaks at ${cools}.` : ""}`;
+      })
+      .join(" ");
+  return {
+    es: `${line("es")} Tome agua cada 15 minutos. Si siente mareo, dolor de cabeza, náusea o confusión, avise al mayordomo de inmediato.`,
+    en: `${line("en")} Drink water every 15 minutes. If you feel dizzy, a headache, nausea or confusion, tell the mayordomo right away.`,
+  };
 }

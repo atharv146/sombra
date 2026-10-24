@@ -132,8 +132,9 @@ export function autoFix(plan: ShiftPlan, crews: Crew[], risks: HourlyRisk[]): Sh
         const r = riskAt(risks, fieldId, cur);
         if (crew.newWorkers > 0 && r?.band === "extreme") break; // end the day before extreme hours
         const hot = (r?.tempF ?? 0) >= RULES.highHeatF;
-        const room = hot ? Math.max(RULES.cooldownEveryMin - sinceRest, 10) : (Math.floor(cur / 60) + 1) * 60 - cur;
-        const stop = Math.min(end, cur + room);
+        const nextHour = (Math.floor(cur / 60) + 1) * 60; // step at most an hour so every hour's band is checked
+        const room = hot ? Math.max(RULES.cooldownEveryMin - sinceRest, 10) : nextHour - cur;
+        const stop = Math.min(end, cur + room, nextHour);
         blocks.push({ ...b, start: toHHMM(cur), end: toHHMM(stop), fieldId });
         sinceRest += stop - cur;
         cur = stop;
