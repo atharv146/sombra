@@ -38,20 +38,21 @@ Darshan never edits app code, so we can't have merge conflicts. He uploads files
 - ✅ Model badge on every agent card (AI/ML track rule)
 - ✅ AI can't freeze the demo: 15-second timeout, rules fallback, `?demo=1` recorded replay
 - ✅ Swap AI provider in `.env.local`: openrouter, groq, gemini or claude
-- ⬜ Real AI run checked and tuned (needs a working key)
+- ✅ Real AI run checked and tuned (OpenRouter free, about 30s per run)
 - ⬜ Design pass so it doesn't look AI-made (Sonnet + taste skill + Godly refs)
 - ⬜ `/command` usable on a phone or tablet
 - ⭐ Crew lead speaks the request instead of filling the form
 - ⭐ Wildfire-smoke replay day (AQI over 151) to show the §5141.1 rules
 
-**Worker phone page (`/crew/[id]`, built by the cloud session on branch `crew`)**
-- 🔨 Opens from the QR code, phone-first, huge type, works one-handed
-- 🔨 Language picker: Español / ਪੰਜਾਬੀ / English
-- 🔨 Today's schedule with the current block highlighted
-- 🔨 "Descanso pagado: $X" ("Paid break: $X") on every cool-down
-- 🔨 Play button reads the briefing aloud (shows a note if the phone has no Punjabi voice)
-- 🔨 Voice check-in "¿Cómo te sientes?" ("How are you feeling?") → `/api/checkin` → our model → shows on the laptop
-- 🔨 Emergency result: "Avísale a tu mayordomo ahora" ("Tell your crew boss now") + call button
+**Worker phone page (`/crew/[id]`, built in the main session)**
+- ✅ Opens from the QR code, phone-first, huge type, works one-handed
+- ✅ Language picker: Español / ਪੰਜਾਬੀ / English
+- ✅ Today's schedule with the current block highlighted
+- ✅ "Descanso pagado: $X" ("Paid break: $X") on every cool-down
+- ✅ Play button reads the briefing aloud (shows a note if the phone has no Punjabi voice)
+- ✅ Voice check-in "¿Cómo te sientes?" ("How are you feeling?") → `/api/checkin` → our model → shows on the laptop
+- ✅ Emergency result: "Avísale a tu mayordomo ahora" ("Tell your crew boss now") + call button
+- ✅ Crew radio: boss types English → workers hear Spanish/Punjabi; workers speak → boss reads English
 - ⬜ Tested on a real iPhone and a real Android
 
 **Our AI model (Darshan)**
