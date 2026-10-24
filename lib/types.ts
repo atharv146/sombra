@@ -72,7 +72,8 @@ export interface ShiftPlan {
   mode: "live" | "replay";
   crews: CrewPlan[];
   violations: RuleViolation[]; // must be empty before the plan can be sent
-  briefings: Partial<Record<Lang, string>>; // what the phone reads aloud
+  briefings: Partial<Record<Lang, string>>; // whole-plan summary (fallback)
+  crewBriefings?: Record<string, Partial<Record<Lang, string>>>; // crewId -> what that crew's phones read aloud
   summary: string;
   crewInfo?: Crew[]; // names, sizes and pay rates, for the phone page
   usual?: CrewPlan[]; // the crew lead's usual day, kept so the before/after can be shown again later

@@ -32,6 +32,12 @@ export async function savePlan(plan: ShiftPlan): Promise<void> {
   }
 }
 
+// "End day": phones stop showing the plan right away; its messages expire with it.
+export async function endActivePlan(): Promise<void> {
+  if (URL) await redis("DEL", "plan:latest");
+  else mem.plans.delete("latest");
+}
+
 export async function getPlan(id: string): Promise<ShiftPlan | null> {
   if (!URL) return mem.plans.get(id) ?? null;
   const key = id === "latest" ? await redis<string | null>("GET", "plan:latest") : id;

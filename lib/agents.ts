@@ -222,16 +222,20 @@ Reply with JSON only, no working shown:
       emit,
       "voz",
       `You are Voz. You write spoken safety briefings for farmworkers at a 5th-grade reading level. Natural Mexican Spanish, Punjabi in Gurmukhi script, plain English.`,
-      `Plan:\n${planText(plan.crews, crews)}\nWrite one line saying which languages you're writing. Then ${SPLIT} on its own line, then JSON {"es": "...", "pa": "...", "en": "..."}. Each briefing under 70 words: start time per crew, when cool-down breaks are, that cool-down breaks are paid, drink water every 15 minutes, and to tell the mayordomo right away about dizziness, headache, nausea or confusion.`,
-      1500,
+      `Plan:\n${planText(plan.crews, crews)}\nWrite one spoken briefing PER CREW, addressed to that crew only ("Buenos días, cuadrilla 2"), never mentioning other crews or codes like c1. Use 12-hour clock words ("4:30 de la mañana", "4:30 in the morning"). Under 55 words each: start time and field, when the paid cool-down breaks are and that they are paid, when work ends, drink water every 15 minutes, tell the crew boss right away about dizziness, headache, nausea or confusion.
+Write one line saying which languages you're writing. Then ${SPLIT} on its own line, then JSON keyed by crew id: {${plan.crews.map((p) => `"${p.crewId}": {"es": "...", "pa": "...", "en": "..."}`).join(", ")}}`,
+      3000,
     ),
   ]);
   try {
-    plan.briefings = parseJSON<Partial<Record<Lang, string>>>(briefing.json || briefing.text);
+    const per = parseJSON<Record<string, Partial<Record<Lang, string>>>>(briefing.json || briefing.text);
+    if (!plan.crews.every((p) => per[p.crewId]?.en)) throw new Error("missing crew briefing");
+    plan.crewBriefings = per;
   } catch {
-    plan.briefings = templateBriefings(plan, crews);
+    plan.crewBriefings = templateBriefings(plan, crews);
   }
-  emit({ type: "agent_done", agent: "voz", summary: `Briefings ready in ${Object.keys(plan.briefings).length} languages` });
+  plan.briefings = plan.crewBriefings[plan.crews[0]?.crewId] ?? {};
+  emit({ type: "agent_done", agent: "voz", summary: `Briefings ready for ${plan.crews.length} crews in Spanish, Punjabi and English` });
 
   plan.usual = usual.crews;
   plan.usualViolations = usual.violations;
@@ -253,22 +257,31 @@ function skyFallback(risks: HourlyRisk[], fields: Field[]) {
     .join("\n");
 }
 
-function templateBriefings(plan: ShiftPlan, crews: Crew[]): Partial<Record<Lang, string>> {
-  const line = (lang: "es" | "en") =>
-    plan.crews
-      .map((p) => {
-        const c = crews.find((x) => x.id === p.crewId);
-        const start = p.blocks[0]?.start;
-        const cools = p.blocks.filter((b) => b.kind === "cooldown").map((b) => b.start).join(", ");
-        return lang === "es"
-          ? `${c?.name}: entrada a las ${start}.${cools ? ` Descansos pagados a las ${cools}.` : ""}`
-          : `${c?.name}: start at ${start}.${cools ? ` Paid cool-down breaks at ${cools}.` : ""}`;
-      })
-      .join(" ");
-  return {
-    es: `${line("es")} Tome agua cada 15 minutos. Si siente mareo, dolor de cabeza, náusea o confusión, avise al mayordomo de inmediato.`,
-    en: `${line("en")} Drink water every 15 minutes. If you feel dizzy, a headache, nausea or confusion, tell the mayordomo right away.`,
+// Rules-based per-crew briefings, used when the model is unavailable.
+function templateBriefings(plan: ShiftPlan, crews: Crew[]): Record<string, Partial<Record<Lang, string>>> {
+  const clock = (hhmm: string) => {
+    const m = toMin(hhmm);
+    const h = Math.floor(m / 60);
+    return `${((h + 11) % 12) + 1}:${String(m % 60).padStart(2, "0")}`;
   };
+  return Object.fromEntries(
+    plan.crews.map((p) => {
+      const c = crews.find((x) => x.id === p.crewId);
+      const work = p.blocks.filter((b) => b.kind === "work");
+      const start = clock(work[0]?.start ?? "06:00");
+      const end = clock(work.at(-1)?.end ?? "14:00");
+      const cools = p.blocks.filter((b) => b.kind === "cooldown").map((b) => clock(b.start)).join(", ");
+      const n = c?.name.replace(/\D/g, "") ?? "";
+      return [
+        p.crewId,
+        {
+          es: `Buenos días, cuadrilla ${n}. Empezamos a las ${start} de la mañana.${cools ? ` Descanso pagado a las ${cools}.` : ""} Terminamos a las ${end}. Tomen agua cada 15 minutos. Si alguien siente mareo, dolor de cabeza, náusea o confusión, avise al mayordomo de inmediato.`,
+          pa: `ਸਤ ਸ੍ਰੀ ਅਕਾਲ, ਕਰੂ ${n}। ਕੰਮ ਸਵੇਰੇ ${start} ਵਜੇ ਸ਼ੁਰੂ ਹੋਵੇਗਾ।${cools ? ` ਤਨਖਾਹ ਵਾਲਾ ਆਰਾਮ ${cools} ਵਜੇ।` : ""} ਕੰਮ ${end} ਵਜੇ ਖ਼ਤਮ। ਹਰ 15 ਮਿੰਟ ਪਾਣੀ ਪੀਓ। ਚੱਕਰ, ਸਿਰ ਦਰਦ ਜਾਂ ਉਲਟੀ ਹੋਵੇ ਤਾਂ ਤੁਰੰਤ ਸੁਪਰਵਾਈਜ਼ਰ ਨੂੰ ਦੱਸੋ।`,
+          en: `Good morning, crew ${n}. We start at ${start} in the morning.${cools ? ` Paid cool-down break at ${cools}.` : ""} We finish at ${end}. Drink water every 15 minutes. If anyone feels dizzy, a headache, nausea or confusion, tell the crew boss right away.`,
+        },
+      ];
+    }),
+  );
 }
 
 function crewOptions(crews: Crew[], risks: HourlyRisk[], fields: Field[]) {

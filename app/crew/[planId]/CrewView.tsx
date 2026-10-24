@@ -87,7 +87,7 @@ export function CrewView() {
   const [planId, setPlanId] = useState(param);
   const [plan, setPlan] = useState<ShiftPlan | null>(null);
   const [missing, setMissing] = useState(false);
-  const [lang, setLangState] = useState<Lang>("es");
+  const [lang, setLangState] = useState<Lang>("en");
   const [crewId, setCrewId] = useState("");
   const [workerId, setWorkerId] = useState("w-anon");
   const [msgs, setMsgs] = useState<RadioMessage[]>([]);
@@ -106,7 +106,7 @@ export function CrewView() {
   const t = T[lang];
 
   useEffect(() => {
-    setLangState((stored("sombra-lang", "es") as Lang) || "es");
+    setLangState((stored("sombra-lang", "en") as Lang) || "en");
     let id = stored("sombra-worker", "");
     if (!id) {
       id = `w-${Math.random().toString(36).slice(2, 6)}`;
@@ -275,7 +275,8 @@ export function CrewView() {
   const mine = plan.crews.find((c) => c.crewId === crewId) ?? plan.crews[0];
   const info = plan.crewInfo?.find((c) => c.id === mine?.crewId);
   const rate = info?.pieceRateUsdPerHour ?? 22;
-  const briefing = plan.briefings[lang] ?? plan.briefings.en ?? "";
+  const own = plan.crewBriefings?.[mine?.crewId ?? ""];
+  const briefing = own?.[lang] ?? own?.en ?? plan.briefings[lang] ?? plan.briefings.en ?? "";
   const canTalk = whisper || canListen();
 
   return (

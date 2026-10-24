@@ -10,8 +10,8 @@ export async function POST(request: Request) {
   const input: SwarmInput = {
     mode: body.mode ?? "replay",
     date: body.date!,
-    start: body.start ?? "06:00",
-    end: body.end ?? "14:30",
+    start: body.start && body.start >= "04:00" ? body.start : "06:00",
+    end: body.end && body.end <= "19:00" && body.end > (body.start ?? "06:00") ? body.end : "14:30",
     crews: body.crews ?? [],
     fields: body.fields ?? (fields as Field[]),
     note: body.note,

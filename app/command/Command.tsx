@@ -53,6 +53,21 @@ export function Command({ fields, replayDate }: { fields: Field[]; replayDate: s
     setPlayMin(m);
     if (m !== null) setHour(Math.min(19, Math.floor(m / 60)));
   }, []);
+  const [shared, setShared] = useState<boolean | null>(null);
+  useEffect(() => {
+    fetch("/api/health")
+      .then((r) => r.json())
+      .then((h) => setShared(!!h.shared))
+      .catch(() => {});
+  }, []);
+  async function endDay() {
+    await fetch("/api/crew/latest", { method: "DELETE" });
+    setDraft(null);
+    setFinal(null);
+    setCards(fresh());
+    setAlerts({});
+    setBanner(null);
+  }
   const [banner, setBanner] = useState<{ crewId: string; label: TriageLabel; text: string } | null>(null);
   const onAlert = useCallback((crewId: string, label: TriageLabel, text: string) => {
     setAlerts((a) => ({ ...a, [crewId]: label }));
@@ -131,6 +146,10 @@ export function Command({ fields, replayDate }: { fields: Field[]; replayDate: s
 
   async function run() {
     unlockAudio();
+    if (start < "04:00" || end > "19:00" || end <= start) {
+      setError("The shift has to start after 4:00 AM and end by 7:00 PM.");
+      return;
+    }
     setRunning(true);
     setError(null);
     setCards(fresh());
@@ -325,6 +344,32 @@ export function Command({ fields, replayDate }: { fields: Field[]; replayDate: s
       </div>
 
       <aside className="flex flex-col gap-4 lg:sticky lg:top-6 lg:self-start">
+        <section className="rounded-xl border-2 border-[var(--ink)] bg-[var(--card)] p-4">
+          <div className="flex items-baseline justify-between">
+            <h2 className="font-display text-2xl">Worker phones</h2>
+            {final && (
+              <button onClick={endDay} className="text-xs font-semibold text-[#b3261e] underline">
+                End day
+              </button>
+            )}
+          </div>
+          {!final ? (
+            <p className="mt-1 text-sm text-[var(--muted)]">Plan a safe day first. Then workers scan the code here to get their crew&apos;s schedule.</p>
+          ) : shared === false ? (
+            <p className="mt-1 text-sm text-[#b3261e]">
+              This laptop is running locally, so phones can&apos;t see its plans. For phone testing use <b>{process.env.NEXT_PUBLIC_SITE_URL ?? "the live site"}</b>.
+            </p>
+          ) : (
+            <div className="mt-2 flex items-center gap-4">
+              <QRCodeSVG value={crewUrl} size={120} bgColor="transparent" fgColor="currentColor" />
+              <div className="text-sm">
+                <p>Scan with a phone camera, or type:</p>
+                <p className="mt-1 break-all font-mono text-xs">{base.replace(/^https?:\/\//, "")}/crew/latest</p>
+                <p className="mt-1 text-xs text-[var(--muted)]">Phones follow whichever plan is active. End day clears them.</p>
+              </div>
+            </div>
+          )}
+        </section>
         {final && final.violations.length === 0 && (
           <>
             <h2 className="font-display text-2xl">Crew channels</h2>
@@ -338,18 +383,7 @@ export function Command({ fields, replayDate }: { fields: Field[]; replayDate: s
         )}
         <h2 className="font-display text-2xl">Agents</h2>
         <AgentPanel cards={cards} />
-        {final && final.violations.length === 0 && crewUrl && (
-          <section className="flex items-center gap-4 rounded-xl border border-[var(--line)] bg-[var(--card)] p-4">
-            <QRCodeSVG value={crewUrl} size={112} bgColor="transparent" fgColor="currentColor" />
-            <div className="text-sm">
-              <p className="font-semibold">Send to crew phones</p>
-              <p className="text-[var(--muted)]">Scan to open the plan in Spanish, Punjabi or English, read aloud.</p>
-              <a href={`/crew/${final.id}`} target="_blank" className="mt-1 inline-block underline">
-                Open crew view
-              </a>
-            </div>
-          </section>
-        )}
+
         <p className="text-[11px] text-[var(--muted)]">
           Weather: Open-Meteo (CC BY 4.0). Map © OpenStreetMap contributors, OpenFreeMap. Rules: Cal/OSHA §3395, §5141.1. <a href="/about" className="underline">How it works &amp; credits</a>
         </p>
