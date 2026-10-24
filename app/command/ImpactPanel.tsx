@@ -37,7 +37,7 @@ export function ImpactPanel({ before, after, crews, fields, risks }: { before: S
       <p className="mt-1 font-display text-3xl leading-tight">
         {a.extremeWorkerHours > 0 ? (
           <>
-            {a.extremeWorkerHours} worker-hours of deadly heat → <span className="text-[#3f6b3a]">{b.extremeWorkerHours}</span>
+            {a.extremeWorkerHours} worker-hours of deadly heat → <span className="text-[var(--good-ink)]">{b.extremeWorkerHours}</span>
           </>
         ) : (
           <>No extreme-heat hours today; the plan still meets every rule.</>
@@ -57,8 +57,8 @@ export function ImpactPanel({ before, after, crews, fields, risks }: { before: S
           {rows.map((r) => (
             <tr key={r.label} className="border-t border-[var(--line)]">
               <td className="py-2 pr-2">{r.label}</td>
-              <td className="py-2 pr-2 font-mono tabular-nums text-[#8c1d17]">{r.before}</td>
-              <td className={`py-2 font-mono font-semibold tabular-nums ${r.good ? "text-[#3f6b3a]" : ""}`}>{r.after}</td>
+              <td className="py-2 pr-2 font-mono tabular-nums text-[var(--bad-ink)]">{r.before}</td>
+              <td className={`py-2 font-mono font-semibold tabular-nums ${r.good ? "text-[var(--good-ink)]" : ""}`}>{r.after}</td>
             </tr>
           ))}
         </tbody>

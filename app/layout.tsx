@@ -18,11 +18,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${gurmukhi.variable} h-full antialiased`}>
       <head>
-        <link rel="preconnect" href="https://api.fontshare.com" />
-        <link
-          rel="stylesheet"
-          href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600&f[]=zodiak@400&f[]=array@400&display=swap"
-        />
+        <link rel="preload" href="/fonts/GeneralSans-Variable.ttf" as="font" type="font/ttf" crossOrigin="anonymous" />
+        <link rel="preload" href="/fonts/Zodiak-Variable.ttf" as="font" type="font/ttf" crossOrigin="anonymous" />
       </head>
       <body className="min-h-full flex flex-col">{children}</body>
     </html>

@@ -48,7 +48,7 @@ export function PlanView({
       return n;
     }, 0);
   return (
-    <section className={`rounded-xl border bg-[var(--card)] p-4 ${tone === "after" ? "border-[#3f6b3a]" : "border-[var(--line)]"}`}>
+    <section className={`rounded-xl border bg-[var(--card)] p-4 ${tone === "after" ? "border-[var(--good-ink)]" : "border-[var(--line)]"}`}>
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h3 className="font-display text-2xl">{label}</h3>
         <span className="flex items-center gap-3">
@@ -92,7 +92,7 @@ export function PlanView({
                           <span>{b}</span>
                         ) : (
                           <>
-                            <span className="text-[#8c1d17] line-through decoration-1">{a}</span> → <b className="text-[#2f5a2b]">{b}</b>
+                            <span className="text-[var(--bad-ink)] line-through decoration-1">{a}</span> → <b className="text-[var(--good-ink)]">{b}</b>
                           </>
                         )}
                       </td>
@@ -147,15 +147,15 @@ export function PlanView({
                       ? "bg-[var(--ink)] text-[var(--bg)]"
                       : b.kind === "cooldown"
                         ? "bg-[#2f6f8f] text-white"
-                        : "bg-[#efe6d6] text-[var(--ink)] border border-[var(--line)]";
+                        : "bg-[var(--lunch)] text-[var(--ink)] border border-[var(--line)]";
                   return (
                     <div
                       key={i}
                       title={`${ampm(toMin(b.start))}–${ampm(toMin(b.end))} ${b.kind}${b.paid ? " (paid)" : ""}`}
-                      className={`absolute top-1.5 grid h-6 place-items-center overflow-hidden rounded text-[10px] font-semibold ${style}`}
+                      className={`absolute top-1.5 grid h-6 place-items-center overflow-hidden whitespace-nowrap rounded text-[10px] font-semibold tabular-nums ${style}`}
                       style={{ left: `${left}%`, width: `${width}%` }}
                     >
-                      {width > 7 ? (b.kind === "work" ? `${ampm(toMin(b.start))}–${ampm(toMin(b.end))}` : b.kind === "meal" ? "lunch" : "") : ""}
+                      {b.kind === "work" ? (width > 13 ? `${ampm(toMin(b.start))}–${ampm(toMin(b.end))}` : width > 6 ? `${ampm(toMin(b.start)).replace(/(am|pm)$/, "")}–${ampm(toMin(b.end))}` : "") : b.kind === "meal" && width > 4 ? "lunch" : ""}
                     </div>
                   );
                 })}
@@ -173,7 +173,7 @@ export function PlanView({
         <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-[var(--muted)]">
           <span><i className="mr-1 inline-block h-2.5 w-4 rounded-sm bg-[var(--ink)] align-middle" />work</span>
           <span><i className="mr-1 inline-block h-2.5 w-4 rounded-sm bg-[#2f6f8f] align-middle" />paid 10-min cool-down in shade</span>
-          <span><i className="mr-1 inline-block h-2.5 w-4 rounded-sm border border-[var(--line)] bg-[#efe6d6] align-middle" />lunch</span>
+          <span><i className="mr-1 inline-block h-2.5 w-4 rounded-sm border border-[var(--line)] bg-[var(--lunch)] align-middle" />lunch</span>
           <span><i className="mr-1 inline-block h-2.5 w-4 rounded-sm align-middle" style={{ background: BAND_COLOR.extreme, opacity: 0.5 }} />background = heat at that field</span>
           <span><i className="hatch mr-1 inline-block h-2.5 w-4 rounded-sm align-middle" />working in deadly heat</span>
         </div>
@@ -199,7 +199,7 @@ export function PlanView({
                   {plan.crews.map((p) => {
                     const v = plan.violations.find((x) => x.crewId === p.crewId && row.rules.includes(x.rule));
                     return (
-                      <td key={p.crewId} className={`py-1.5 pr-3 ${v ? "font-semibold text-[#8c1d17]" : "text-[#2f5a2b]"}`} title={v?.message}>
+                      <td key={p.crewId} className={`py-1.5 pr-3 ${v ? "font-semibold text-[var(--bad-ink)]" : "text-[var(--good-ink)]"}`} title={v?.message}>
                         {v ? `✗ ${v.short ?? "broken"}` : "✓"}
                       </td>
                     );

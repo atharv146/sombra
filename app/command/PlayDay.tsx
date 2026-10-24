@@ -95,12 +95,12 @@ export function PlayDay({
               <p className="font-mono text-2xl tabular-nums">{ampm(min)}</p>
               <p className="text-xs text-[var(--muted)]">{hottest ? `${hottest.tempF}°F at the hottest field` : ""}</p>
             </div>
-            <div className="rounded-lg bg-[#f6dcd9] p-3">
-              <p className="font-mono text-2xl tabular-nums text-[#8c1d17]">{usual}</p>
+            <div className="rounded-lg bg-[var(--bad-wash)] p-3">
+              <p className="font-mono text-2xl tabular-nums text-[var(--bad-ink)]">{usual}</p>
               <p className="text-xs">deadly-heat worker-hours, usual day</p>
             </div>
-            <div className="rounded-lg bg-[#dce9d6] p-3">
-              <p className="font-mono text-2xl tabular-nums text-[#2f5a2b]">{ours}</p>
+            <div className="rounded-lg bg-[var(--good-wash)] p-3">
+              <p className="font-mono text-2xl tabular-nums text-[var(--good-ink)]">{ours}</p>
               <p className="text-xs">deadly-heat worker-hours, Sombra</p>
             </div>
           </div>
@@ -108,7 +108,7 @@ export function PlayDay({
             {shown.map((e, i) => (
               <li
                 key={i}
-                className={`play-event rounded px-2 py-1 ${e.tone === "bad" ? "bg-[#f6dcd9] text-[#8c1d17]" : e.tone === "alert" ? "bg-[#b3261e] font-semibold text-white" : "bg-[var(--track)]"}`}
+                className={`play-event rounded px-2 py-1 ${e.tone === "bad" ? "bg-[var(--bad-wash)] text-[var(--bad-ink)]" : e.tone === "alert" ? "bg-[#b3261e] font-semibold text-white" : "bg-[var(--track)]"}`}
               >
                 <span className="mr-2 font-mono text-xs">{ampm(e.at)}</span>
                 {e.text}

@@ -82,6 +82,7 @@ export interface ShiftPlan {
   usual?: CrewPlan[]; // the crew lead's usual day, kept so the before/after can be shown again later
   usualViolations?: RuleViolation[];
   createdAt?: string;
+  agentLog?: Partial<Record<AgentId, { text: string; summary?: string; model?: string; verdict?: "approve" | "reject" }>>;
 }
 
 export type AgentId = "cielo" | "ley" | "cuadrilla" | "voz" | "critico" | "medic";

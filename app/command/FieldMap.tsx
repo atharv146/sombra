@@ -31,7 +31,19 @@ export function FieldMap({
       if (cancelled || !el.current || map.current) return;
       const m = new maplibre.Map({
         container: el.current,
-        style: "https://tiles.openfreemap.org/styles/positron",
+        // Satellite imagery, desaturated so the heat colors stay the loudest thing on the map.
+        style: {
+          version: 8,
+          sources: {
+            sat: {
+              type: "raster",
+              tiles: ["https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"],
+              tileSize: 256,
+              attribution: "Imagery © Esri, Maxar, Earthstar Geographics",
+            },
+          },
+          layers: [{ id: "sat", type: "raster", source: "sat", paint: { "raster-saturation": -0.45, "raster-brightness-max": 0.72, "raster-contrast": 0.05 } }],
+        },
         center: [(Math.min(...fields.map((f) => f.lon)) + Math.max(...fields.map((f) => f.lon))) / 2, (Math.min(...fields.map((f) => f.lat)) + Math.max(...fields.map((f) => f.lat))) / 2],
         zoom: 10,
         attributionControl: { compact: true },

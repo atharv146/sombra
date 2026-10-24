@@ -90,7 +90,15 @@ function planText(crews: CrewPlan[], all: Crew[]) {
 
 const violationText = (v: RuleViolation[]) => (v.length ? v.map((x) => `- ${x.message}`).join("\n") : "None.");
 
-export async function runSwarm(input: SwarmInput, emit: Emit): Promise<ShiftPlan> {
+export async function runSwarm(input: SwarmInput, emitOut: Emit): Promise<ShiftPlan> {
+  // Keep a copy of what each agent wrote, so the AI brain can be shown again after a reload.
+  const log: NonNullable<ShiftPlan["agentLog"]> = {};
+  const emit: Emit = (e) => {
+    if (e.type === "agent_start") log[e.agent] = { text: log[e.agent]?.text ? `${log[e.agent]!.text}\n\n` : "", model: e.model };
+    if (e.type === "agent_delta") log[e.agent] = { ...log[e.agent], text: (log[e.agent]?.text ?? "") + e.text };
+    if (e.type === "agent_done") log[e.agent] = { ...log[e.agent]!, summary: e.summary, verdict: e.verdict ?? log[e.agent]?.verdict };
+    emitOut(e);
+  };
   const { crews, fields } = input;
   const id = Math.random().toString(36).slice(2, 8);
   const voice = "Write like a calm field safety lead texting a crew boss: short lines, no markdown headers, no emoji.";
@@ -252,6 +260,7 @@ Write one line saying which languages you're writing. Then ${SPLIT} on its own l
   plan.usual = usual.crews;
   plan.usualViolations = usual.violations;
   plan.createdAt = new Date().toISOString();
+  plan.agentLog = log;
   await savePlan(plan);
   emit({ type: "plan", plan, revision: 2 });
   return plan;

@@ -324,7 +324,7 @@ export function CrewView() {
   const canTalk = whisper || canListen();
 
   return (
-    <main className="mx-auto flex w-full max-w-md flex-col gap-5 px-4 pb-16 pt-5 text-[var(--ink)]" onClick={() => !armed && (unlockAudio(), setArmed(true))}>
+    <main className="phone mx-auto flex w-full max-w-md flex-col gap-5 px-4 pb-16 pt-5 text-[var(--ink)]" onClick={() => !armed && (unlockAudio(), setArmed(true))}>
       {takeover && (
         <div className="alert-banner fixed inset-0 z-50 flex flex-col items-center justify-center gap-6 bg-[#b3261e] p-8 text-center text-white">
           <p className="text-sm font-bold tracking-[0.3em]">{t.alertTitle}</p>
@@ -371,7 +371,7 @@ export function CrewView() {
                 seen.current.clear();
                 loaded.current = false;
               }}
-              className={`rounded-full border px-3 py-1.5 ${c.crewId === mine?.crewId ? "border-[var(--ink)] bg-[var(--card)] font-semibold" : "border-[var(--line)]"}`}
+              className={`rounded-full border px-3 py-1.5 ${c.crewId === mine?.crewId ? "border-[var(--ink)] bg-[var(--card)] font-medium" : "border-[var(--line)]"}`}
             >
               {plan.crewInfo?.find((x) => x.id === c.crewId)?.name ?? c.crewId}
             </button>
@@ -382,7 +382,7 @@ export function CrewView() {
       <section className="rounded-2xl bg-[var(--card)] p-5">
         <div className="flex items-center justify-between">
           <h1 className="font-display text-4xl leading-none">{t.today}</h1>
-          <button onClick={() => speakAny(briefing, lang)} className="rounded-full bg-[var(--accent)] px-5 py-3 text-lg font-semibold text-white">
+          <button onClick={() => speakAny(briefing, lang)} className="rounded-full bg-[var(--accent)] px-5 py-3 text-lg font-medium text-white">
             ▶ {t.listen}
           </button>
         </div>
@@ -399,20 +399,20 @@ export function CrewView() {
               {cur || next ? (
                 <>
                   {cur && (
-                    <p className="text-2xl font-semibold leading-tight">
+                    <p className="text-2xl font-medium leading-tight">
                       {t.nowL}: {t[cur.kind]} {t.untilL} {ampm(cur.end)}
                       {pay(cur)}
                     </p>
                   )}
                   {next && (
-                    <p className={cur ? "mt-1 text-lg opacity-80" : "text-2xl font-semibold leading-tight"}>
+                    <p className={cur ? "mt-1 text-lg opacity-80" : "text-2xl font-medium leading-tight"}>
                       {t.nextL}: {t[next.kind]}
                       {pay(next)} {t.inL} {mins >= 60 ? `${Math.floor(mins / 60)} h ${mins % 60} min` : `${mins} min`}
                     </p>
                   )}
                 </>
               ) : (
-                <p className="text-xl font-semibold">{t.doneL}</p>
+                <p className="text-xl font-medium">{t.doneL}</p>
               )}
             </div>
           );
@@ -427,7 +427,7 @@ export function CrewView() {
                 <span className="text-lg tabular-nums">
                   {ampm(b.start)} – {ampm(b.end)}
                 </span>
-                <span className={`text-right text-lg ${b.kind === "cooldown" ? "font-semibold text-[#2f6f8f]" : ""}`}>
+                <span className={`text-right text-lg ${b.kind === "cooldown" ? "font-medium text-[#2f6f8f]" : ""}`}>
                   {t[b.kind]}
                   {b.kind === "cooldown" && <span className="block text-sm">+${pay.toFixed(2)}</span>}
                 </span>
@@ -438,11 +438,11 @@ export function CrewView() {
       </section>
 
       <section className="flex flex-col items-center gap-3 rounded-2xl bg-[var(--card)] p-5 text-center">
-        {ask && <p className="w-full rounded-xl bg-[#2f6f8f] px-4 py-3 text-lg font-semibold text-white">{t.coolAsk}</p>}
+        {ask && <p className="w-full rounded-xl bg-[#2f6f8f] px-4 py-3 text-lg font-medium text-white">{t.coolAsk}</p>}
         <h2 className="font-display text-3xl">{t.ask}</h2>
         <p className="-mt-2 text-sm text-[var(--muted)]">{t.hint}</p>
         {canTalk && (
-          <button onClick={talk} disabled={busy} className={`mic h-36 w-36 rounded-full text-lg font-semibold text-white disabled:opacity-60 ${rec ? "is-listening" : ""}`}>
+          <button onClick={talk} disabled={busy} className={`mic h-36 w-36 rounded-full text-lg font-medium text-white disabled:opacity-60 ${rec ? "is-listening" : ""}`}>
             {busy ? t.sending : rec ? (
               <>
                 {t.stop}
@@ -460,7 +460,7 @@ export function CrewView() {
               key={q}
               onClick={() => sendText(q, i)}
               disabled={busy}
-              className={`rounded-xl px-2 py-3 text-base font-semibold leading-tight disabled:opacity-60 ${i === 2 ? "bg-[#c85f22] text-white" : i === 1 ? "bg-[#2f6f8f] text-white" : "bg-[#3f6b3a] text-white"}`}
+              className={`rounded-xl px-2 py-3 text-base font-medium leading-tight disabled:opacity-60 ${i === 2 ? "bg-[#c85f22] text-white" : i === 1 ? "bg-[#2f6f8f] text-white" : "bg-[#3f6b3a] text-white"}`}
             >
               {q}
             </button>
@@ -502,7 +502,10 @@ export function CrewView() {
                 </li>
               ) : (
                 <li key={m.id} className="flex flex-col items-end gap-1">
-                  <p className="ml-10 rounded-2xl rounded-br-sm bg-[var(--ink)] px-3 py-2 text-lg leading-snug text-[var(--bg)]">{m.original}</p>
+                  <div className="ml-10 rounded-2xl rounded-br-sm bg-[var(--brand)] px-3 py-2 text-[var(--brand-ink)]">
+                    <p className="text-lg leading-snug">{m.text[lang] || m.original}</p>
+                    {m.original && m.original !== m.text[lang] && <p className="mt-0.5 text-xs opacity-75">{m.original}</p>}
+                  </div>
                   {m.intent === "other" && !m.autoReply ? (
                     <p className="text-xs text-[var(--muted)]">✓ {t.sent.split(".")[0]}</p>
                   ) : !msgs.slice(i + 1).some((x) => x.from === "boss") && <p

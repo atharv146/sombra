@@ -1,25 +1,35 @@
 @import "tailwindcss";
 
-/* Design tokens: everything visual comes from here (design/guidelines.md §5). */
+/* Darshan's fonts, self-hosted (design/fonts.md) */
+@font-face { font-family: "General Sans"; src: url("/fonts/GeneralSans-Variable.ttf") format("truetype"); font-weight: 200 700; font-display: swap; }
+@font-face { font-family: "Zodiak"; src: url("/fonts/Zodiak-Variable.ttf") format("truetype"); font-weight: 100 900; font-display: swap; }
+@font-face { font-family: "Array"; src: url("/fonts/Array-Regular.ttf") format("truetype"); font-weight: 400; font-display: swap; }
+
+/* Design tokens (design/guidelines.md §5). Default = the worker phone: sage and forest green, from the moodboard. */
 :root {
-  /* warm neutrals */
-  --bg: #f2ede3;
-  --card: #f8f5ee;
-  --ink: #1e1b16;
-  --muted: #645c51;
-  --line: #d6ccbb;
-  --track: #e8e0d1;
-  /* one brand color: shade */
-  --brand: #2b5d57;
-  --brand-ink: #f3efe6;
+  --bg: #e6ece1;
+  --card: #f7f9f3;
+  --ink: #1b2a21;
+  --muted: #56655a;
+  --line: #cbd6c5;
+  --track: #dbe4d5;
+  --brand: #2f5d3a;
+  --brand-ink: #f4f6ef;
   --accent: var(--brand);
-  /* data only: heat bands (HeatRisk-style order), alerts, status */
+  --bad-ink: #8c1d17;
+  --good-ink: #2f5a2b;
+  --bad-wash: #f4dcd7;
+  --good-wash: #d8e8d2;
+  --lunch: #ece3d2;
+  --warn-wash: #f3e2b8;
+  --warn-ink: #6b4e10;
+  /* data only: heat bands, alerts, status */
   --heat-low: #4e8f4a;
   --heat-moderate: #d9a514;
   --heat-high: #d9661c;
-  --heat-extreme: #a3195b;
-  --alert: #b3261e;
-  --ok: #3f6b3a;
+  --heat-extreme: #b8246e;
+  --alert: #c0302a;
+  --ok: #3f7a3a;
   --cool: #2f6f8f;
   /* type */
   --font-ui: "General Sans", var(--font-gurmukhi), system-ui, sans-serif;
@@ -31,6 +41,31 @@
   --dur-fast: 180ms;
   --dur-story: 560ms;
 }
+
+/* Command center: the pre-dawn theme. Editorial and data-forward (Clay-style big serif numbers, hairlines). */
+.cmd {
+  --bg: #0c1411;
+  --card: #121c18;
+  --ink: #ece6d7;
+  --muted: #95a399;
+  --line: #24332d;
+  --track: #18241f;
+  --brand: #a6d1a8;
+  --brand-ink: #0c1411;
+  --accent: #a6d1a8;
+  --bad-ink: #f4a699;
+  --good-ink: #a9d9a1;
+  --bad-wash: #3a1c1a;
+  --good-wash: #16301d;
+  --lunch: #3b3427;
+  --warn-wash: #3b3015;
+  --warn-ink: #f1d38a;
+  --heat-extreme: #d23c86;
+  background: var(--bg);
+  color: var(--ink);
+}
+.cmd select option { color: #111; }
+.cmd .bg-\[var\(--accent\)\].text-white { color: var(--brand-ink); }
 
 @theme inline {
   --color-background: var(--bg);
@@ -44,8 +79,10 @@ body {
   background: var(--bg);
   color: var(--ink);
   font-family: var(--font-ui);
+  font-weight: 450;
   font-size: 15px;
 }
+body:has(.cmd) { background: #0c1411; }
 
 .font-display {
   font-family: var(--font-display-face);
@@ -131,9 +168,9 @@ select:focus-visible {
   display: flex;
   align-items: center;
   gap: 6px;
-  font: 600 12px/1 var(--font-geist-sans), system-ui, sans-serif;
-  color: var(--ink);
-  text-shadow: 0 0 3px #fff, 0 0 3px #fff;
+  font: 600 12px/1.2 var(--font-ui);
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9), 0 0 2px rgba(0, 0, 0, 0.9);
 }
 .field-dot {
   --dot: #8a8278;
@@ -175,8 +212,9 @@ select:focus-visible {
 }
 .field-sub {
   display: block;
-  font: 500 11px/1 var(--font-geist-mono), monospace;
-  color: var(--muted);
+  font: 500 11px/1.2 var(--font-ui);
+  font-variant-numeric: tabular-nums;
+  color: #e9e4d6;
 }
 
 /* Worker check-in mic */
@@ -228,3 +266,26 @@ select:focus-visible {
 .ring {
   transition: stroke-dashoffset 900ms var(--ease);
 }
+
+/* Worker phone: friendly, readable in sun. Medium weights, big sizes, rounded like the moodboard apps. */
+.phone {
+  font-size: 17px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+}
+.phone h1,
+.phone h2 {
+  font-family: var(--font-display-face);
+  font-weight: 450;
+}
+.phone .font-medium {
+  font-weight: 560;
+}
+
+/* Command center type hierarchy: green kickers, serif headings, muted secondary, tabular numbers. */
+.cmd .font-label { color: var(--brand); }
+.cmd h2, .cmd h3 { font-family: var(--font-display-face); font-weight: 400; }
+.cmd table { font-variant-numeric: tabular-nums; }
+.cmd th { color: var(--muted); font-weight: 500; }
+.cmd td b, .cmd td .font-semibold { font-weight: 600; }
+.cmd section > h2:first-child, .cmd section h3.font-display { letter-spacing: -0.01em; }

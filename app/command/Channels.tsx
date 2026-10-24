@@ -186,7 +186,7 @@ export function Channels({
                   worker {m.workerId} · {time(m.at)}
                 </span>
                 {m.intent !== "other" && !thread.some((x) => x.from === "boss" && x.at > m.at) && Date.now() - +new Date(m.at) > 120_000 && (
-                  <span className="rounded-full bg-[#f3e2b8] px-2 py-0.5 font-semibold text-[#6b4e10]">
+                  <span className="rounded-full bg-[var(--warn-wash)] px-2 py-0.5 font-semibold text-[var(--warn-ink)]">
                     No reply yet · {Math.round((Date.now() - +new Date(m.at)) / 60_000)} min
                   </span>
                 )}

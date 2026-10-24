@@ -11,7 +11,7 @@ import { PlayDay } from "./PlayDay";
 import { complianceCsv } from "@/lib/compliance";
 import { SCENARIOS, scenarioFor } from "@/lib/scenarios";
 import { type AgentCard } from "./AgentPanel";
-import { AgentFloor } from "./AgentFloor";
+import { AIBrain } from "./AIBrain";
 import { PlanView } from "./PlanView";
 import { BAND_COLOR, BAND_LABEL } from "./bands";
 
@@ -125,6 +125,13 @@ export function Command({ fields }: { fields: Field[] }) {
         setCrews(p.crewInfo);
         setDraft({ ...p, crews: p.usual, violations: p.usualViolations ?? [], summary: "Your usual schedule" });
         setFinal(p);
+        if (p.agentLog)
+          setCards(
+            fresh().map((c) => {
+              const l = p.agentLog?.[c.id];
+              return l ? { ...c, status: "done" as const, text: l.text, summary: l.summary, model: l.model, verdict: l.verdict } : c;
+            }),
+          );
       })
       .catch(() => {});
   }, []);
@@ -272,13 +279,10 @@ export function Command({ fields }: { fields: Field[] }) {
         <header className="flex flex-col gap-4">
           <div className="flex items-baseline justify-between gap-3">
             <p className="font-label text-xs text-[var(--muted)]">Sombra · heat and smoke safety for Central Valley farm crews</p>
-            <nav className="flex gap-4 text-sm">
-              <a href="/about" className="underline">How it works</a>
-              <a href="/privacy" className="underline">Privacy &amp; data safety</a>
-            </nav>
+
           </div>
           <div className="flex flex-wrap items-end gap-x-6 gap-y-2">
-            <p className="font-display tabular text-[88px] leading-[0.85]">{hero ? `${hero.peak.tempF}°` : "··"}</p>
+            <p className="font-display tabular text-[120px] leading-[0.8] tracking-tight">{hero ? `${hero.peak.tempF}°` : "··"}</p>
             <p className="max-w-md pb-1 text-[17px] leading-snug">
               {hero
                 ? `${scenario.label}${scenario.smokeAqi ? " smoke drill" : ""}: peaks at ${hero.peak.tempF}°F at ${ampm(hero.peak.time)}. ${hero.from ? `Deadly heat from ${ampm(hero.from)} to ${ampm(hero.to!)}.` : "No deadly-heat hours."}${hero.smoke ? ` Smoke up to AQI ${hero.smoke}.` : ""} Sombra rebuilds the day so nobody works through it, and tells every worker in their language.`
@@ -342,7 +346,7 @@ export function Command({ fields }: { fields: Field[] }) {
             <p className="mt-2 text-xs text-[var(--muted)]">
               Each square is one hour, 4am to 7pm. Color is heat danger from temperature, humidity and sun (WBGT): green safe, yellow caution, orange high, red deadly for hard work. Drag the slider to move through the day; map dots change color and pulse when a field is dangerous at that hour.
             </p>
-            <input type="range" min={4} max={19} value={hour} onChange={(e) => setHour(Number(e.target.value))} className="mt-3 w-full" aria-label="Hour of day" />
+            <input type="range" min={4} max={19} value={hour} style={{ accentColor: "var(--brand)" }} onChange={(e) => setHour(Number(e.target.value))} className="mt-3 w-full" aria-label="Hour of day" />
           </section>
         )}
 
@@ -420,7 +424,7 @@ export function Command({ fields }: { fields: Field[] }) {
       </div>
 
       <aside className="flex flex-col gap-4 lg:sticky lg:top-6 lg:self-start">
-        <AgentFloor cards={cards} risks={risks} draft={draft} final={final} alerts={alerts} />
+        <AIBrain cards={cards} risks={risks} draft={draft} final={final} alerts={alerts} />
         <section className="rounded-xl border-2 border-[var(--ink)] bg-[var(--card)] p-4">
           <div className="flex items-baseline justify-between">
             <h2 className="font-display text-2xl">Worker phones</h2>
