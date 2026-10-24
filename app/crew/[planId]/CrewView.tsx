@@ -12,6 +12,7 @@ const T = {
   es: {
     newPlan: "Tu mayordomo hizo un plan nuevo.", waiting: "No hay plan activo. Esperando a tu mayordomo…", micBlocked: "Permite el micrófono para este sitio en la configuración del navegador.", secs: "seg",
     quick: ["Estoy bien", "Necesito agua", "Me siento mal"], coolAsk: "Hora de tu descanso pagado. ¿Cómo te sientes?",
+    privacy: "Privacidad",
     today: "Tu día", listen: "Escuchar", work: "Trabajo", meal: "Comida", cooldown: "Descanso pagado", travel: "Traslado",
     thread: "Mensajes con tu mayordomo", none: "Sin mensajes todavía", ask: "¿Cómo te sientes?", hint: "Habla en cualquier idioma",
     tap: "Toca para hablar", stop: "Toca para enviar", sending: "Enviando…", type: "O escribe aquí", send: "Enviar",
@@ -28,6 +29,7 @@ const T = {
   pa: {
     newPlan: "ਸੁਪਰਵਾਈਜ਼ਰ ਨੇ ਨਵੀਂ ਯੋਜਨਾ ਬਣਾਈ ਹੈ।", waiting: "ਕੋਈ ਯੋਜਨਾ ਚਾਲੂ ਨਹੀਂ। ਸੁਪਰਵਾਈਜ਼ਰ ਦੀ ਉਡੀਕ…", micBlocked: "ਬ੍ਰਾਊਜ਼ਰ ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਇਸ ਸਾਈਟ ਲਈ ਮਾਈਕ੍ਰੋਫ਼ੋਨ ਦੀ ਇਜਾਜ਼ਤ ਦਿਓ।", secs: "ਸਕਿੰਟ",
     quick: ["ਮੈਂ ਠੀਕ ਹਾਂ", "ਮੈਨੂੰ ਪਾਣੀ ਚਾਹੀਦਾ", "ਮੈਨੂੰ ਠੀਕ ਨਹੀਂ ਲੱਗ ਰਿਹਾ"], coolAsk: "ਤਨਖਾਹ ਵਾਲੇ ਆਰਾਮ ਦਾ ਸਮਾਂ। ਤੁਸੀਂ ਕਿਵੇਂ ਮਹਿਸੂਸ ਕਰ ਰਹੇ ਹੋ?",
+    privacy: "ਪਰਦੇਦਾਰੀ",
     today: "ਤੁਹਾਡਾ ਦਿਨ", listen: "ਸੁਣੋ", work: "ਕੰਮ", meal: "ਖਾਣਾ", cooldown: "ਤਨਖਾਹ ਵਾਲਾ ਆਰਾਮ", travel: "ਸਫ਼ਰ",
     thread: "ਸੁਪਰਵਾਈਜ਼ਰ ਨਾਲ ਸੁਨੇਹੇ", none: "ਅਜੇ ਕੋਈ ਸੁਨੇਹਾ ਨਹੀਂ", ask: "ਤੁਸੀਂ ਕਿਵੇਂ ਮਹਿਸੂਸ ਕਰ ਰਹੇ ਹੋ?", hint: "ਕਿਸੇ ਵੀ ਭਾਸ਼ਾ ਵਿੱਚ ਬੋਲੋ",
     tap: "ਬੋਲਣ ਲਈ ਦਬਾਓ", stop: "ਭੇਜਣ ਲਈ ਦਬਾਓ", sending: "ਭੇਜ ਰਿਹਾ ਹੈ…", type: "ਜਾਂ ਇੱਥੇ ਲਿਖੋ", send: "ਭੇਜੋ",
@@ -44,6 +46,7 @@ const T = {
   en: {
     newPlan: "Your crew boss made a new plan.", waiting: "No active plan. Waiting for your crew boss…", micBlocked: "Allow the microphone for this site in your browser settings.", secs: "sec",
     quick: ["I'm OK", "I need water", "I feel sick"], coolAsk: "Paid cool-down time. How do you feel?",
+    privacy: "Privacy",
     today: "Your day", listen: "Listen", work: "Work", meal: "Lunch", cooldown: "Paid break", travel: "Travel",
     thread: "Messages with your crew boss", none: "No messages yet", ask: "How do you feel?", hint: "Speak in any language",
     tap: "Tap to talk", stop: "Tap to send", sending: "Sending…", type: "Or type here", send: "Send",
@@ -487,6 +490,9 @@ export function CrewView() {
         )}
         <div ref={endRef} />
       </section>
+      <a href="/privacy" className="text-center text-sm text-[var(--muted)] underline">
+        {t.privacy}
+      </a>
     </main>
   );
 }

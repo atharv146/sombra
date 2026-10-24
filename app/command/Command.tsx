@@ -438,7 +438,7 @@ export function Command({ fields }: { fields: Field[] }) {
         <AgentPanel cards={cards} />
 
         <p className="text-[11px] text-[var(--muted)]">
-          Weather: Open-Meteo (CC BY 4.0). Map © OpenStreetMap contributors, OpenFreeMap. Rules: Cal/OSHA §3395, §5141.1. <a href="/about" className="underline">How it works &amp; credits</a>
+          Weather: Open-Meteo (CC BY 4.0). Map © OpenStreetMap contributors, OpenFreeMap. Rules: Cal/OSHA §3395, §5141.1. <a href="/about" className="underline">How it works &amp; credits</a> · <a href="/privacy" className="underline">Privacy &amp; data safety</a>
         </p>
       </aside>
     </div>
