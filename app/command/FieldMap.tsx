@@ -26,7 +26,11 @@ export function FieldMap({ fields, risks, hour, alerts = {} }: { fields: Field[]
       map.current = m;
       const lons = fields.map((f) => f.lon);
       const lats = fields.map((f) => f.lat);
-      m.fitBounds([[Math.min(...lons), Math.min(...lats)], [Math.max(...lons), Math.max(...lats)]], { padding: 60, duration: 0 });
+      // Fit after load too: the first fit can run before the container has its final size.
+      const fit = () =>
+        m.fitBounds([[Math.min(...lons), Math.min(...lats)], [Math.max(...lons), Math.max(...lats)]], { padding: 70, maxZoom: 10.5, duration: 0 });
+      fit();
+      m.once("load", fit);
       for (const f of fields) {
         const wrap = document.createElement("div");
         wrap.className = "field-marker";

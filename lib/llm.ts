@@ -1,7 +1,7 @@
 // One entry point for every model call. Server-only: never import from a client component.
 import "server-only";
 
-type Provider = "claude" | "gemini";
+type Provider = "claude" | "gemini" | "openrouter" | "groq";
 
 export interface LLMRequest {
   system: string;
@@ -14,13 +14,32 @@ export interface LLMRequest {
 const CLAUDE_MODEL = process.env.CLAUDE_MODEL || "claude-sonnet-5-5";
 const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3.8-flash";
 
+// OpenAI-compatible providers: same request shape, different base URL, key and model.
+const COMPAT = {
+  openrouter: {
+    url: "https://openrouter.ai/api/v1/chat/completions",
+    key: () => process.env.OPENROUTER_API_KEY,
+    model: process.env.OPENROUTER_MODEL || "google/gemma-4-31b-it:free",
+  },
+  groq: {
+    url: "https://api.groq.com/openai/v1/chat/completions",
+    key: () => process.env.GROQ_API_KEY,
+    model: process.env.GROQ_MODEL || "openai/gpt-oss-120b",
+  },
+};
+
+// LLM_PROVIDER picks the provider: claude | gemini | openrouter | groq.
 function provider(): Provider {
-  if (process.env.LLM_PROVIDER === "gemini" || !process.env.ANTHROPIC_API_KEY) return "gemini";
-  return "claude";
+  const p = process.env.LLM_PROVIDER as Provider | undefined;
+  if (p && ["claude", "gemini", "openrouter", "groq"].includes(p)) return p;
+  return process.env.ANTHROPIC_API_KEY ? "claude" : "gemini";
 }
 
 export function modelName(): string {
-  return provider() === "claude" ? CLAUDE_MODEL : GEMINI_MODEL;
+  const p = provider();
+  if (p === "claude") return CLAUDE_MODEL;
+  if (p === "gemini") return GEMINI_MODEL;
+  return COMPAT[p].model;
 }
 
 // Reads an SSE response body and yields each `data:` payload as parsed JSON.
@@ -35,7 +54,7 @@ async function* sseJSON(body: ReadableStream) {
     buf = lines.pop() ?? "";
     for (const line of lines) {
       const l = line.trim();
-      if (l.startsWith("data: ")) yield JSON.parse(l.slice(6));
+      if (l.startsWith("data: ") && l !== "data: [DONE]") yield JSON.parse(l.slice(6));
     }
   }
 }
@@ -67,7 +86,40 @@ export async function* streamModel(req: LLMRequest): AsyncGenerator<string> {
 // Streams text chunks from whichever provider is configured.
 async function* streamProvider(req: LLMRequest): AsyncGenerator<string> {
   const system = req.json ? `${req.system}\nRespond with one JSON object only, no prose, no code fences.` : req.system;
-  if (provider() === "claude") {
+  const p = provider();
+  if (p === "openrouter" || p === "groq") {
+    const cfg = COMPAT[p];
+    const call = timedFetch(cfg.url, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        authorization: `Bearer ${cfg.key()}`,
+        "x-title": "Sombra",
+      },
+      body: JSON.stringify({
+        model: req.model || cfg.model,
+        max_tokens: req.maxTokens ?? 1024,
+        stream: true,
+        messages: [
+          { role: "system", content: system },
+          { role: "user", content: req.prompt },
+        ],
+      }),
+    });
+    try {
+      const res = await call.res;
+      if (!res.ok || !res.body) throw new Error(`${p} ${res.status}: ${await res.text()}`);
+      for await (const evt of sseJSON(res.body)) {
+        if (evt.error) throw new Error(`${p}: ${evt.error.message ?? "stream error"}`);
+        const text = evt.choices?.[0]?.delta?.content;
+        if (text) yield text;
+      }
+    } finally {
+      call.done();
+    }
+    return;
+  }
+  if (p === "claude") {
     const call = timedFetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {

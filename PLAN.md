@@ -20,6 +20,54 @@
 
 Darshan never edits app code, so we can't have merge conflicts. He uploads files to a `darshan` branch through the GitHub website, and Atharv merges them.
 
+## Feature checklist (the end goal)
+
+✅ done · 🔨 in progress · ⬜ to do · ⭐ stretch (only if everything else is done)
+
+**Crew lead command center (`/command`, laptop)**
+- ✅ Map of 3 real fields; dots colored by heat, pulsing when dangerous
+- ✅ Heat strip per field by hour (WBGT estimate) with an hour slider
+- ✅ Heat-wave replay (July 11, 2024, 114°F, real archived data) and Live (today's forecast) toggle
+- ✅ Crew editor: field, size, new workers, usual shift
+- ✅ 5 agents stream live: Cielo → Ley + Crítico (parallel) → Cuadrilla → Crítico + Voz (parallel)
+- ✅ Crítico rejects the usual day, and the agents rebuild it
+- ✅ Rules engine: Cal/OSHA checks, auto-fix safety net, "can't send until it passes"
+- ✅ Before/after timelines: usual day with violations vs. Sombra's plan
+- ✅ QR code to the crew phone page once the plan passes
+- ✅ Live check-in feed: the field turns red, our model's label + Medic's opinion + first-aid steps
+- ✅ Model badge on every agent card (AI/ML track rule)
+- ✅ AI can't freeze the demo: 15-second timeout, rules fallback, `?demo=1` recorded replay
+- ✅ Swap AI provider in `.env.local`: openrouter, groq, gemini or claude
+- ⬜ Real AI run checked and tuned (needs a working key)
+- ⬜ Design pass so it doesn't look AI-made (Sonnet + taste skill + Godly refs)
+- ⬜ `/command` usable on a phone or tablet
+- ⭐ Crew lead speaks the request instead of filling the form
+- ⭐ Wildfire-smoke replay day (AQI over 151) to show the §5141.1 rules
+
+**Worker phone page (`/crew/[id]`, built by the cloud session on branch `crew`)**
+- 🔨 Opens from the QR code, phone-first, huge type, works one-handed
+- 🔨 Language picker: Español / ਪੰਜਾਬੀ / English
+- 🔨 Today's schedule with the current block highlighted
+- 🔨 "Descanso pagado: $X" ("Paid break: $X") on every cool-down
+- 🔨 Play button reads the briefing aloud (shows a note if the phone has no Punjabi voice)
+- 🔨 Voice check-in "¿Cómo te sientes?" ("How are you feeling?") → `/api/checkin` → our model → shows on the laptop
+- 🔨 Emergency result: "Avísale a tu mayordomo ahora" ("Tell your crew boss now") + call button
+- ⬜ Tested on a real iPhone and a real Android
+
+**Our AI model (Darshan)**
+- 🔨 `train.csv` (Gemini-made, hand-checked) + `test.csv` (40 written by hand)
+- 🔨 `triage.json` + `confusion.png` from Colab
+- ✅ Model card and credits page `/about` (fills in automatically when `triage.json` lands)
+- 🔨 `docs/facts.md` with a source for every number
+
+**Ship**
+- ⬜ Vercel deploy + Upstash storage + key set as an env var
+- ⬜ Record the demo run (`public/demo/run.json`) from a real AI run
+- ⬜ Repo public, README with the one-sentence explanation + credits
+- ⬜ 2-minute video, 5 slides, Devpost on the main + AI/ML tracks, submitted by 6:15
+
+---
+
 ## 1. Why this idea wins (from past winners)
 
 | Pattern in winners | Who did it | How Sombra uses it |
