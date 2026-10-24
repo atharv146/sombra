@@ -111,6 +111,7 @@ export async function runSwarm(input: SwarmInput, emit: Emit): Promise<ShiftPlan
   };
   plan.violations = checkPlan(plan, crews, risks);
   emit({ type: "plan", plan, revision: 0 });
+  const usual = { crews: plan.crews, violations: plan.violations };
 
   const [, critique] = await Promise.all([
     run(
@@ -232,6 +233,9 @@ Reply with JSON only, no working shown:
   }
   emit({ type: "agent_done", agent: "voz", summary: `Briefings ready in ${Object.keys(plan.briefings).length} languages` });
 
+  plan.usual = usual.crews;
+  plan.usualViolations = usual.violations;
+  plan.createdAt = new Date().toISOString();
   await savePlan(plan);
   emit({ type: "plan", plan, revision: 2 });
   return plan;

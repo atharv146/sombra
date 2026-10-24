@@ -75,6 +75,9 @@ export interface ShiftPlan {
   briefings: Partial<Record<Lang, string>>; // what the phone reads aloud
   summary: string;
   crewInfo?: Crew[]; // names, sizes and pay rates, for the phone page
+  usual?: CrewPlan[]; // the crew lead's usual day, kept so the before/after can be shown again later
+  usualViolations?: RuleViolation[];
+  createdAt?: string;
 }
 
 export type AgentId = "cielo" | "ley" | "cuadrilla" | "voz" | "critico" | "medic";

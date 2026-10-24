@@ -10,6 +10,7 @@ import type { Lang, RadioMessage, ShiftPlan, TriageLabel } from "@/lib/types";
 // UI text per language. Punjabi strings should be checked by a Punjabi speaker.
 const T = {
   es: {
+    newPlan: "Tu mayordomo hizo un plan nuevo.", waiting: "No hay plan activo. Esperando a tu mayordomo…", micBlocked: "Permite el micrófono para este sitio en la configuración del navegador.", secs: "seg",
     today: "Tu día", listen: "Escuchar", work: "Trabajo", meal: "Comida", cooldown: "Descanso pagado", travel: "Traslado",
     thread: "Mensajes con tu mayordomo", none: "Sin mensajes todavía", ask: "¿Cómo te sientes?", hint: "Habla en cualquier idioma",
     tap: "Toca para hablar", stop: "Toca para enviar", sending: "Enviando…", type: "O escribe aquí", send: "Enviar",
@@ -24,6 +25,7 @@ const T = {
     },
   },
   pa: {
+    newPlan: "ਸੁਪਰਵਾਈਜ਼ਰ ਨੇ ਨਵੀਂ ਯੋਜਨਾ ਬਣਾਈ ਹੈ।", waiting: "ਕੋਈ ਯੋਜਨਾ ਚਾਲੂ ਨਹੀਂ। ਸੁਪਰਵਾਈਜ਼ਰ ਦੀ ਉਡੀਕ…", micBlocked: "ਬ੍ਰਾਊਜ਼ਰ ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਇਸ ਸਾਈਟ ਲਈ ਮਾਈਕ੍ਰੋਫ਼ੋਨ ਦੀ ਇਜਾਜ਼ਤ ਦਿਓ।", secs: "ਸਕਿੰਟ",
     today: "ਤੁਹਾਡਾ ਦਿਨ", listen: "ਸੁਣੋ", work: "ਕੰਮ", meal: "ਖਾਣਾ", cooldown: "ਤਨਖਾਹ ਵਾਲਾ ਆਰਾਮ", travel: "ਸਫ਼ਰ",
     thread: "ਸੁਪਰਵਾਈਜ਼ਰ ਨਾਲ ਸੁਨੇਹੇ", none: "ਅਜੇ ਕੋਈ ਸੁਨੇਹਾ ਨਹੀਂ", ask: "ਤੁਸੀਂ ਕਿਵੇਂ ਮਹਿਸੂਸ ਕਰ ਰਹੇ ਹੋ?", hint: "ਕਿਸੇ ਵੀ ਭਾਸ਼ਾ ਵਿੱਚ ਬੋਲੋ",
     tap: "ਬੋਲਣ ਲਈ ਦਬਾਓ", stop: "ਭੇਜਣ ਲਈ ਦਬਾਓ", sending: "ਭੇਜ ਰਿਹਾ ਹੈ…", type: "ਜਾਂ ਇੱਥੇ ਲਿਖੋ", send: "ਭੇਜੋ",
@@ -38,6 +40,7 @@ const T = {
     },
   },
   en: {
+    newPlan: "Your crew boss made a new plan.", waiting: "No active plan. Waiting for your crew boss…", micBlocked: "Allow the microphone for this site in your browser settings.", secs: "sec",
     today: "Your day", listen: "Listen", work: "Work", meal: "Lunch", cooldown: "Paid break", travel: "Travel",
     thread: "Messages with your crew boss", none: "No messages yet", ask: "How do you feel?", hint: "Speak in any language",
     tap: "Tap to talk", stop: "Tap to send", sending: "Sending…", type: "Or type here", send: "Send",
@@ -96,6 +99,8 @@ export function CrewView() {
   const [armed, setArmed] = useState(false);
   const [takeover, setTakeover] = useState<RadioMessage | null>(null);
   const [now, setNow] = useState(0);
+  const [notice, setNotice] = useState(false);
+  const [recSec, setRecSec] = useState(0);
   const seen = useRef(new Set<string>());
   const loaded = useRef(false);
   const t = T[lang];
@@ -114,14 +119,45 @@ export function CrewView() {
       .then((r) => r.json())
       .then((x) => setWhisper(!!x.enabled))
       .catch(() => {});
-    fetch(`/api/crew/${param}`)
-      .then((r) => (r.ok ? r.json() : Promise.reject()))
-      .then((p: ShiftPlan) => {
-        setPlan(p);
-        setPlanId(p.id); // "/crew/latest" resolves to the newest plan's real id
-        setCrewId(stored(`sombra-crew-${p.id}`, p.crews[0]?.crewId ?? ""));
-      })
-      .catch(() => setMissing(true));
+  }, []);
+
+  // Load the plan from the link, then keep following the crew boss's newest plan. Expired plans end right away.
+  useEffect(() => {
+    let alive = true;
+    let current: ShiftPlan | null = null;
+    const get = (id: string) => fetch(`/api/crew/${id}`, { cache: "no-store" }).then((r) => (r.ok ? (r.json() as Promise<ShiftPlan>) : null)).catch(() => null);
+    const adopt = (p: ShiftPlan, isNew: boolean) => {
+      current = p;
+      seen.current.clear();
+      loaded.current = false;
+      setMsgs([]);
+      setPlan(p);
+      setPlanId(p.id);
+      setCrewId(stored(`sombra-crew-${p.id}`, p.crews[0]?.crewId ?? ""));
+      setMissing(false);
+      setNotice(isNew);
+    };
+    const tick = async () => {
+      const latest = await get("latest");
+      if (!alive) return;
+      if (!current) {
+        const first = param === "latest" ? latest : ((await get(param)) ?? latest);
+        if (first) adopt(first, false);
+        else setMissing(true);
+        return;
+      }
+      if (!latest) {
+        current = null;
+        setPlan(null);
+        setMissing(true);
+      } else if (latest.id !== current.id && (latest.createdAt ?? "") >= (current.createdAt ?? "")) adopt(latest, true);
+    };
+    tick();
+    const id = setInterval(tick, 5000);
+    return () => {
+      alive = false;
+      clearInterval(id);
+    };
   }, [param]);
 
   // Poll this crew's channel. New boss messages are read aloud; heat alerts take over the screen with an alarm.
@@ -154,6 +190,16 @@ export function CrewView() {
       clearInterval(id);
     };
   }, [planId, crewId, workerId, lang]);
+
+  const talkRef = useRef<() => void>(() => {});
+  useEffect(() => {
+    if (!rec) return setRecSec(0);
+    const id = setInterval(() => setRecSec((n) => n + 1), 1000);
+    return () => clearInterval(id);
+  }, [rec]);
+  useEffect(() => {
+    if (rec && recSec >= 20) talkRef.current(); // auto-send long recordings
+  }, [rec, recSec]);
 
   function setLang(l: Lang) {
     unlockAudio();
@@ -206,8 +252,8 @@ export function CrewView() {
     if (whisper) {
       try {
         setRec(await startRecording());
-      } catch {
-        setNote(t.heard);
+      } catch (err) {
+        setNote(err instanceof Error && err.name === "NotAllowedError" ? t.micBlocked : t.heard);
       }
       return;
     }
@@ -222,7 +268,8 @@ export function CrewView() {
     }
   }
 
-  if (missing) return <main className="p-6 text-xl">{t.missing}</main>;
+  talkRef.current = talk;
+  if (missing) return <main className="p-6 text-xl">{t.waiting}</main>;
   if (!plan) return <main className="p-6 text-xl">{t.loading}</main>;
 
   const mine = plan.crews.find((c) => c.crewId === crewId) ?? plan.crews[0];
@@ -242,6 +289,12 @@ export function CrewView() {
             {t.safe}
           </button>
         </div>
+      )}
+
+      {notice && (
+        <button onClick={() => setNotice(false)} className="rounded-xl bg-[#2f6f8f] px-4 py-3 text-left text-white">
+          {t.newPlan} ✕
+        </button>
       )}
 
       {!armed && (
@@ -313,7 +366,14 @@ export function CrewView() {
         <p className="-mt-2 text-sm text-[var(--muted)]">{t.hint}</p>
         {canTalk && (
           <button onClick={talk} disabled={busy} className={`mic h-36 w-36 rounded-full text-lg font-semibold text-white disabled:opacity-60 ${rec ? "is-listening" : ""}`}>
-            {busy ? t.sending : rec ? t.stop : t.tap}
+            {busy ? t.sending : rec ? (
+              <>
+                {t.stop}
+                <span className="mt-1 block font-mono text-sm">● {recSec} {t.secs}</span>
+              </>
+            ) : (
+              t.tap
+            )}
           </button>
         )}
         {note && <p className="text-sm text-[#b3261e]">{note}</p>}

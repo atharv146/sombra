@@ -66,11 +66,26 @@ export function Command({ fields, replayDate }: { fields: Field[]; replayDate: s
       .then((r) => (r.ok ? r.json() : []))
       .then((r: HourlyRisk[]) => {
         setRisks(r);
-        setDraft(null);
-        setFinal(null);
+        // A plan made for the other mode no longer matches this weather.
+        setDraft((d) => (d && d.mode !== mode ? null : d));
+        setFinal((f) => (f && f.mode !== mode ? null : f));
       })
       .catch(() => {});
   }, [mode]);
+
+  // Open on the active plan (if one exists) so channels, the QR code and "Play the day" work without re-planning.
+  useEffect(() => {
+    fetch("/api/crew/latest", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((p: ShiftPlan | null) => {
+        if (!p?.usual || !p.crewInfo) return;
+        setMode(p.mode);
+        setCrews(p.crewInfo);
+        setDraft({ ...p, crews: p.usual, violations: p.usualViolations ?? [], summary: "Your usual schedule" });
+        setFinal(p);
+      })
+      .catch(() => {});
+  }, []);
 
   const patch = (id: AgentId, f: (c: AgentCard) => AgentCard) =>
     setCards((cs) => (cs.some((c) => c.id === id) ? cs.map((c) => (c.id === id ? f(c) : c)) : [...cs, f({ ...AGENT_META[id], status: "idle", text: "" })]));
@@ -313,7 +328,12 @@ export function Command({ fields, replayDate }: { fields: Field[]; replayDate: s
         {final && final.violations.length === 0 && (
           <>
             <h2 className="font-display text-2xl">Crew channels</h2>
-            <Channels planId={final.id} crews={crews} fields={fields} fieldOf={fieldOf} onAlert={onAlert} />
+            {final.createdAt && (
+              <p className="-mt-2 text-xs text-[var(--muted)]">
+                Active plan since {new Date(final.createdAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}. Workers&apos; phones follow it automatically; planning again replaces it and clears these channels.
+              </p>
+            )}
+            <Channels key={final.id} planId={final.id} crews={crews} fields={fields} fieldOf={fieldOf} onAlert={onAlert} />
           </>
         )}
         <h2 className="font-display text-2xl">Agents</h2>

@@ -14,18 +14,22 @@ export interface LLMRequest {
 const CLAUDE_MODEL = process.env.CLAUDE_MODEL || "claude-sonnet-5-5";
 const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3.8-flash";
 
+// Several keys (one per free account) can be listed comma-separated; they're used in turn.
+const splitKeys = (v?: string) => (v ?? "").split(/[\s,]+/).filter(Boolean);
+const keyIndex = { openrouter: 0, groq: 0 };
+
 // OpenAI-compatible providers: same request shape, different base URL, key and model.
 const COMPAT = {
   openrouter: {
     url: "https://openrouter.ai/api/v1/chat/completions",
-    key: () => process.env.OPENROUTER_API_KEY,
+    keys: () => splitKeys(process.env.OPENROUTER_API_KEYS || process.env.OPENROUTER_API_KEY),
     model: process.env.OPENROUTER_MODEL || "nvidia/nemotron-3-ultra-550b-a55b:free",
     // Tried in order if the first is rate-limited (free models share upstream pools).
     fallbacks: ["nvidia/nemotron-3.5-lightning:free", "google/gemma-4-31b-it:free"],
   },
   groq: {
     url: "https://api.groq.com/openai/v1/chat/completions",
-    key: () => process.env.GROQ_API_KEY,
+    keys: () => splitKeys(process.env.GROQ_API_KEY),
     model: process.env.GROQ_MODEL || "openai/gpt-oss-120b",
     fallbacks: [] as string[],
   },
@@ -93,35 +97,42 @@ async function* streamProvider(req: LLMRequest): AsyncGenerator<string> {
   const p = provider();
   if (p === "openrouter" || p === "groq") {
     const cfg = COMPAT[p];
-    const call = timedFetch(cfg.url, {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        authorization: `Bearer ${cfg.key()}`,
-        "x-title": "Sombra",
-      },
-      body: JSON.stringify({
-        model: req.model || cfg.model,
-        // Thinking off: 5s answers instead of 30-60s, and the agents' prompts are narrow enough not to need it.
-        ...(p === "openrouter" ? { models: [req.model || cfg.model, ...cfg.fallbacks], reasoning: { enabled: false } } : {}),
-        max_tokens: Math.max(req.maxTokens ?? 1024, 1500), // reasoning models spend part of the budget thinking
-        stream: true,
-        messages: [
-          { role: "system", content: system },
-          { role: "user", content: req.prompt },
-        ],
-      }),
-    });
-    try {
-      const res = await call.res;
-      if (!res.ok || !res.body) throw new Error(`${p} ${res.status}: ${await res.text()}`);
-      for await (const evt of sseJSON(res.body)) {
-        if (evt.error) throw new Error(`${p}: ${evt.error.message ?? "stream error"}`);
-        const text = evt.choices?.[0]?.delta?.content;
-        if (text) yield text;
+    const keys = cfg.keys();
+    if (!keys.length) throw new Error(`No ${p} key`);
+    // Free accounts have daily caps: on a rate-limit or auth error, move to the next account's key and retry.
+    for (let attempt = 0; attempt < keys.length; attempt++) {
+      const key = keys[keyIndex[p] % keys.length];
+      const call = timedFetch(cfg.url, {
+        method: "POST",
+        headers: { "content-type": "application/json", authorization: `Bearer ${key}`, "x-title": "Sombra" },
+        body: JSON.stringify({
+          model: req.model || cfg.model,
+          // Thinking off: 5s answers instead of 30-60s, and the agents' prompts are narrow enough not to need it.
+          ...(p === "openrouter" ? { models: [req.model || cfg.model, ...cfg.fallbacks], reasoning: { enabled: false } } : {}),
+          max_tokens: Math.max(req.maxTokens ?? 1024, 1500),
+          stream: true,
+          messages: [
+            { role: "system", content: system },
+            { role: "user", content: req.prompt },
+          ],
+        }),
+      });
+      try {
+        const res = await call.res;
+        if ([401, 402, 403, 429].includes(res.status) && attempt < keys.length - 1) {
+          keyIndex[p]++;
+          continue;
+        }
+        if (!res.ok || !res.body) throw new Error(`${p} ${res.status}: ${await res.text()}`);
+        for await (const evt of sseJSON(res.body)) {
+          if (evt.error) throw new Error(`${p}: ${evt.error.message ?? "stream error"}`);
+          const text = evt.choices?.[0]?.delta?.content;
+          if (text) yield text;
+        }
+        return;
+      } finally {
+        call.done();
       }
-    } finally {
-      call.done();
     }
     return;
   }

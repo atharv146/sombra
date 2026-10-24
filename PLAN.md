@@ -20,52 +20,67 @@
 
 Darshan never edits app code, so we can't have merge conflicts. He uploads files to a `darshan` branch through the GitHub website, and Atharv merges them.
 
-## Feature checklist (the end goal)
+## Status board (keep this current)
 
-✅ done · 🔨 in progress · ⬜ to do · ⭐ stretch (only if everything else is done)
+**Live site:** https://sombra-pied.vercel.app · **Worker phone:** https://sombra-pied.vercel.app/crew/latest · every push to `main` deploys automatically.
 
-**Crew lead command center (`/command`, laptop)**
-- ✅ Map of 3 real fields; dots colored by heat, pulsing when dangerous
-- ✅ Heat strip per field by hour (WBGT estimate) with an hour slider
-- ✅ Heat-wave replay (July 11, 2024, 114°F, real archived data) and Live (today's forecast) toggle
-- ✅ Crew editor: field, size, new workers, usual shift
-- ✅ 5 agents stream live: Cielo → Ley + Crítico (parallel) → Cuadrilla → Crítico + Voz (parallel)
-- ✅ Crítico rejects the usual day, and the agents rebuild it
-- ✅ Rules engine: Cal/OSHA checks, auto-fix safety net, "can't send until it passes"
-- ✅ Before/after timelines: usual day with violations vs. Sombra's plan
-- ✅ QR code to the crew phone page once the plan passes
-- ✅ Live check-in feed: the field turns red, our model's label + Medic's opinion + first-aid steps
-- ✅ Model badge on every agent card (AI/ML track rule)
-- ✅ AI can't freeze the demo: 15-second timeout, rules fallback, `?demo=1` recorded replay
-- ✅ Swap AI provider in `.env.local`: openrouter, groq, gemini or claude
-- ✅ Real AI run checked and tuned (OpenRouter free, about 30s per run)
-- ⬜ Design pass so it doesn't look AI-made (Sonnet + taste skill + Godly refs)
-- ⬜ `/command` usable on a phone or tablet
-- ⭐ Crew lead speaks the request instead of filling the form
-- ⭐ Wildfire-smoke replay day (AQI over 151) to show the §5141.1 rules
+### Keys and accounts
+| Variable | Where | What it does | Notes |
+|---|---|---|---|
+| `LLM_PROVIDER=openrouter` | `.env.local` + Vercel | Picks the AI provider | |
+| `OPENROUTER_API_KEYS=key1,key2,key3` | `.env.local` + Vercel | The 5 agents, translation, Medic | One key per free account (~50 requests/day each). The app moves to the next key automatically when one hits its limit. $10 of credit on one account = ~1,000/day |
+| `GROQ_API_KEY` | `.env.local` + Vercel | Whisper voice-to-text, any language | **Without it in Vercel the phone mic doesn't work in Brave**, and is unreliable on iPhone |
+| `KV_REST_API_URL`, `KV_REST_API_TOKEN` | Vercel (auto) | Shared storage so laptop and phones see the same plan | Copy them into `.env.local` too if you want phones to work with your laptop's localhost |
+| `NEXT_PUBLIC_SITE_URL` | `.env.local` | QR codes made on localhost point at the live site | |
 
-**Worker phone page (`/crew/[id]`, built in the main session)**
-- ✅ Opens from the QR code, phone-first, huge type, works one-handed
-- ✅ Language picker: Español / ਪੰਜਾਬੀ / English
-- ✅ Today's schedule with the current block highlighted
-- ✅ "Descanso pagado: $X" ("Paid break: $X") on every cool-down
-- ✅ Play button reads the briefing aloud (shows a note if the phone has no Punjabi voice)
-- ✅ Voice check-in "¿Cómo te sientes?" ("How are you feeling?") → `/api/checkin` → our model → shows on the laptop
-- ✅ Emergency result: "Avísale a tu mayordomo ahora" ("Tell your crew boss now") + call button
-- ✅ Crew radio: boss types English → workers hear Spanish/Punjabi; workers speak → boss reads English
-- ⬜ Tested on a real iPhone and a real Android
+After changing a Vercel variable: **Deployments → ⋯ → Redeploy**.
+
+### Features
+✅ done · ⬜ to do · ⭐ stretch
+
+**Crew boss, laptop (`/command`)**
+- ✅ Plain-English intro of the problem (114°F, July 11, 2024)
+- ✅ Map of 3 real fields, colored by heat at the chosen hour, crew names + temperature on each, with an explanation
+- ✅ Heat-danger strip per field by hour, with a slider and an explanation; Heat wave / Live toggle loads that day's weather
+- ✅ Crew editor (wraps on phones)
+- ✅ 5 AI agents stream live (Cielo, Ley, Crítico, Cuadrilla, Voz), each showing its model; Crítico rejects the usual day
+- ✅ Rules engine: Cal/OSHA checks, paid cool-downs, water, shade; **no crew works in deadly heat**; a plan that breaks a rule can't ship
+- ✅ Impact scorecard: deadly-heat worker-hours, violations, hottest temperature worked, hours kept, paid break wages, one line per crew
+- ✅ Usual day vs Sombra timelines drawn over the heat colors, am/pm times, legend
+- ✅ **Play the day:** 4am→7pm in about 25 seconds, live counters, story ticker, a real heat alert to phones at the first deadly hour
+- ✅ Separate channel per crew: worker messages in any language → English, our model's label, Medic first aid; replies translated; unread badges
+- ✅ Heat alert to one crew or all crews; red banner + alarm on the laptop when a worker reports heat illness
+- ✅ Active plan restored on load; QR code + `/crew/latest`
+- ✅ Survives a dead AI: timeouts, key rotation, rules fallback, `?demo=1` replay
+- ⬜ Record `public/demo/run.json` from a good real run
+- ⬜ Design pass (Sonnet + taste skill)
+- ⭐ Wildfire-smoke replay day · ⭐ downloadable Cal/OSHA compliance log
+
+**Worker, phone (`/crew/[id]` or `/crew/latest`)**
+- ✅ Español / ਪੰਜਾਬੀ / English; pick your crew
+- ✅ Your day in large type, am/pm, current block highlighted, "+$3.67" on paid breaks
+- ✅ Briefing read aloud (server audio for Punjabi)
+- ✅ Push-to-talk in any language (Whisper), with a seconds counter and auto-send at 20s; a typing box as backup
+- ✅ Smart routing: health → advice + boss alert; requests and questions → forwarded; unclear → forwarded with "(unclear)"
+- ✅ One timestamped thread with the crew boss; new boss messages read aloud
+- ✅ Full-screen heat-alert takeover with alarm and vibration
+- ✅ Follows the newest plan automatically; expired plan → "waiting for your crew boss"
+- ⬜ Tested on a real iPhone + Android (and in Safari/Chrome, not just Brave)
 
 **Our AI model (Darshan)**
-- 🔨 `train.csv` (Gemini-made, hand-checked) + `test.csv` (40 written by hand)
-- 🔨 `triage.json` + `confusion.png` from Colab
-- ✅ Model card and credits page `/about` (fills in automatically when `triage.json` lands)
-- 🔨 `docs/facts.md` with a source for every number
+- ⬜ `train.csv` + **hand-written** `test.csv` → `triage.json` + `confusion.png` on the `darshan` branch (until then the app shows "fallback (keywords)")
+- ✅ The app already runs `triage.json` and the `/about` model card fills itself in
+- ⬜ `docs/facts.md` with sources
 
 **Ship**
-- ⬜ Vercel deploy + Upstash storage + key set as an env var
-- ⬜ Record the demo run (`public/demo/run.json`) from a real AI run
-- ⬜ Repo public, README with the one-sentence explanation + credits
-- ⬜ 2-minute video, 5 slides, Devpost on the main + AI/ML tracks, submitted by 6:15
+- ⬜ Repo public + README · ⬜ 2-minute video (film Play the day with a phone going off) · ⬜ 5 slides · ⬜ Devpost on main + AI/ML tracks by 6:15
+
+### Demo script (90 seconds of the 2 minutes)
+1. Laptop on `/command`. "Rosa runs three crews outside Manteca. July 11 hit 114°F."
+2. Click **Plan a safe day**. Point at Crítico rejecting the usual day, then the scorecard: deadly heat → 0, $219 in paid breaks.
+3. Hand a judge the phone (`/crew/latest`, tap "turn on alerts", pick Español). They press the mic and say "me siento mareado". The laptop banner and alarm go off; Medic's first aid appears.
+4. Type "Water truck at the north gate" to their crew; the phone reads it in Spanish.
+5. Press **▶ Play the day**. At 1pm the judge's phone goes full-screen red.
 
 ---
 
