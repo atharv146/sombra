@@ -168,7 +168,7 @@ export function CrewView() {
       try {
         const list = (await fetch(`/api/radio/${planId}`, { cache: "no-store" }).then((r) => r.json())) as RadioMessage[];
         if (!alive) return;
-        const mine = list.filter((m) => (m.from === "boss" && (!m.crewId || m.crewId === crewId)) || (m.from === "worker" && m.workerId === workerId));
+        const mine = list.filter((m) => (m.from === "boss" && (!m.crewId || m.crewId === crewId)) || (m.from === "worker" && m.workerId === workerId && m.crewId === crewId));
         for (const m of mine) {
           if (seen.current.has(m.id)) continue;
           seen.current.add(m.id);
@@ -222,7 +222,7 @@ export function CrewView() {
       seen.current.add(m.id);
       setMsgs((x) => [...x, m]);
       setTyped("");
-      speakAny(m.intent === "health" && m.triage ? t.reply[m.triage.label] : t.sent, lang);
+      speakAny(m.autoReply?.[lang] ?? (m.intent === "health" && m.triage ? t.reply[m.triage.label] : t.sent), lang);
     } finally {
       setBusy(false);
     }
@@ -400,7 +400,7 @@ export function CrewView() {
           <ol className="mt-3 flex flex-col gap-3">
             {[...msgs].reverse().map((m) =>
               m.from === "boss" ? (
-                <li key={m.id} className={`rounded-xl p-3 ${m.kind === "alert" ? "bg-[#b3261e] text-white" : "bg-[var(--track)]"}`}>
+                <li key={m.id} className={`mr-10 rounded-2xl rounded-bl-sm p-3 ${m.kind === "alert" ? "bg-[#b3261e] text-white" : "bg-[var(--track)]"}`}>
                   <div className="flex items-start justify-between gap-3">
                     <p className="text-lg leading-snug">{m.text[lang]}</p>
                     <button onClick={() => speakAny(m.text[lang], lang)} className="shrink-0 rounded-full border border-current px-3 py-1.5" aria-label={t.listen}>
@@ -412,15 +412,14 @@ export function CrewView() {
                   </p>
                 </li>
               ) : (
-                <li key={m.id} className="ml-8 rounded-xl border border-[var(--line)] p-3">
-                  <p className="text-lg leading-snug">{m.original}</p>
-                  {m.intent === "health" && m.triage ? (
-                    <p className="mt-2 rounded-lg px-3 py-2 text-sm font-semibold text-white" style={{ background: TONE[m.triage.label] }}>
-                      {t.reply[m.triage.label]}
-                    </p>
-                  ) : (
-                    <p className="mt-1 text-sm text-[var(--muted)]">{t.sent}</p>
-                  )}
+                <li key={m.id} className="flex flex-col items-end gap-1">
+                  <p className="ml-10 rounded-2xl rounded-br-sm bg-[var(--ink)] px-3 py-2 text-lg leading-snug text-[var(--bg)]">{m.original}</p>
+                  <p
+                    className="mr-10 self-start rounded-2xl rounded-bl-sm px-3 py-2 text-sm font-medium text-white"
+                    style={{ background: m.intent === "health" && m.triage ? TONE[m.triage.label] : "#6f665b" }}
+                  >
+                    {m.autoReply?.[lang] ?? (m.intent === "health" && m.triage ? t.reply[m.triage.label] : t.sent)}
+                  </p>
                   {m.triage?.label === "emergency" && (
                     <a href="tel:911" className="mt-2 block rounded-lg bg-[#b3261e] py-3 text-center text-lg font-bold text-white">
                       911

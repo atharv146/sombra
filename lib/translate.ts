@@ -22,23 +22,30 @@ export async function translateAll(text: string, from: string): Promise<Record<L
   }
 }
 
-// One call: what kind of message a worker sent, plus translations. Any input language, typos, or noise.
-export async function understand(text: string): Promise<{ intent: NonNullable<RadioMessage["intent"]>; text: Record<Lang, string> }> {
+// One call: what kind of message a worker sent, translations, and an instant reply that addresses what they said.
+export async function understand(text: string): Promise<{
+  intent: NonNullable<RadioMessage["intent"]>;
+  text: Record<Lang, string>;
+  reply?: Record<Lang, string>;
+}> {
   try {
-    const out = parseJSON<{ intent: RadioMessage["intent"]; es: string; pa: string; en: string }>(
+    const out = parseJSON<{ intent: RadioMessage["intent"]; es: string; pa: string; en: string; reply?: Record<Lang, string> }>(
       await callModel({
-        system: TRANSLATOR,
+        system:
+          "You help farmworkers talk to their crew boss on a heat-safety app. You translate faithfully and write short, specific, kind replies. Never invent the boss's decision. Natural Mexican Spanish, Punjabi in Gurmukhi script, plain English.",
         prompt: `A farmworker sent this to their crew boss. It may be in any language, have typos, or be speech-to-text noise.
 <message>${text}</message>
-intent: "health" (how they or a coworker feel, symptoms), "request" (asking for a break, water, shade, a ride, permission), "question" (asking for information), or "other" (anything else, or unclear).
-Translate the meaning into es, pa and en. If it's unclear, give your best guess and add "(unclear)".
-JSON only: {"intent": "...", "es": "...", "pa": "...", "en": "..."}`,
+1. intent: "health" (how they or a coworker feel physically, symptoms), "request" (break, water, shade, ride, leave early, permission), "question" (asking for information), or "other" (personal, chit-chat, jokes, off-topic, unclear).
+2. Translate the meaning into es, pa and en. If it's unclear, give your best guess and add "(unclear)".
+3. reply: one or two short sentences from Sombra (not the boss) answering exactly what they said, in es, pa and en. Health: concrete first steps for THEIR symptoms, and say the boss was alerted. Request or question: say the boss has it and will answer here, plus what to do meanwhile if relevant. Other: a brief friendly acknowledgement. Never say the boss approved anything.
+JSON only: {"intent": "...", "es": "...", "pa": "...", "en": "...", "reply": {"es": "...", "pa": "...", "en": "..."}}`,
         json: true,
-        maxTokens: 400,
+        maxTokens: 700,
       }),
     );
     const intent = ["health", "request", "question", "other"].includes(out.intent ?? "") ? out.intent! : "other";
-    return { intent, text: { es: out.es || text, pa: out.pa || text, en: out.en || text } };
+    const reply = out.reply?.en ? { es: out.reply.es || out.reply.en, pa: out.reply.pa || out.reply.en, en: out.reply.en } : undefined;
+    return { intent, text: { es: out.es || text, pa: out.pa || text, en: out.en || text }, reply };
   } catch {
     return { intent: "other", text: { es: text, pa: text, en: text } };
   }

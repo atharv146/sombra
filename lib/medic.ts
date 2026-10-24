@@ -32,14 +32,14 @@ export async function medicOpinion(transcript: string, modelLabel: TriageLabel) 
     const raw = await callModel({
       system:
         "You are Medic, a heat-illness triage assistant for a farm crew boss. Use CDC/NIOSH heat illness categories. You are not a doctor; when unsure, choose the more serious label.",
-      prompt: `A worker said: "${transcript}"\nOur on-device classifier says: ${modelLabel}.\nReply as JSON: {"label": "ok|warning|heat_exhaustion|emergency", "reason": "one short sentence"}`,
+      prompt: `A worker said: "${transcript}"\nOur classifier says: ${modelLabel}.\nReply as JSON: {"label": "ok|warning|heat_exhaustion|emergency", "reason": "one short sentence", "note": "one sentence for the crew boss about THIS situation beyond standard first aid (e.g. don't let them drive home alone)"}`,
       json: true,
       maxTokens: 200,
     });
-    const { label, reason } = parseJSON<{ label: TriageLabel; reason: string }>(raw);
+    const { label, reason, note } = parseJSON<{ label: TriageLabel; reason: string; note?: string }>(raw);
     // Safety: never let the second opinion downgrade the classifier.
     const final = RANK.indexOf(label) > RANK.indexOf(modelLabel) ? label : modelLabel;
-    return { label: final, reason, agrees: label === modelLabel, model: modelName(), steps: FIRST_AID[final] };
+    return { label: final, reason, note, agrees: label === modelLabel, model: modelName(), steps: FIRST_AID[final] };
   } catch {
     return { label: modelLabel, reason: "Model unavailable; using the classifier's call.", agrees: true, model: "rules", steps: FIRST_AID[modelLabel] };
   }

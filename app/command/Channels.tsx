@@ -7,6 +7,7 @@ import type { Crew, Field, RadioMessage, TriageLabel } from "@/lib/types";
 interface Medic {
   label: TriageLabel;
   reason: string;
+  note?: string;
   agrees: boolean;
   model: string;
   steps: string[];
@@ -18,7 +19,7 @@ const LABEL: Record<TriageLabel, { text: string; color: string }> = {
   warning: { text: "Early warning", color: "#b7862a" },
   ok: { text: "OK", color: "#3f6b3a" },
 };
-const INTENT = { health: "Health", request: "Request", question: "Question", other: "Message" } as const;
+const INTENT = { health: "Health", request: "Request", question: "Question", other: "Off-topic" } as const;
 const time = (iso: string) => new Date(iso).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
 
 // One channel per crew: worker messages (any language, triaged by our model) and the boss's replies and heat alerts.
@@ -53,7 +54,7 @@ export function Channels({
         for (const m of list) {
           if (seen.current.has(m.id)) continue;
           seen.current.add(m.id);
-          if (m.from !== "worker" || !m.triage || m.triage.label === "ok") continue;
+          if (m.from !== "worker" || m.intent !== "health" || !m.triage || m.triage.label === "ok") continue;
           if (!first.current) {
             onAlert(m.crewId ?? "", m.triage.label, m.text.en);
             if (m.triage.label === "emergency" || m.triage.label === "heat_exhaustion") alarm(3);
@@ -93,7 +94,7 @@ export function Channels({
     }
   }
 
-  const unread = (crewId: string) => msgs.filter((m) => m.from === "worker" && m.crewId === crewId && m.triage && m.triage.label !== "ok").length;
+  const unread = (crewId: string) => msgs.filter((m) => m.from === "worker" && m.crewId === crewId && m.intent === "health" && m.triage?.label !== "ok").length;
   const thread = msgs.filter((m) => m.crewId === sel || (m.from === "boss" && !m.crewId));
   const crew = crews.find((c) => c.id === sel);
   const fieldName = fields.find((f) => f.id === fieldOf[sel])?.name;
@@ -156,11 +157,13 @@ export function Channels({
               </div>
               <p className="mt-1 font-medium">{m.text.en}</p>
               {m.original && m.original !== m.text.en && <p className="text-[var(--muted)]">“{m.original}”</p>}
+              {m.autoReply && <p className="mt-1 text-xs text-[var(--muted)]">Sombra replied: {m.autoReply.en}</p>}
               {m.triage && (
                 <p className="mt-1 font-mono text-[10px] text-[var(--muted)]">
                   {m.triage.model} → {m.triage.label}
                   {score !== undefined ? ` ${score.toFixed(2)}` : ""}
                   {m.triage.forcedByKeyword ? ` · safety keyword “${m.triage.forcedByKeyword}”` : ""}
+                  {!health ? " · not health-related" : ""}
                 </p>
               )}
               {health && medic[m.id] && label !== "ok" && (
@@ -168,6 +171,7 @@ export function Channels({
                   <p className="font-mono text-[10px] text-[var(--muted)]">
                     Medic ({medic[m.id].model}) {medic[m.id].agrees ? "agrees" : `says ${medic[m.id].label}`}: {medic[m.id].reason}
                   </p>
+                  {medic[m.id].note && <p className="mt-1 font-semibold">{medic[m.id].note}</p>}
                   <ol className="mt-1 list-decimal pl-5">
                     {medic[m.id].steps.map((s) => (
                       <li key={s}>{s}</li>

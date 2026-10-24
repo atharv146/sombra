@@ -9,7 +9,11 @@ export async function POST(request: Request) {
   const said = b.transcript?.trim().slice(0, 500);
   if (!said) return Response.json({ error: "Empty message" }, { status: 400 });
   const triage = classify(said);
-  const { intent, text } = await understand(said);
+  const { intent, text, reply } = await understand(said);
+  // Health if the AI reads it as health, or our model is confident, or a safety keyword fired.
+  // A low-confidence model guess on chit-chat ("I miss you") stays off-topic.
+  const score = triage.scores?.[triage.label] ?? 0;
+  const health = intent === "health" || !!triage.forcedByKeyword || (triage.label !== "ok" && score >= 0.55);
   const msg: RadioMessage = {
     id: Math.random().toString(36).slice(2, 10),
     planId: b.planId,
@@ -20,9 +24,9 @@ export async function POST(request: Request) {
     original: said,
     text,
     kind: "chat",
-    // Our model always runs; anything it flags counts as health even if the router missed it.
-    intent: triage.label !== "ok" ? "health" : intent,
+    intent: health ? "health" : intent,
     triage,
+    autoReply: reply,
     at: new Date().toISOString(),
   };
   await addMessage(msg);

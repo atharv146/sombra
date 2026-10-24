@@ -128,5 +128,6 @@ export interface RadioMessage {
   kind: "chat" | "alert"; // alert = full-screen heat alarm on phones
   intent?: "health" | "request" | "question" | "other";
   triage?: TriageResult; // our model, on worker messages
+  autoReply?: Record<Lang, string>; // Sombra's instant, specific reply to the worker while the boss reads it
   at: string;
 }

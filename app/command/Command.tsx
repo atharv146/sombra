@@ -315,6 +315,23 @@ export function Command({ fields, replayDate }: { fields: Field[]; replayDate: s
                 </label>
               </div>
             ))}
+            <div className="flex gap-3 text-xs">
+              {crews.length < 4 && (
+                <button
+                  onClick={() =>
+                    setCrews([...crews, { id: `c${crews.length + 1}`, name: `Crew ${crews.length + 1}`, size: 25, newWorkers: 0, fieldId: fields[crews.length % fields.length].id, lang: ["es"], pieceRateUsdPerHour: 21 }])
+                  }
+                  className="underline"
+                >
+                  + Add crew
+                </button>
+              )}
+              {crews.length > 1 && (
+                <button onClick={() => setCrews(crews.slice(0, -1))} className="text-[var(--muted)] underline">
+                  Remove last crew
+                </button>
+              )}
+            </div>
             <div className="mt-1 flex flex-wrap items-center gap-2">
               <span>Usual shift</span>
               <input type="time" value={start} onChange={(e) => setStart(e.target.value)} className="rounded border border-[var(--line)] bg-transparent px-2 py-1" />
