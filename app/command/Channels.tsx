@@ -41,6 +41,8 @@ export function Channels({
   const [medic, setMedic] = useState<Record<string, Medic>>({});
   const [text, setText] = useState("");
   const [busy, setBusy] = useState<"" | "chat" | "alert">("");
+  const [pending, setPending] = useState<RadioMessage | null>(null);
+  const listRef = useRef<HTMLOListElement>(null);
   const seen = useRef(new Set<string>());
   const first = useRef(true);
 
@@ -79,23 +81,47 @@ export function Channels({
     };
   }, [planId, onAlert, sel]);
 
+  // The sent message shows at once (as "sending") and stays in the thread with its timestamp.
   async function send(kind: "chat" | "alert", crewId?: string) {
     if (kind === "chat" && !text.trim()) return;
+    const draft = kind === "chat" ? text : "";
+    const temp: RadioMessage = {
+      id: `pending-${Date.now()}`,
+      planId,
+      from: "boss",
+      crewId,
+      lang: "en",
+      kind,
+      text: { en: draft || "Heat alert", es: "", pa: "" },
+      at: new Date().toISOString(),
+    };
+    setPending(temp);
+    setText("");
     setBusy(kind);
     try {
-      await fetch(`/api/radio/${planId}`, {
+      const res = await fetch(`/api/radio/${planId}`, {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ text: kind === "chat" ? text : undefined, lang: "en", crewId, kind }),
+        body: JSON.stringify({ text: draft || undefined, lang: "en", crewId, kind }),
       });
-      if (kind === "chat") setText("");
+      if (res.ok) {
+        const m = (await res.json()) as RadioMessage;
+        seen.current.add(m.id);
+        setMsgs((x) => (x.some((y) => y.id === m.id) ? x : [...x, m]));
+      } else if (draft) setText(draft);
     } finally {
+      setPending(null);
       setBusy("");
     }
   }
 
+  // Keep the newest message in view.
+  useEffect(() => {
+    listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: "smooth" });
+  }, [msgs.length, pending, sel]);
+
   const unread = (crewId: string) => msgs.filter((m) => m.from === "worker" && m.crewId === crewId && m.intent === "health" && m.triage?.label !== "ok").length;
-  const thread = msgs.filter((m) => m.crewId === sel || (m.from === "boss" && !m.crewId));
+  const thread = [...msgs.filter((m) => m.crewId === sel || (m.from === "boss" && !m.crewId)), ...(pending && (!pending.crewId || pending.crewId === sel) ? [pending] : [])];
   const crew = crews.find((c) => c.id === sel);
   const fieldName = fields.find((f) => f.id === fieldOf[sel])?.name;
 
@@ -130,7 +156,7 @@ export function Channels({
         {crew?.name} · {crew?.size} workers{fieldName ? ` · ${fieldName}` : ""}. Workers write or speak in any language; you read English. Your replies reach them in Spanish or Punjabi, read aloud.
       </p>
 
-      <ol className="flex max-h-[420px] flex-col gap-2 overflow-y-auto p-3">
+      <ol ref={listRef} className="flex max-h-[420px] flex-col gap-2 overflow-y-auto p-3">
         {thread.length === 0 && <li className="text-sm text-[var(--muted)]">No messages yet. Scan the QR code with a phone and say how you feel.</li>}
         {thread.map((m) => {
           if (m.from === "boss")
@@ -138,7 +164,7 @@ export function Channels({
               <li key={m.id} className={`self-end max-w-[85%] rounded-xl px-3 py-2 text-sm ${m.kind === "alert" ? "bg-[#b3261e] text-white" : "bg-[var(--ink)] text-[var(--bg)]"}`}>
                 <p>{m.kind === "alert" ? "🚨 " : ""}{m.text.en}</p>
                 <p className="mt-1 text-[11px] opacity-70">
-                  You · {time(m.at)} · {m.crewId ? "this crew" : "all crews"} · sent in es + ਪੰਜਾਬੀ
+                  You · {time(m.at)} · {m.crewId ? "this crew" : "all crews"} · {m.id.startsWith("pending") ? "translating and sending…" : "delivered in Spanish and Punjabi"}
                 </p>
               </li>
             );
