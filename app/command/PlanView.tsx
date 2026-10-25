@@ -2,7 +2,6 @@
 
 import type { Crew, Field, HourlyRisk, ShiftPlan } from "@/lib/types";
 import { toMin } from "@/lib/rules";
-import { BAND_COLOR } from "./bands";
 
 const DAY_START = 4 * 60;
 const DAY_END = 19 * 60;
@@ -127,22 +126,17 @@ export function PlanView({
                   {p.waterGallons} gal water · {p.shadeUnits} shade tent{p.shadeUnits === 1 ? "" : "s"} (needs 1 per 10 workers)
                 </span>
               </div>
-              <div className="relative mt-1 h-9 overflow-hidden rounded-md">
-                {/* heat underneath: one cell per hour, colored by danger */}
-                <div className="absolute inset-0 flex">
-                  {hours.map((r) => (
-                    <div key={r.time} className="h-full flex-1" style={{ background: BAND_COLOR[r.band], opacity: 0.45 }} title={`${r.time.slice(11, 16)} ${r.tempF}°F`} />
-                  ))}
-                </div>
+              <div className="relative mt-1 h-10 overflow-hidden rounded-md bg-[var(--track)]">
+
                 {nowMin !== null && <div className="absolute inset-y-0 z-10 w-0.5 bg-[var(--ink)]" style={{ left: `${pct(nowMin)}%` }} />}
                 {/* deadly hours that the schedule works through: hatched on top of the work block */}
-                {p.blocks
+                {tone === "before" && p.blocks
                   .filter((b) => b.kind === "work")
                   .flatMap((b) => hours.filter((r) => r.band === "extreme" && Number(r.time.slice(11, 13)) * 60 >= toMin(b.start) - 59 && Number(r.time.slice(11, 13)) * 60 < toMin(b.end)).map((r) => ({ r, b })))
                   .map(({ r, b }) => {
                     const h0 = Math.max(Number(r.time.slice(11, 13)) * 60, toMin(b.start));
                     const h1 = Math.min(Number(r.time.slice(11, 13)) * 60 + 60, toMin(b.end));
-                    return <div key={r.time + b.start} className="hatch absolute top-1.5 z-[5] h-6 rounded-sm" title="Working in deadly heat" style={{ left: `${pct(h0)}%`, width: `${pct(h1) - pct(h0)}%` }} />;
+                    return <div key={r.time + b.start} className="absolute bottom-0 z-[5] h-1 bg-[var(--heat-extreme)]" title="Working in deadly heat" style={{ left: `${pct(h0)}%`, width: `${pct(h1) - pct(h0)}%` }} />;
                   })}
                 {/* the schedule on top; on Sombra's plan it slides in from where the usual day sat */}
                 <div
@@ -157,12 +151,12 @@ export function PlanView({
                       ? "bg-[var(--work)] text-[var(--work-ink)]"
                       : b.kind === "cooldown"
                         ? "bg-[var(--cooldown)] text-black"
-                        : "bg-[var(--lunch-block)] text-black";
+                        : "bg-[var(--lunch-block)] text-[var(--ink)]";
                   return (
                     <div
                       key={i}
                       title={`${ampm(toMin(b.start))}–${ampm(toMin(b.end))} ${b.kind}${b.paid ? " (paid)" : ""}`}
-                      className={`absolute top-1.5 grid h-6 place-items-center overflow-hidden whitespace-nowrap rounded text-[10px] font-semibold tabular-nums ${style}`}
+                      className={`absolute top-1 grid h-8 place-items-center overflow-hidden whitespace-nowrap rounded text-[11px] font-semibold tabular-nums ${style}`}
                       style={{ left: `${left}%`, width: `${width}%` }}
                     >
                       {b.kind === "work" ? (width > 13 ? `${ampm(toMin(b.start))}–${ampm(toMin(b.end))}` : width > 6 ? `${ampm(toMin(b.start)).replace(/(am|pm)$/, "")}–${ampm(toMin(b.end))}` : "") : b.kind === "meal" && width > 4 ? "lunch" : ""}
@@ -185,8 +179,7 @@ export function PlanView({
           <span><i className="mr-1 inline-block h-2.5 w-4 rounded-sm bg-[var(--work)] align-middle" />work</span>
           <span><i className="mr-1 inline-block h-2.5 w-4 rounded-sm bg-[var(--cooldown)] align-middle" />paid 10-min cool-down in shade</span>
           <span><i className="mr-1 inline-block h-2.5 w-4 rounded-sm bg-[var(--lunch-block)] align-middle" />lunch</span>
-          <span><i className="mr-1 inline-block h-2.5 w-4 rounded-sm align-middle" style={{ background: BAND_COLOR.extreme, opacity: 0.5 }} />background = heat at that field</span>
-          <span><i className="hatch mr-1 inline-block h-2.5 w-4 rounded-sm align-middle" />working in deadly heat</span>
+          <span><i className="mr-1 inline-block h-1 w-4 align-middle" style={{ background: "var(--heat-extreme)" }} />red line = working in deadly heat</span>
         </div>
       </div>
 

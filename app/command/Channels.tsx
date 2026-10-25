@@ -193,10 +193,11 @@ export function Channels({
                   </span>
                 )}
               </div>
-              <p className="mt-1 font-medium">{m.text.en}</p>
-              {m.original && m.original !== m.text.en && <p className="text-[var(--muted)]">“{m.original}”</p>}
+              {/* English messages show exactly what the worker wrote; other languages show the translation with the original under it */}
+              <p className="mt-1 font-medium">{m.lang === "en" && m.original ? m.original : m.text.en}</p>
+              {m.lang !== "en" && m.original && m.original !== m.text.en && <p className="text-[var(--muted)]">“{m.original}”</p>}
               {m.autoReply && <p className="mt-1 text-xs text-[var(--muted)]">Sombra replied: {m.autoReply.en}</p>}
-              {m.triage && (
+              {m.triage && health && (
                 <p className="mt-1 font-mono text-[10px] text-[var(--muted)]">
                   {m.triage.model} → {m.triage.label}
                   {score !== undefined ? ` ${score.toFixed(2)}` : ""}

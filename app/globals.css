@@ -32,7 +32,7 @@
   --work: #2e4a36;
   --work-ink: #fdfbef;
   --cooldown: #14a8c9;
-  --lunch-block: #9d8fb8;
+  --lunch-block: #e4dccb;
   /* the agents, each with its own color (Belgrade Arbor palette) */
   --a-cielo: #c99a4a;
   --a-ley: #5f86ad;
@@ -76,7 +76,7 @@
   --work: #a6d1a8;
   --work-ink: #0c1411;
   --cooldown: #2fd0f0;
-  --lunch-block: #a99cc9;
+  --lunch-block: #4a4436;
   --a-cielo: var(--ink);
   --a-ley: var(--ink);
   --a-critico: var(--ink);
