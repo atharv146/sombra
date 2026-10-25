@@ -19,8 +19,16 @@ const splitKeys = (v?: string) => (v ?? "").split(/[\s,]+/).filter(Boolean);
 const keyIndex = { openrouter: 0, groq: 0 };
 // Every env var whose name mentions the provider (any spelling, e.g. OPENROUTER_API_KEY_2, openrouter_darshan),
 // keeping only values that look like that provider's keys.
-export const envKeys = (name: string, prefix: string) =>
-  [...new Set(Object.entries(process.env).filter(([k]) => k.toUpperCase().includes(name)).flatMap(([, v]) => splitKeys(v)))].filter((k) => k.startsWith(prefix));
+// Keys are sorted by what they look like (sk-or- = OpenRouter, gsk_ = Groq), from any variable whose name mentions
+// an AI provider (typos like OPERROUTER included), with quotes and spaces stripped.
+export const envKeys = (_name: string, prefix: string) =>
+  [
+    ...new Set(
+      Object.entries(process.env)
+        .filter(([k]) => /ROUTER|GROQ|LLM_KEY|AI_KEY/i.test(k))
+        .flatMap(([, v]) => splitKeys((v ?? "").replace(/["']/g, ""))),
+    ),
+  ].filter((k) => k.startsWith(prefix));
 
 // OpenAI-compatible providers: same request shape, different base URL, key and model.
 const COMPAT = {
