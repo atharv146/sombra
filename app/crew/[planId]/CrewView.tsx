@@ -129,6 +129,15 @@ export function CrewView() {
   const [ask, setAsk] = useState(false); // "how do you feel?" prompt at a cool-down
   const seen = useRef(new Set<string>());
   const endRef = useRef<HTMLDivElement>(null);
+  const [unread, setUnread] = useState(0);
+  // New boss messages count up until the thread is on screen.
+  useEffect(() => {
+    const el = endRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(([e]) => e.isIntersecting && setUnread(0));
+    io.observe(el);
+    return () => io.disconnect();
+  }, [plan]);
   const count = useRef(0);
   const loaded = useRef(false);
   const t = T[lang];
@@ -208,12 +217,13 @@ export function CrewView() {
             setTimeout(() => speakAny(m.text[lang], lang), 2200);
           } else if (m.kind === "checkin") {
             setAsk(true);
-            alarm(1);
+            chime(); // a gentle question, not an alarm
             setTimeout(() => speakAny(m.text[lang], lang), 900);
           } else {
             chime();
             setTimeout(() => speakAny(m.text[lang], lang), 450);
           }
+          setUnread((n) => n + 1);
         }
         loaded.current = true;
         setMsgs(mine);
@@ -505,7 +515,10 @@ export function CrewView() {
       </section>
 
       <section className="chat-bg rounded-2xl p-5">
-        <h2 className="font-display text-2xl">{t.thread}</h2>
+        <h2 className="font-display text-2xl">
+          {t.thread}
+          {unread > 0 && <span className="ml-2 inline-grid h-7 min-w-7 place-items-center rounded-full bg-[var(--alert)] px-2 align-middle font-sans text-sm text-white">{unread}</span>}
+        </h2>
         {msgs.length === 0 ? (
           <p className="mt-2 text-[var(--muted)]">{t.none}</p>
         ) : (

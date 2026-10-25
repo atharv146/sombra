@@ -47,8 +47,8 @@ function els() {
       0.9,
     ),
   );
-  chimeEl ??= new Audio(wav([[880, 0.16], [1320, 0.34]], 0.7));
-  sentEl ??= new Audio(wav([[1046, 0.08], [1568, 0.14]], 0.55));
+  chimeEl ??= new Audio(wav([[880, 0.16], [1320, 0.34]], 0.45));
+  sentEl ??= new Audio(wav([[1046, 0.08], [1568, 0.14]], 0.3));
 }
 
 // Call from a tap: plays both sounds silently once so the phone allows them later.

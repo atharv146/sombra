@@ -47,6 +47,14 @@ export function Channels({
     return () => clearInterval(id);
   }, []);
   const [pending, setPending] = useState<RadioMessage | null>(null);
+  const [seenAt, setSeenAt] = useState<Record<string, string>>(() => Object.fromEntries(crews.map((c) => [c.id, new Date().toISOString()])));
+  // The open tab is always read; switching away remembers when you last looked.
+  useEffect(() => {
+    const mark = () => setSeenAt((s) => ({ ...s, [sel]: new Date(Date.now() + 1000).toISOString() }));
+    mark();
+    const id = setInterval(mark, 1000);
+    return () => clearInterval(id);
+  }, [sel]);
   const listRef = useRef<HTMLOListElement>(null);
   const seen = useRef(new Set<string>());
   const first = useRef(true);
@@ -129,7 +137,10 @@ export function Channels({
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: "smooth" });
   }, [msgs.length, pending, sel]);
 
-  const unread = (crewId: string) => msgs.filter((m) => m.from === "worker" && m.crewId === crewId && m.intent === "health" && m.triage?.label !== "ok").length;
+  // Unread = worker messages that arrived after the boss last had that crew's tab open.
+  const unreadOf = (crewId: string) => msgs.filter((m) => m.from === "worker" && m.crewId === crewId && crewId !== sel && m.at > (seenAt[crewId] ?? "")).length;
+  const seriousOf = (crewId: string) =>
+    msgs.some((m) => m.from === "worker" && m.crewId === crewId && crewId !== sel && m.at > (seenAt[crewId] ?? "") && m.intent === "health" && m.triage?.label !== "ok");
   const thread = [...msgs.filter((m) => m.crewId === sel || (m.from === "boss" && !m.crewId)), ...(pending && (!pending.crewId || pending.crewId === sel) ? [pending] : [])];
   const crew = crews.find((c) => c.id === sel);
   const fieldName = fields.find((f) => f.id === fieldOf[sel])?.name;
@@ -145,8 +156,13 @@ export function Channels({
               className={`relative rounded-full px-3 py-1.5 text-sm ${sel === c.id ? "bg-[var(--ink)] text-[var(--bg)]" : "border border-[var(--line)]"}`}
             >
               {c.name}
-              {unread(c.id) > 0 && (
-                <span className="absolute -right-1 -top-1 grid h-4 min-w-4 place-items-center rounded-full bg-[#b3261e] px-1 text-[10px] text-white">{unread(c.id)}</span>
+              {unreadOf(c.id) > 0 && (
+                <span
+                  className="absolute -right-1.5 -top-1.5 grid h-5 min-w-5 place-items-center rounded-full px-1 text-[11px] font-bold"
+                  style={{ background: seriousOf(c.id) ? "var(--alert)" : "var(--brand)", color: seriousOf(c.id) ? "#fff" : "var(--brand-ink)" }}
+                >
+                  {unreadOf(c.id)}
+                </span>
               )}
             </button>
           ))}
