@@ -73,16 +73,16 @@
   --warn-wash: #3b3015;
   --warn-ink: #f1d38a;
   --heat-extreme: #ff2e4d;
-  --work: #e9c983;
-  --work-ink: #1b1608;
+  --work: #a6d1a8;
+  --work-ink: #0c1411;
   --cooldown: #2fd0f0;
   --lunch-block: #a99cc9;
-  --a-cielo: #e3b768;
-  --a-ley: #86aee0;
-  --a-critico: #f08a6c;
-  --a-cuadrilla: #9fcb98;
-  --a-voz: #e9a0b6;
-  --a-medic: #ff6b7d;
+  --a-cielo: var(--ink);
+  --a-ley: var(--ink);
+  --a-critico: var(--ink);
+  --a-cuadrilla: var(--ink);
+  --a-voz: var(--ink);
+  --a-medic: var(--ink);
   background: var(--bg);
   color: var(--ink);
 }

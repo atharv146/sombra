@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import type { AgentId, HourlyRisk, ShiftPlan, TriageLabel } from "@/lib/types";
 import type { AgentCard } from "./AgentPanel";
 import { AgentFloor } from "./AgentFloor";
@@ -40,6 +41,13 @@ export function AIBrain({
 }) {
   const [big, setBig] = useState(false);
   const [focus, setFocus] = useState<AgentId>("critico");
+  // While the brain is open, the page behind it stays still.
+  useEffect(() => {
+    document.body.style.overflow = big ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [big]);
   useEffect(() => {
     const esc = (e: KeyboardEvent) => e.key === "Escape" && setBig(false);
     window.addEventListener("keydown", esc);
@@ -120,8 +128,9 @@ export function AIBrain({
         })}
       </ol>
 
-      {big && (
-        <div className="drawer fixed inset-0 z-[100] overflow-y-auto bg-[var(--bg)] p-6 lg:p-10" role="dialog" aria-label="Inside Sombra's AI">
+      {big &&
+        createPortal(
+        <div className="cmd drawer fixed inset-0 z-[100] overflow-y-auto bg-[var(--bg)] p-6 lg:p-10" role="dialog" aria-label="Inside Sombra's AI">
           <div className="flex items-end justify-between">
             <div>
               <p className="font-label text-xs text-[var(--muted)]">Inside Sombra&apos;s AI</p>
@@ -174,7 +183,7 @@ export function AIBrain({
             </div>
           </div>
         </div>
-      )}
+      , document.body)}
     </section>
   );
 }

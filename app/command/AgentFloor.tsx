@@ -63,7 +63,7 @@ export function AgentFloor({
     if (s === "idle") return "waiting";
     if (s === "working") return id === "cielo" ? "reading the forecast" : id === "ley" ? "checking rules" : id === "critico" ? "looking for risks" : id === "cuadrilla" ? "rebuilding the day" : "writing briefings";
     if (s === "fallback") return "rules fallback";
-    if (id === "critico") return c?.verdict === "reject" ? "rejected the usual day" : "approved";
+    if (id === "critico") return c?.verdict === "reject" ? "rejected the usual day" : /REJECT|reject/.test(c?.text ?? "") || (draft?.violations.length ?? 0) > 0 ? "rejected, then approved" : "approved";
     if (id === "ley") return `${draft?.violations.length ?? 0} rules broken`;
     if (id === "cielo" && peak) return `peak ${peak.tempF}°F`;
     return "done";
@@ -103,17 +103,18 @@ export function AgentFloor({
       );
     }
     if (id === "critico") {
-      const rejected = card("critico")?.verdict === "reject" || (cards.find((c) => c.id === "critico")?.text.includes("REJECT") ?? false);
+      const rejected = card("critico")?.verdict === "reject";
+      const revised = !rejected && s === "settled" && (draft?.violations.length ?? 0) > 0;
       return (
         <svg {...svg} aria-hidden>
           <path d="M4 22h56" strokeWidth={6} stroke="var(--track)" />
           <path d="M8 22h22M34 22h22" strokeWidth={6} stroke={ink} />
           {s !== "idle" && (
-            <ellipse cx="45" cy="22" rx="14" ry="9" stroke="var(--alert)" className={active ? "pen" : ""} strokeWidth={1.6} style={{ opacity: rejected || active ? 1 : 0.3 }} />
+            <ellipse cx="45" cy="22" rx="14" ry="9" stroke={revised ? "var(--good-ink)" : "var(--alert)"} className={active ? "pen" : ""} strokeWidth={1.6} style={{ opacity: rejected || revised || active ? 1 : 0.3 }} />
           )}
-          {rejected && s !== "working" && (
-            <text x="32" y="42" textAnchor="middle" fontSize="8" stroke="none" fill="var(--alert)" style={{ letterSpacing: 1 }}>
-              REJECTED
+          {(rejected || revised) && s !== "working" && (
+            <text x="32" y="42" textAnchor="middle" fontSize="8" stroke="none" fill={rejected ? "var(--alert)" : "var(--good-ink)"} style={{ letterSpacing: 1 }}>
+              {rejected ? "REJECTED" : "FIXED"}
             </text>
           )}
         </svg>
@@ -163,16 +164,16 @@ export function AgentFloor({
       </div>
       <div className="relative mt-2">
         {/* the line the work travels along; it fills as each agent hands off */}
-        <div className="absolute left-6 right-[19%] top-[30px] h-px bg-[var(--line)]" />
-        <div className="absolute left-6 top-[30px] h-px bg-[var(--brand)] transition-[width] duration-[560ms]" style={{ width: `${Math.min(doneUpTo, 4) * 16}%` }} />
+        <div className="absolute bottom-0 left-6 right-[19%] h-px bg-[var(--line)]" />
+        <div className="absolute bottom-0 left-6 h-px bg-[var(--brand)] transition-[width] duration-[560ms]" style={{ width: `${Math.min(doneUpTo, 4) * 16}%` }} />
         {doneUpTo > 0 && doneUpTo < 5 && (
           <span
-            className="token absolute top-[26px] h-2.5 w-2.5 rounded-full bg-[var(--brand)] transition-[left] duration-[640ms]"
+            className="token absolute -bottom-[4px] h-2.5 w-2.5 rounded-full bg-[var(--brand)] transition-[left] duration-[640ms]"
             style={{ left: `calc(24px + ${Math.min(doneUpTo, 4) * 16}%)` }}
             title="Data handed to the next agent"
           />
         )}
-        <ol className="relative grid grid-cols-6 gap-1">
+        <ol className="relative grid grid-cols-6 gap-1 pb-3">
           {all.map((id) => {
             const c = card(id);
             const s = id === "medic" ? (medicOn ? "working" : "idle") : stateOf(c);

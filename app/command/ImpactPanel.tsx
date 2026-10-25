@@ -21,15 +21,33 @@ export function ImpactPanel({ before, after, crews, fields, risks }: { before: S
   return (
     <section className="rounded-xl border border-[var(--ink)] bg-[var(--card)] p-5">
       <div className="flex flex-wrap items-center gap-6">
-      <figure className="shrink-0" aria-label={`Deadly-heat worker-hours: usual day ${a.extremeWorkerHours}, Sombra ${b.extremeWorkerHours}`}>
-        <svg viewBox="0 0 128 128" className="h-32 w-32 -rotate-90">
-          <circle cx="64" cy="64" r={R1} fill="none" stroke="var(--track)" strokeWidth="10" />
-          <circle cx="64" cy="64" r={R1} fill="none" stroke="var(--heat-extreme)" strokeWidth="10" strokeDasharray={C1} strokeDashoffset={C1 * (1 - a.extremeWorkerHours / max)} className="ring" />
-          <circle cx="64" cy="64" r={R2} fill="none" stroke="var(--track)" strokeWidth="10" />
-          <circle cx="64" cy="64" r={R2} fill="none" stroke="var(--brand)" strokeWidth="10" strokeDasharray={C2} strokeDashoffset={C2 * (1 - b.extremeWorkerHours / max)} className="ring" />
-        </svg>
-        <figcaption className="mt-1 text-center text-[11px] text-[var(--muted)]">
-          <span className="text-[var(--heat-extreme)]">outer</span> usual · <span className="text-[var(--brand)]">inner</span> Sombra
+      <figure className="flex shrink-0 items-center gap-4" aria-label={`Deadly-heat worker-hours: usual day ${a.extremeWorkerHours}, Sombra ${b.extremeWorkerHours}`}>
+        <div className="relative h-36 w-36">
+          <svg viewBox="0 0 128 128" className="h-36 w-36 -rotate-90">
+            <circle cx="64" cy="64" r={R1} fill="none" stroke="var(--track)" strokeWidth="10" />
+            <circle cx="64" cy="64" r={R1} fill="none" stroke="var(--heat-extreme)" strokeWidth="10" strokeDasharray={C1} strokeDashoffset={C1 * (1 - a.extremeWorkerHours / max)} className="ring" />
+            <circle cx="64" cy="64" r={R2} fill="none" stroke="var(--track)" strokeWidth="10" />
+            <circle cx="64" cy="64" r={R2} fill="none" stroke="var(--good-ink)" strokeWidth="10" strokeDasharray={C2} strokeDashoffset={C2 * (1 - b.extremeWorkerHours / max)} className="ring" />
+          </svg>
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+            <span className="font-display text-3xl leading-none text-[var(--good-ink)]">
+              {a.extremeWorkerHours ? `−${Math.round((1 - b.extremeWorkerHours / a.extremeWorkerHours) * 100)}%` : "0"}
+            </span>
+            <span className="mt-1 text-[10px] leading-tight text-[var(--muted)]">deadly-heat
+              <br />
+              hours
+            </span>
+          </div>
+        </div>
+        <figcaption className="flex flex-col gap-2 text-sm">
+          <span className="flex items-center gap-2">
+            <i className="inline-block h-3 w-3 rounded-full" style={{ background: "var(--heat-extreme)" }} />
+            Usual day: <b className="tabular">{a.extremeWorkerHours}</b> worker-hours
+          </span>
+          <span className="flex items-center gap-2">
+            <i className="inline-block h-3 w-3 rounded-full" style={{ background: "var(--good-ink)" }} />
+            Sombra: <b className="tabular">{b.extremeWorkerHours}</b> worker-hours
+          </span>
         </figcaption>
       </figure>
       <div className="min-w-0 flex-1">
