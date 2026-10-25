@@ -59,7 +59,10 @@ export function AgentFloor({
   const status = (id: AgentId) => {
     const c = card(id);
     const s = stateOf(c);
-    if (id === "medic") return medicOn ? "check-in received" : "dormant";
+    if (id === "medic") {
+      const n = Object.values(alerts).filter((l) => l !== "ok").length;
+      return n ? `${n} crew${n > 1 ? "s" : ""} reported symptoms` : final ? "watching check-ins" : "ready";
+    }
     if (s === "idle") return "waiting";
     if (s === "working") return id === "cielo" ? "reading the forecast" : id === "ley" ? "checking rules" : id === "critico" ? "looking for risks" : id === "cuadrilla" ? "rebuilding the day" : "writing briefings";
     if (s === "fallback") return "rules fallback";
@@ -70,7 +73,7 @@ export function AgentFloor({
   };
 
   const Vignette = ({ id }: { id: AgentId }) => {
-    const s = id === "medic" ? (medicOn ? "working" : "idle") : stateOf(card(id));
+    const s = id === "medic" ? (medicOn ? "working" : "settled") : stateOf(card(id));
     const active = s === "working";
     const ink = s === "idle" ? "var(--line)" : `var(--a-${id})`;
     const svg = { viewBox: "0 0 64 44", className: "h-11 w-16", fill: "none", stroke: ink, strokeWidth: 1.5, strokeLinecap: "round" as const };
@@ -147,7 +150,7 @@ export function AgentFloor({
     }
     return (
       <svg {...svg} aria-hidden>
-        <path d={medicOn ? "M4 22h18l4-10 6 20 5-14 3 4h20" : "M4 22h56"} stroke={medicOn ? "var(--alert)" : ink} className={medicOn ? "pen" : ""} />
+        <path d={medicOn ? "M4 22h18l4-10 6 20 5-14 3 4h20" : "M4 22h20l3-5 4 10 3-5h26"} stroke={medicOn ? "var(--alert)" : "var(--brand)"} className={medicOn ? "pen" : ""} />
       </svg>
     );
   };

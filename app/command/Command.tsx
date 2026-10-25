@@ -114,9 +114,9 @@ export function Command({ fields }: { fields: Field[] }) {
     setCrews(DEFAULT_CREWS);
   }
   const [banner, setBanner] = useState<{ crewId: string; label: TriageLabel; text: string } | null>(null);
-  const onAlert = useCallback((crewId: string, label: TriageLabel, text: string) => {
+  const onAlert = useCallback((crewId: string, label: TriageLabel, text: string, quiet?: boolean) => {
     setAlerts((a) => ({ ...a, [crewId]: label }));
-    if (label === "emergency" || label === "heat_exhaustion") setBanner({ crewId, label, text });
+    if (!quiet && (label === "emergency" || label === "heat_exhaustion")) setBanner({ crewId, label, text });
   }, []);
 
   // Load the day's weather as soon as the mode changes, so the map and heat strip work before planning.

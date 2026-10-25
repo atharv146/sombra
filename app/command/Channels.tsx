@@ -34,7 +34,7 @@ export function Channels({
   crews: Crew[];
   fieldOf: Record<string, string>; // crewId -> fieldId in Sombra's plan
   fields: Field[];
-  onAlert: (crewId: string, label: TriageLabel, text: string) => void;
+  onAlert: (crewId: string, label: TriageLabel, text: string, quiet?: boolean) => void;
 }) {
   const [msgs, setMsgs] = useState<RadioMessage[]>([]);
   const [sel, setSel] = useState(crews[0]?.id ?? "");
@@ -63,6 +63,7 @@ export function Channels({
           seen.current.add(m.id);
           if (m.from === "worker" && !first.current && !(m.intent === "health" && (m.triage?.label === "emergency" || m.triage?.label === "heat_exhaustion"))) chime();
           if (m.from !== "worker" || m.intent !== "health" || !m.triage || m.triage.label === "ok") continue;
+          if (first.current) onAlert(m.crewId ?? "", m.triage.label, m.text.en, true); // earlier reports: update Medic and the map, no alarm
           if (!first.current) {
             onAlert(m.crewId ?? "", m.triage.label, m.text.en);
             if (m.triage.label === "emergency" || m.triage.label === "heat_exhaustion") alarm(3);
