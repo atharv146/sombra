@@ -37,6 +37,7 @@ function wav(parts: [number, number, boolean?][], volume: number): string {
 
 let alarmEl: HTMLAudioElement | null = null;
 let chimeEl: HTMLAudioElement | null = null;
+let sentEl: HTMLAudioElement | null = null;
 
 function els() {
   if (typeof window === "undefined") return;
@@ -47,13 +48,14 @@ function els() {
     ),
   );
   chimeEl ??= new Audio(wav([[880, 0.16], [1320, 0.34]], 0.7));
+  sentEl ??= new Audio(wav([[1046, 0.08], [1568, 0.14]], 0.55));
 }
 
 // Call from a tap: plays both sounds silently once so the phone allows them later.
 export function unlockAudio() {
   try {
     els();
-    for (const el of [alarmEl, chimeEl]) {
+    for (const el of [alarmEl, chimeEl, sentEl]) {
       if (!el || el.dataset.unlocked) continue;
       el.muted = true;
       void el
@@ -92,5 +94,15 @@ export function chime() {
     chimeEl.currentTime = 0;
     void chimeEl.play().catch(() => {});
     navigator.vibrate?.(120);
+  } catch {}
+}
+
+// Short rising blip: your message was sent.
+export function sent() {
+  try {
+    els();
+    if (!sentEl) return;
+    sentEl.currentTime = 0;
+    void sentEl.play().catch(() => {});
   } catch {}
 }

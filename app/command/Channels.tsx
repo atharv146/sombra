@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { alarm, chime } from "@/lib/alarm";
+import { alarm, chime, sent } from "@/lib/alarm";
 import type { Crew, Field, RadioMessage, TriageLabel } from "@/lib/types";
 
 interface Medic {
@@ -81,7 +81,7 @@ export function Channels({
       } catch {}
     };
     tick();
-    const t = setInterval(tick, 2000);
+    const t = setInterval(tick, 1000);
     return () => {
       alive = false;
       clearInterval(t);
@@ -106,6 +106,7 @@ export function Channels({
     setText("");
     setBusy(kind);
     if (kind === "alert") alarm(1); // confirms the alarm is going out to phones
+    else sent();
     try {
       const res = await fetch(`/api/radio/${planId}`, {
         method: "POST",

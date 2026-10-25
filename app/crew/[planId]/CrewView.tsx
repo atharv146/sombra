@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
-import { alarm, chime, unlockAudio } from "@/lib/alarm";
+import { alarm, chime, sent, unlockAudio } from "@/lib/alarm";
 import { canListen, listen, speakAny, startRecording } from "@/lib/speech";
 import { toMin } from "@/lib/rules";
 import type { Lang, RadioMessage, ShiftPlan, TriageLabel } from "@/lib/types";
@@ -212,7 +212,7 @@ export function CrewView() {
             setTimeout(() => speakAny(m.text[lang], lang), 900);
           } else {
             chime();
-            setTimeout(() => speakAny(m.text[lang], lang), 600);
+            setTimeout(() => speakAny(m.text[lang], lang), 450);
           }
         }
         loaded.current = true;
@@ -220,7 +220,7 @@ export function CrewView() {
       } catch {}
     };
     tick();
-    const id = setInterval(tick, 2000);
+    const id = setInterval(tick, 1000);
     return () => {
       alive = false;
       clearInterval(id);
@@ -270,6 +270,7 @@ export function CrewView() {
         body: JSON.stringify({ planId, crewId, workerId, lang, transcript: text, quick }),
       });
       if (!res.ok) return;
+      sent();
       const m = (await res.json()) as RadioMessage;
       seen.current.add(m.id);
       setMsgs((x) => [...x, m]);
