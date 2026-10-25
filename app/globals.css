@@ -320,3 +320,17 @@ select:focus-visible {
   padding: 18px 18px 20px;
 }
 .phone-hero .gold { color: #e3c48a; }
+
+/* Sombra's plan morphs in from the usual day */
+.morph {
+  animation: morph 900ms var(--ease) both;
+}
+@keyframes morph {
+  from { transform: translateX(var(--from)); opacity: 0.55; }
+  to { transform: translateX(0); opacity: 1; }
+}
+.token {
+  box-shadow: 0 0 0 4px rgba(166, 209, 168, 0.25);
+}
+/* the voice-level ring replaces the pulse while recording */
+.mic.is-listening { animation: none; transition: box-shadow 60ms linear; }

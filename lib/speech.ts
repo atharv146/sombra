@@ -68,14 +68,30 @@ export function speakAny(text: string, lang: string) {
 }
 
 // Push-to-talk recording for server transcription (Whisper). Call stop() to get the audio.
-export async function startRecording(): Promise<{ stop: () => Promise<Blob> }> {
+export async function startRecording(): Promise<{ stop: () => Promise<Blob>; level: () => number }> {
   const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  // Live input level (0..1) for the mic ring.
+  let level = () => 0;
+  try {
+    const ac = new AudioContext();
+    const an = ac.createAnalyser();
+    an.fftSize = 512;
+    ac.createMediaStreamSource(stream).connect(an);
+    const buf = new Uint8Array(an.fftSize);
+    level = () => {
+      an.getByteTimeDomainData(buf);
+      let sum = 0;
+      for (const v of buf) sum += ((v - 128) / 128) ** 2;
+      return Math.min(1, Math.sqrt(sum / buf.length) * 4);
+    };
+  } catch {}
   const type = ["audio/webm", "audio/mp4", "audio/ogg"].find((t) => MediaRecorder.isTypeSupported(t)) ?? "";
   const rec = new MediaRecorder(stream, type ? { mimeType: type } : undefined);
   const chunks: Blob[] = [];
   rec.ondataavailable = (e) => e.data.size && chunks.push(e.data);
   rec.start();
   return {
+    level: () => level(),
     stop: () =>
       new Promise((resolve) => {
         rec.onstop = () => {

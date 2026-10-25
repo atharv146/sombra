@@ -20,6 +20,25 @@ const ampm = (iso: string) => {
   return `${((h + 11) % 12) + 1}${h < 12 ? "am" : "pm"}`;
 };
 
+// Live: how long until deadly heat starts. Past days: how long the deadly window lasted.
+function countdown(from: string, to: string, mode: "live" | "replay") {
+  const start = Number(from.slice(11, 13)) * 60;
+  const hours = Number(to.slice(11, 13)) - Number(from.slice(11, 13));
+  if (mode === "replay") return `Deadly heat for ${hours} hours that day`;
+  const d = new Date();
+  const left = start - (d.getHours() * 60 + d.getMinutes());
+  return left > 0 ? `Deadly heat starts in ${Math.floor(left / 60)}h ${left % 60}m` : `Deadly heat now, for ${hours} hours today`;
+}
+
+// Play the day: the page tone follows the sun, cool before dawn and warmer at midday (subtle, contrast stays).
+function sunTone(min: number | null) {
+  if (min === null) return undefined;
+  const t = Math.max(0, Math.min(1, (min - 240) / 900));
+  const k = Math.sin(Math.PI * t) * 0.85;
+  const mix = (a: number, b: number) => Math.round(a + (b - a) * k);
+  return `rgb(${mix(10, 36)}, ${mix(18, 24)}, ${mix(22, 14)})`;
+}
+
 const FieldMap = dynamic(() => import("./FieldMap").then((m) => m.FieldMap), { ssr: false });
 
 const AGENT_META: Record<AgentId, Omit<AgentCard, "status" | "text">> = {
@@ -264,7 +283,7 @@ export function Command({ fields }: { fields: Field[] }) {
   );
 
   return (
-    <div className="cmd grid min-h-dvh grid-cols-1 gap-5 p-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(380px,1fr)] lg:p-6">
+    <div style={playMin !== null ? ({ "--bg": sunTone(playMin), transition: "background 400ms linear" } as React.CSSProperties) : undefined} className="cmd grid min-h-dvh grid-cols-1 gap-5 p-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(380px,1fr)] lg:p-6">
       {banner && (
         <div className="alert-banner fixed inset-x-0 top-0 z-50 flex items-center justify-between gap-4 bg-[#b3261e] px-5 py-4 text-white shadow-lg">
           <p className="text-lg font-semibold">
@@ -287,6 +306,11 @@ export function Command({ fields }: { fields: Field[] }) {
               {hero
                 ? `${scenario.label}${scenario.smokeAqi ? " smoke drill" : ""}: peaks at ${hero.peak.tempF}°F at ${ampm(hero.peak.time)}. ${hero.from ? `Deadly heat from ${ampm(hero.from)} to ${ampm(hero.to!)}.` : "No deadly-heat hours."}${hero.smoke ? ` Smoke up to AQI ${hero.smoke}.` : ""} Sombra rebuilds the day so nobody works through it, and tells every worker in their language.`
                 : "Loading the forecast…"}
+              {hero?.from && (
+                <span className="mt-2 block font-label text-xs" style={{ color: "var(--heat-extreme)" }}>
+                  {countdown(hero.from, hero.to!, mode)}
+                </span>
+              )}
             </p>
           </div>
           <div className="flex flex-wrap gap-2 text-sm" role="tablist" aria-label="Day to plan">

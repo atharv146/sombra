@@ -100,7 +100,23 @@ export function CrewView() {
   const [crewId, setCrewId] = useState("");
   const [workerId, setWorkerId] = useState("w-anon");
   const [msgs, setMsgs] = useState<RadioMessage[]>([]);
-  const [rec, setRec] = useState<null | { stop: () => Promise<Blob> }>(null);
+  const [rec, setRec] = useState<null | { stop: () => Promise<Blob>; level: () => number }>(null);
+  const micRef = useRef<HTMLButtonElement>(null);
+  // While recording, the ring around the mic grows with your voice.
+  useEffect(() => {
+    if (!rec) {
+      if (micRef.current) micRef.current.style.boxShadow = "";
+      return;
+    }
+    let raf = 0;
+    const draw = () => {
+      const l = rec.level();
+      if (micRef.current) micRef.current.style.boxShadow = `0 0 0 ${6 + l * 34}px rgba(166, 129, 80, ${0.25 + l * 0.35})`;
+      raf = requestAnimationFrame(draw);
+    };
+    draw();
+    return () => cancelAnimationFrame(raf);
+  }, [rec]);
   const [busy, setBusy] = useState(false);
   const [typed, setTyped] = useState("");
   const [note, setNote] = useState("");
@@ -445,7 +461,7 @@ export function CrewView() {
         <h2 className="font-display text-3xl">{t.ask}</h2>
         <p className="-mt-2 text-sm text-[var(--muted)]">{t.hint}</p>
         {canTalk && (
-          <button onClick={talk} disabled={busy} className={`mic h-36 w-36 rounded-full text-lg font-medium text-white disabled:opacity-60 ${rec ? "is-listening" : ""}`}>
+          <button ref={micRef} onClick={talk} disabled={busy} className={`mic h-36 w-36 rounded-full text-lg font-medium text-white disabled:opacity-60 ${rec ? "is-listening" : ""}`}>
             {busy ? t.sending : rec ? (
               <>
                 {t.stop}

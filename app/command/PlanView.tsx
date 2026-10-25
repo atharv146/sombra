@@ -19,6 +19,12 @@ const RULE_ROWS: { label: string; cite: string; rules: string[] }[] = [
   { label: "1 quart of water per worker per hour", cite: "§3395(c)", rules: ["water_quart_hour"] },
   { label: "N95 masks in wildfire smoke", cite: "§5141.1", rules: ["smoke_151", "smoke_500"] },
 ];
+// How far the crew's day moved (in % of the timeline) between the usual day and Sombra's plan.
+function morphShift(before: ShiftPlan, p: ShiftPlan["crews"][number]) {
+  const old = before.crews.find((x) => x.crewId === p.crewId)?.blocks[0];
+  return old ? pct(toMin(old.start)) - pct(toMin(p.blocks[0].start)) : 0;
+}
+
 const TICKS = [4, 6, 8, 10, 12, 14, 16, 18].map((h) => h * 60);
 
 // Each crew's day drawn over its field's hourly heat: you can see work blocks running into red, or ending before it.
@@ -138,7 +144,11 @@ export function PlanView({
                     const h1 = Math.min(Number(r.time.slice(11, 13)) * 60 + 60, toMin(b.end));
                     return <div key={r.time + b.start} className="hatch absolute top-1.5 z-[5] h-6 rounded-sm" title="Working in deadly heat" style={{ left: `${pct(h0)}%`, width: `${pct(h1) - pct(h0)}%` }} />;
                   })}
-                {/* the schedule on top */}
+                {/* the schedule on top; on Sombra's plan it slides in from where the usual day sat */}
+                <div
+                  className={compare ? "morph absolute inset-0" : "absolute inset-0"}
+                  style={compare ? ({ "--from": `${morphShift(compare, p)}%`, animationDelay: `${plan.crews.indexOf(p) * 140}ms` } as React.CSSProperties) : undefined}
+                >
                 {p.blocks.map((b, i) => {
                   const left = pct(toMin(b.start));
                   const width = pct(toMin(b.end)) - left;
@@ -159,6 +169,7 @@ export function PlanView({
                     </div>
                   );
                 })}
+                </div>
               </div>
             </div>
           );

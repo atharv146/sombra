@@ -165,6 +165,13 @@ export function AgentFloor({
         {/* the line the work travels along; it fills as each agent hands off */}
         <div className="absolute left-6 right-[19%] top-[30px] h-px bg-[var(--line)]" />
         <div className="absolute left-6 top-[30px] h-px bg-[var(--brand)] transition-[width] duration-[560ms]" style={{ width: `${Math.min(doneUpTo, 4) * 16}%` }} />
+        {doneUpTo > 0 && doneUpTo < 5 && (
+          <span
+            className="token absolute top-[26px] h-2.5 w-2.5 rounded-full bg-[var(--brand)] transition-[left] duration-[640ms]"
+            style={{ left: `calc(24px + ${Math.min(doneUpTo, 4) * 16}%)` }}
+            title="Data handed to the next agent"
+          />
+        )}
         <ol className="relative grid grid-cols-6 gap-1">
           {all.map((id) => {
             const c = card(id);
