@@ -125,7 +125,7 @@ export function PlanView({
                 {/* heat underneath: one cell per hour, colored by danger */}
                 <div className="absolute inset-0 flex">
                   {hours.map((r) => (
-                    <div key={r.time} className="h-full flex-1" style={{ background: BAND_COLOR[r.band], opacity: 0.35 }} title={`${r.time.slice(11, 16)} ${r.tempF}°F`} />
+                    <div key={r.time} className="h-full flex-1" style={{ background: BAND_COLOR[r.band], opacity: 0.45 }} title={`${r.time.slice(11, 16)} ${r.tempF}°F`} />
                   ))}
                 </div>
                 {nowMin !== null && <div className="absolute inset-y-0 z-10 w-0.5 bg-[var(--ink)]" style={{ left: `${pct(nowMin)}%` }} />}
@@ -144,10 +144,10 @@ export function PlanView({
                   const width = pct(toMin(b.end)) - left;
                   const style =
                     b.kind === "work"
-                      ? "bg-[var(--ink)] text-[var(--bg)]"
+                      ? "bg-[var(--work)] text-[var(--work-ink)]"
                       : b.kind === "cooldown"
-                        ? "bg-[#2f6f8f] text-white"
-                        : "bg-[var(--lunch)] text-[var(--ink)] border border-[var(--line)]";
+                        ? "bg-[var(--cooldown)] text-black"
+                        : "bg-[var(--lunch-block)] text-black";
                   return (
                     <div
                       key={i}
@@ -171,9 +171,9 @@ export function PlanView({
           ))}
         </div>
         <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-[var(--muted)]">
-          <span><i className="mr-1 inline-block h-2.5 w-4 rounded-sm bg-[var(--ink)] align-middle" />work</span>
-          <span><i className="mr-1 inline-block h-2.5 w-4 rounded-sm bg-[#2f6f8f] align-middle" />paid 10-min cool-down in shade</span>
-          <span><i className="mr-1 inline-block h-2.5 w-4 rounded-sm border border-[var(--line)] bg-[var(--lunch)] align-middle" />lunch</span>
+          <span><i className="mr-1 inline-block h-2.5 w-4 rounded-sm bg-[var(--work)] align-middle" />work</span>
+          <span><i className="mr-1 inline-block h-2.5 w-4 rounded-sm bg-[var(--cooldown)] align-middle" />paid 10-min cool-down in shade</span>
+          <span><i className="mr-1 inline-block h-2.5 w-4 rounded-sm bg-[var(--lunch-block)] align-middle" />lunch</span>
           <span><i className="mr-1 inline-block h-2.5 w-4 rounded-sm align-middle" style={{ background: BAND_COLOR.extreme, opacity: 0.5 }} />background = heat at that field</span>
           <span><i className="hatch mr-1 inline-block h-2.5 w-4 rounded-sm align-middle" />working in deadly heat</span>
         </div>

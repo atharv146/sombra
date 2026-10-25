@@ -67,9 +67,10 @@ export function AIBrain({
     return (
       <button
         onClick={() => id && setFocus(id)}
+        style={id ? { borderTop: `3px solid var(--a-${id})` } : undefined}
         className={`w-full rounded-[6px] border p-3 text-left transition-colors ${kind === "code" ? "border-dashed border-[var(--brand)]" : kind === "data" ? "border-[var(--line)] bg-[var(--track)]" : focus === id ? "border-[var(--ink)] bg-[var(--card)]" : "border-[var(--line)] bg-[var(--card)]"} ${c?.status === "thinking" ? "agent-breathe" : ""}`}
       >
-        <p className="font-display text-xl leading-none">{label}</p>
+        <p className="font-display text-xl leading-none" style={{ color: id ? `var(--a-${id})` : undefined }}>{label}</p>
         <p className="mt-1 text-[11px] leading-snug text-[var(--muted)]">{sub}</p>
         {st && <span className={`mt-2 inline-block rounded-[4px] border px-1.5 py-0.5 text-[10px] uppercase tracking-wider ${st.cls}`}>{st.text}</span>}
         {c?.model && <p className="mt-1 truncate text-[10px] text-[var(--muted)]">{c.model}</p>}
@@ -106,7 +107,8 @@ export function AIBrain({
             <li key={id} className="py-3">
               <div className="flex items-baseline justify-between gap-2">
                 <p>
-                  <span className="font-display text-xl">{NAME[id]}</span> <span className="text-xs text-[var(--muted)]">{JOB[id]}</span>
+                  <i className="mr-2 inline-block h-2.5 w-2.5 rounded-full align-middle" style={{ background: `var(--a-${id})` }} />
+                  <span className="font-display text-2xl" style={{ color: `var(--a-${id})` }}>{NAME[id]}</span> <span className="text-xs text-[var(--muted)]">{JOB[id]}</span>
                 </p>
                 <span className={`shrink-0 rounded-[4px] border px-1.5 py-0.5 text-[10px] uppercase tracking-wider ${st.cls}`}>{st.text}</span>
               </div>
@@ -161,7 +163,7 @@ export function AIBrain({
           <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_1.2fr]">
             <div>
               <p className="font-label text-xs text-[var(--muted)]">Selected</p>
-              <h3 className="font-display text-4xl">{NAME[focus]}</h3>
+              <h3 className="font-display text-6xl" style={{ color: `var(--a-${focus})` }}>{NAME[focus]}</h3>
               <p className="mt-1 text-[var(--muted)]">{JOB[focus]}</p>
               {card(focus)?.model && <p className="mt-2 text-sm">Model: {card(focus)?.model}</p>}
               {card(focus)?.summary && <p className="mt-4 font-display text-2xl leading-snug text-[var(--brand)]">{card(focus)?.summary}</p>}

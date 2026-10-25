@@ -7,14 +7,15 @@
 
 /* Design tokens (design/guidelines.md §5). Default = the worker phone: sage and forest green, from the moodboard. */
 :root {
-  --bg: #e6ece1;
-  --card: #f7f9f3;
-  --ink: #1b2a21;
-  --muted: #56655a;
-  --line: #cbd6c5;
-  --track: #dbe4d5;
-  --brand: #2f5d3a;
-  --brand-ink: #f4f6ef;
+  --bg: #f6f0df;
+  --card: #fffcf3;
+  --ink: #22301f;
+  --muted: #6a6450;
+  --line: #e2d7bd;
+  --track: #efe6cf;
+  --brand: #2e4a36;
+  --brand-ink: #fdfbef;
+  --gold: #a68150;
   --accent: var(--brand);
   --bad-ink: #8c1d17;
   --good-ink: #2f5a2b;
@@ -24,10 +25,21 @@
   --warn-wash: #f3e2b8;
   --warn-ink: #6b4e10;
   /* data only: heat bands, alerts, status */
-  --heat-low: #4e8f4a;
-  --heat-moderate: #d9a514;
-  --heat-high: #d9661c;
-  --heat-extreme: #b8246e;
+  --heat-low: #34b45f;
+  --heat-moderate: #f2c230;
+  --heat-high: #ff8a1f;
+  --heat-extreme: #f0243f;
+  --work: #2e4a36;
+  --work-ink: #fdfbef;
+  --cooldown: #14a8c9;
+  --lunch-block: #9d8fb8;
+  /* the agents, each with its own color (Belgrade Arbor palette) */
+  --a-cielo: #c99a4a;
+  --a-ley: #5f86ad;
+  --a-critico: #d4654a;
+  --a-cuadrilla: #6f9a6a;
+  --a-voz: #c77c93;
+  --a-medic: #e0475a;
   --alert: #c0302a;
   --ok: #3f7a3a;
   --cool: #2f6f8f;
@@ -60,7 +72,17 @@
   --lunch: #3b3427;
   --warn-wash: #3b3015;
   --warn-ink: #f1d38a;
-  --heat-extreme: #d23c86;
+  --heat-extreme: #ff2e4d;
+  --work: #e9c983;
+  --work-ink: #1b1608;
+  --cooldown: #2fd0f0;
+  --lunch-block: #a99cc9;
+  --a-cielo: #e3b768;
+  --a-ley: #86aee0;
+  --a-critico: #f08a6c;
+  --a-cuadrilla: #9fcb98;
+  --a-voz: #e9a0b6;
+  --a-medic: #ff6b7d;
   background: var(--bg);
   color: var(--ink);
 }
@@ -111,7 +133,7 @@ body:has(.cmd) { background: #0c1411; }
 
 /* Unsafe hours on the usual day: hatched, so it reads without color too. */
 .hatch {
-  background-image: repeating-linear-gradient(135deg, rgba(163, 25, 91, 0.85) 0 3px, transparent 3px 7px);
+  background-image: repeating-linear-gradient(135deg, var(--heat-extreme) 0 3px, transparent 3px 7px);
 }
 
 button:focus-visible,
@@ -289,3 +311,12 @@ select:focus-visible {
 .cmd th { color: var(--muted); font-weight: 500; }
 .cmd td b, .cmd td .font-semibold { font-weight: 600; }
 .cmd section > h2:first-child, .cmd section h3.font-display { letter-spacing: -0.01em; }
+
+/* Worker phone header band */
+.phone-hero {
+  background: var(--brand);
+  color: var(--brand-ink);
+  border-radius: 28px;
+  padding: 18px 18px 20px;
+}
+.phone-hero .gold { color: #e3c48a; }

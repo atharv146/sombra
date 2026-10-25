@@ -72,7 +72,7 @@ export function AgentFloor({
   const Vignette = ({ id }: { id: AgentId }) => {
     const s = id === "medic" ? (medicOn ? "working" : "idle") : stateOf(card(id));
     const active = s === "working";
-    const ink = s === "idle" ? "var(--line)" : "var(--ink)";
+    const ink = s === "idle" ? "var(--line)" : `var(--a-${id})`;
     const svg = { viewBox: "0 0 64 44", className: "h-11 w-16", fill: "none", stroke: ink, strokeWidth: 1.5, strokeLinecap: "round" as const };
     if (id === "cielo") {
       const angle = peak ? ((Number(peak.time.slice(11, 13)) - 4) / 15) * 180 : 90;
@@ -177,7 +177,7 @@ export function AgentFloor({
                   className={`flex w-full flex-col items-center rounded-[6px] px-1 py-1 text-center transition-colors ${open === id ? "bg-[var(--track)]" : ""} ${s === "working" ? "agent-breathe" : ""}`}
                 >
                   <Vignette id={id} />
-                  <span className={`mt-1 text-[12px] font-semibold ${s === "working" ? "text-[var(--brand)]" : ""}`}>{id === "critico" ? "Crítico" : id[0].toUpperCase() + id.slice(1)}</span>
+                  <span className="mt-1 text-[13px] font-semibold" style={{ color: s === "idle" ? undefined : `var(--a-${id})` }}>{id === "critico" ? "Crítico" : id[0].toUpperCase() + id.slice(1)}</span>
                   <span className="text-[10px] leading-tight text-[var(--muted)]">{ROLE[id]}</span>
                   <span className={`mt-0.5 text-[10px] leading-tight ${status(id) === "rules fallback" ? "text-[var(--muted)] italic" : status(id).startsWith("rejected") ? "text-[var(--alert)]" : ""}`} aria-live="polite">
                     {status(id)}

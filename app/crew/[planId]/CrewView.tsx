@@ -348,15 +348,18 @@ export function CrewView() {
         </button>
       )}
 
-      <header className="flex items-center justify-between">
+      <header className="phone-hero flex flex-col gap-4">
+        <div className="flex items-center justify-between">
         <span className="font-display text-3xl">Sombra</span>
-        <div className="flex rounded-full border border-[var(--line)] p-1">
+        <div className="flex rounded-full border border-[rgba(253,251,239,0.3)] p-1">
           {LANGS.map((l) => (
-            <button key={l.id} onClick={() => setLang(l.id)} className={`rounded-full px-3 py-2 text-sm ${lang === l.id ? "bg-[var(--ink)] text-[var(--bg)]" : ""}`}>
+            <button key={l.id} onClick={() => setLang(l.id)} className={`rounded-full px-3 py-2 text-sm ${lang === l.id ? "bg-[var(--brand-ink)] text-[var(--brand)]" : "text-[var(--brand-ink)]"}`}>
               {l.label}
             </button>
           ))}
         </div>
+        </div>
+        <p className="gold font-label text-xs">{plan.date}{plan.smoke ? " · smoke drill" : ""} · {plan.crewInfo?.find((c) => c.id === mine?.crewId)?.name ?? ""}</p>
       </header>
 
       {plan.crews.length > 1 && (
@@ -382,7 +385,7 @@ export function CrewView() {
       <section className="rounded-2xl bg-[var(--card)] p-5">
         <div className="flex items-center justify-between">
           <h1 className="font-display text-4xl leading-none">{t.today}</h1>
-          <button onClick={() => speakAny(briefing, lang)} className="rounded-full bg-[var(--accent)] px-5 py-3 text-lg font-medium text-white">
+          <button onClick={() => speakAny(briefing, lang)} className="rounded-full bg-[var(--gold)] px-5 py-3 text-lg font-medium text-white">
             ▶ {t.listen}
           </button>
         </div>
