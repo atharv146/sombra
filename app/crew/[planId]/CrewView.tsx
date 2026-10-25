@@ -165,12 +165,13 @@ export function CrewView() {
       setMissing(false);
       setNotice(isNew);
     };
+    // Phones only ever show the ACTIVE plan (whatever link opened them). No active plan = day ended, and it
+    // stays ended until the crew boss plans a new day, so the screen never flips back to an old plan.
     const tick = async () => {
       const latest = await get("latest");
       if (!alive) return;
       if (!current) {
-        const first = param === "latest" ? latest : ((await get(param)) ?? latest);
-        if (first) adopt(first, false);
+        if (latest) adopt(latest, false);
         else setMissing(true);
         return;
       }
@@ -181,7 +182,7 @@ export function CrewView() {
       } else if (latest.id !== current.id && (latest.createdAt ?? "") >= (current.createdAt ?? "")) adopt(latest, true);
     };
     tick();
-    const id = setInterval(tick, 5000);
+    const id = setInterval(tick, 3000);
     return () => {
       alive = false;
       clearInterval(id);
