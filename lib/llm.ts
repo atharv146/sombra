@@ -17,20 +17,24 @@ const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3.8-flash";
 // Several keys (one per free account) can be listed comma-separated; they're used in turn.
 const splitKeys = (v?: string) => (v ?? "").split(/[\s,]+/).filter(Boolean);
 const keyIndex = { openrouter: 0, groq: 0 };
+// Every env var whose name mentions the provider (any spelling, e.g. OPENROUTER_API_KEY_2, openrouter_darshan),
+// keeping only values that look like that provider's keys.
+export const envKeys = (name: string, prefix: string) =>
+  [...new Set(Object.entries(process.env).filter(([k]) => k.toUpperCase().includes(name)).flatMap(([, v]) => splitKeys(v)))].filter((k) => k.startsWith(prefix));
 
 // OpenAI-compatible providers: same request shape, different base URL, key and model.
 const COMPAT = {
   openrouter: {
     url: "https://openrouter.ai/api/v1/chat/completions",
     // Every env var starting with OPENROUTER_API_KEY counts (…_KEYS, …_KEY_2, …_KEY_DARSHAN), comma lists included.
-    keys: () => [...new Set(Object.entries(process.env).filter(([k]) => k.startsWith("OPENROUTER_API_KEY")).flatMap(([, v]) => splitKeys(v)))],
+    keys: () => envKeys("OPENROUTER", "sk-or-"),
     model: process.env.OPENROUTER_MODEL || "nvidia/nemotron-3-ultra-550b-a55b:free",
     // Tried in order if the first is rate-limited (free models share upstream pools).
     fallbacks: ["nvidia/nemotron-3.5-lightning:free", "google/gemma-4-31b-it:free"],
   },
   groq: {
     url: "https://api.groq.com/openai/v1/chat/completions",
-    keys: () => splitKeys(process.env.GROQ_API_KEY),
+    keys: () => envKeys("GROQ", "gsk_"),
     model: process.env.GROQ_MODEL || "llama-3.3-70b-versatile",
     fallbacks: ["openai/gpt-oss-120b"],
   },

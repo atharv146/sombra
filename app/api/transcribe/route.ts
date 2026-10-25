@@ -1,5 +1,7 @@
 // Speech to text in any language: Whisper on Groq (free tier). The phone records audio and uploads it here.
-const KEY = () => process.env.GROQ_API_KEY;
+import { envKeys } from "@/lib/llm";
+
+const KEY = () => envKeys("GROQ", "gsk_")[0]; // first Groq key, whatever the variable is called
 
 export async function GET() {
   return Response.json({ enabled: !!KEY() });
@@ -8,7 +10,7 @@ export async function GET() {
 const CODES: Record<string, string> = { spanish: "es", punjabi: "pa", english: "en" };
 
 export async function POST(request: Request) {
-  if (!KEY()) return Response.json({ error: "No GROQ_API_KEY" }, { status: 501 });
+  if (!KEY()) return Response.json({ error: "No Groq key" }, { status: 501 });
   const form = await request.formData();
   const audio = form.get("audio");
   if (!(audio instanceof Blob) || audio.size < 1000) return Response.json({ text: "" });
