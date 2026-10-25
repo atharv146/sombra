@@ -150,7 +150,7 @@ export function AgentFloor({
     }
     return (
       <svg {...svg} aria-hidden>
-        <path d={medicOn ? "M4 22h18l4-10 6 20 5-14 3 4h20" : "M4 22h20l3-5 4 10 3-5h26"} stroke={medicOn ? "var(--alert)" : "var(--brand)"} className={medicOn ? "pen" : ""} />
+        <path d={medicOn ? "M4 22h18l4-10 6 20 5-14 3 4h20" : "M4 22h20l3-5 4 10 3-5h26"} stroke="var(--a-medic)" className={medicOn ? "pen" : ""} />
       </svg>
     );
   };

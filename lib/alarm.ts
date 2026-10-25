@@ -44,7 +44,7 @@ function els() {
   alarmEl ??= new Audio(
     wav(
       Array.from({ length: 6 }, (_, i) => [[i % 2 ? 660 : 880, 0.42, true], [0, 0.08]] as [number, number, boolean?][]).flat(),
-      0.9,
+      0.5, // clearly an alarm, not ear-splitting
     ),
   );
   chimeEl ??= new Audio(wav([[880, 0.16], [1320, 0.34]], 0.45));

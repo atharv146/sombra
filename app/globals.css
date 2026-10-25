@@ -77,12 +77,12 @@
   --work-ink: #0c1411;
   --cooldown: #2fd0f0;
   --lunch-block: #c9b37e;
-  --a-cielo: var(--ink);
-  --a-ley: var(--ink);
-  --a-critico: var(--ink);
-  --a-cuadrilla: var(--ink);
-  --a-voz: var(--ink);
-  --a-medic: var(--ink);
+  --a-cielo: #f2c94c;
+  --a-ley: #7fb2ff;
+  --a-critico: #ff5a5f;
+  --a-cuadrilla: #6fdc8c;
+  --a-voz: #4fd1e0;
+  --a-medic: #ff4d5e;
   background: var(--bg);
   color: var(--ink);
 }
