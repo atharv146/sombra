@@ -30,7 +30,6 @@ export function PlayDay({
 }) {
   const [min, setMin] = useState<number | null>(null);
   const alerted = useRef(false);
-  const checked = useRef(false);
   const events = useMemo(() => dayEvents(before, after, crews, risks, fields), [before, after, crews, risks, fields]);
 
   useEffect(() => {
@@ -40,15 +39,6 @@ export function PlayDay({
     const t = setTimeout(() => setMin(min + 10), STEP_MS);
     return () => clearTimeout(t);
   }, [min, onMinute]);
-
-  useEffect(() => {
-    if (min === null || checked.current) return;
-    const cool = events.find((e) => e.text.includes("cool-down"));
-    if (cool && min >= cool.at) {
-      checked.current = true;
-      fetch(`/api/radio/${planId}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ kind: "checkin" }) }).catch(() => {});
-    }
-  }, [min, events, planId]);
 
   useEffect(() => {
     if (min === null || alerted.current) return;
@@ -63,7 +53,6 @@ export function PlayDay({
   const play = () => {
     unlockAudio();
     alerted.current = false;
-    checked.current = false;
     setMin(START);
   };
   const stop = () => {

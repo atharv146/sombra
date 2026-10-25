@@ -226,25 +226,14 @@ export function CrewView() {
     };
   }, [planId, crewId, workerId, lang]);
 
-  const asked = useRef(new Set<string>());
+  // Keep the "now / next" card current. (Check-in prompts only come when the crew boss asks.)
   useEffect(() => {
-    if (!plan) return;
-    const check = () => {
+    const id = setInterval(() => {
       const d = new Date();
-      const m = d.getHours() * 60 + d.getMinutes();
-      setNow(m);
-      const cool = plan.crews.find((c) => c.crewId === crewId)?.blocks.find((b) => b.kind === "cooldown" && m >= toMin(b.start) && m < toMin(b.end));
-      if (cool && !asked.current.has(cool.start)) {
-        asked.current.add(cool.start);
-        setAsk(true);
-        alarm(1);
-        speakAny(T[lang].coolAsk, lang);
-      }
-    };
-    check();
-    const id = setInterval(check, 30_000);
+      setNow(d.getHours() * 60 + d.getMinutes());
+    }, 30_000);
     return () => clearInterval(id);
-  }, [plan, crewId, lang]);
+  }, []);
 
   const talkRef = useRef<() => void>(() => {});
   useEffect(() => {
