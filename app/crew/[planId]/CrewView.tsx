@@ -332,7 +332,10 @@ export function CrewView() {
   const canTalk = whisper || canListen();
 
   return (
-    <main className="phone mx-auto flex w-full max-w-md flex-col gap-5 px-4 pb-16 pt-5 text-[var(--ink)]" onClick={() => !armed && (unlockAudio(), setArmed(true))}>
+    <main className="phone mx-auto flex w-full max-w-md flex-col gap-5 px-4 pb-16 pt-5 text-[var(--ink)]" onClick={() => {
+        unlockAudio();
+        if (!armed) setArmed(true);
+      }}>
       {takeover && (
         <div className="alert-banner fixed inset-0 z-50 flex flex-col items-center justify-center gap-6 bg-[#b3261e] p-8 text-center text-white">
           <p className="text-sm font-bold tracking-[0.3em]">{t.alertTitle}</p>
@@ -351,7 +354,14 @@ export function CrewView() {
       )}
 
       {!armed && (
-        <button onClick={() => (unlockAudio(), setArmed(true))} className="rounded-xl bg-[var(--ink)] px-4 py-3 text-left text-sm text-[var(--bg)]">
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            unlockAudio();
+            setArmed(true);
+            setTimeout(chime, 350); // test sound so the worker knows alerts are on
+          }}
+          className="rounded-xl bg-[var(--ink)] px-4 py-3 text-left text-sm text-[var(--bg)]">
           {t.enable}
         </button>
       )}
