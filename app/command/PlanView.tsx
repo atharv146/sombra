@@ -136,7 +136,7 @@ export function PlanView({
                   .map(({ r, b }) => {
                     const h0 = Math.max(Number(r.time.slice(11, 13)) * 60, toMin(b.start));
                     const h1 = Math.min(Number(r.time.slice(11, 13)) * 60 + 60, toMin(b.end));
-                    return <div key={r.time + b.start} className="absolute bottom-0 z-[5] h-1 bg-[var(--heat-extreme)]" title="Working in deadly heat" style={{ left: `${pct(h0)}%`, width: `${pct(h1) - pct(h0)}%` }} />;
+                    return <div key={r.time + b.start} className="deadly absolute top-0.5 z-[15] h-9 rounded-[4px]" title="Working in deadly heat" style={{ left: `${pct(h0)}%`, width: `${pct(h1) - pct(h0)}%` }} />;
                   })}
                 {/* the schedule on top; on Sombra's plan it slides in from where the usual day sat */}
                 <div
@@ -179,7 +179,7 @@ export function PlanView({
           <span><i className="mr-1 inline-block h-2.5 w-4 rounded-sm bg-[var(--work)] align-middle" />work</span>
           <span><i className="mr-1 inline-block h-2.5 w-4 rounded-sm bg-[var(--cooldown)] align-middle" />paid 10-min cool-down in shade</span>
           <span><i className="mr-1 inline-block h-2.5 w-4 rounded-sm bg-[var(--lunch-block)] align-middle" />lunch</span>
-          <span><i className="mr-1 inline-block h-1 w-4 align-middle" style={{ background: "var(--heat-extreme)" }} />red line = working in deadly heat</span>
+          <span><i className="deadly mr-1 inline-block h-3 w-5 rounded-[3px] align-middle" />red box = working in deadly heat</span>
         </div>
       </div>
 

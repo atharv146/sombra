@@ -75,11 +75,53 @@ After changing a Vercel variable: **Deployments → ⋯ → Redeploy**.
 **Ship**
 - ⬜ Repo public + README · ⬜ 2-minute video (film Play the day with a phone going off) · ⬜ 5 slides · ⬜ Devpost on main + AI/ML tracks by 6:15
 
-### Demo script (3 minutes, then 2 minutes of questions)
-Before you start: live site open on the laptop with a plan already made (Jul 11, 2024), one phone on `/crew/latest` with alerts turned on, a second phone ready for a judge.
+### Final demo script (3 minutes + 2 minutes of questions)
+Screens: `docs/screenshots/01-command.png` … `08-phone-heat-alert.png`.
 
-| Time | Say | Do |
+**Before going on stage (2 min):**
+1. Laptop on https://sombra-pied.vercel.app (Chrome, full screen). If a plan is active and the agents show real text, keep it. Otherwise press End day, pick **Jul 11, 2024**, press **Plan a safe day** and wait about 30 s.
+2. Phone A (yours) on `/crew/latest`: tap **turn on alerts**, pick **Español**, **Crew 1**. Phone B (for a judge): same, **ਪੰਜਾਬੀ**, **Crew 2**. Volume up.
+3. Click anywhere on the laptop page once so its sounds are allowed.
+
+| Time | Say | Show |
 |---|---|---|
+| 0:00 to 0:20 | "July 11, 2024: 114 degrees outside Manteca. Farmworkers die of heat at about 20 times the rate of other workers, and piece-rate pay means a water break costs them money. Rosa runs three crews here." | The big **115°** and the red **deadly heat for 6 hours** line, then the satellite map |
+| 0:20 to 0:55 | "Five AI models plan her day. Cielo reads the heat, Ley checks California heat law, Crítico tries to break the plan and rejects her usual schedule, Cuadrilla rebuilds it, Voz writes briefings. Plain code has the final say on the law." | **Expand the brain**: the flow map with real numbers on each arrow. Close it |
+| 0:55 to 1:20 | "The result: 168 worker-hours of deadly heat become zero, 8 law violations become zero, and workers get $324 in paid breaks they didn't get before, while keeping 88% of the hours." | The ring and scorecard, then **Your usual day** (red boxes, rule table) and **Sombra's plan** (What changes table) |
+| 1:20 to 2:05 | "Every worker gets their crew's plan on their phone, in their language, out loud." | Hand Phone B to a judge. They press **Listen**, then tap **ਮੈਨੂੰ ਠੀਕ ਨਹੀਂ ਲੱਗ ਰਿਹਾ** (I feel sick) or speak. The laptop chimes or alarms, Crew 2's channel shows it in English, Medic adds first aid. Type a reply; it arrives in Punjabi, read aloud |
+| 2:05 to 2:40 | "And it watches the whole day." | **▶ Play the day**: the clock runs, the counters split, the story ticker. At the first deadly hour both phones go full-screen red with an alarm |
+| 2:40 to 3:00 | "Our own model, trained and tested on sentences we wrote by hand, flags emergencies. AI drafts, code enforces the law, nothing is kept past 48 hours." | The `/about` model card for 3 s, the **Compliance log** download, the **Privacy** link |
+
+**If something fails on stage:** AI slow → the agents fall back to the rules engine in seconds and the plan still works (say "AI busy, so the rules engine answered" is the safety net). Wi-Fi down → `?demo=1` replays a recorded run. Phone sound blocked → show the red takeover screen.
+
+### Features list (Devpost and questions)
+**Crew boss, laptop**
+- 5 real days to plan: 114°F heat wave, 118°F record heat, a 104°F day, a wildfire smoke drill, and today's live forecast. The day locks once planned; End day unlocks it and clears every phone
+- Satellite map of 3 real fields colored by hourly heat danger, with crews and temperatures, and an hour slider
+- 5 AI agents (Cielo, Ley, Crítico, Cuadrilla, Voz) streaming live, plus Medic for check-ins; "Inside Sombra's AI" panel with every agent's reasoning, model and verdict, and an expandable flow map with the real data passed between them
+- Deterministic rules engine for Cal/OSHA §3395 (shade, water, cool-downs, new-worker acclimatization) and §5141.1 (wildfire smoke, N95s). No crew works in deadly heat. A plan that breaks a rule cannot ship
+- Before/after scorecard and ring chart: deadly-heat worker-hours, violations, hottest temperature worked, hours kept, paid break wages
+- Usual day vs Sombra timelines; rule-by-crew table; "What changes" table per crew; Sombra's plan morphs in from the usual day
+- Play the day: 4am to 7pm in 25 seconds, live counters, story ticker, sun-tinted background, real heat alert to phones
+- Separate channel per crew: messages in any language translated to English, our model's health label, Medic's second opinion and first aid, "no reply yet" flags, unread badges; replies translated to Spanish or Punjabi
+- Heat alert (one crew or all), Ask how they feel, alarms and chimes, a red banner for emergencies
+- Compliance log CSV, QR code and `/crew/latest`, privacy and data-safety page, model card, credits
+
+**Worker, phone**
+- Español, ਪੰਜਾਬੀ, English; pick your crew; the whole screen and every message switch language instantly
+- Now / Next card ("Paid break +$3.67 in 10 min"), schedule in large type, per-crew spoken briefing (server voice for Punjabi)
+- One-tap I'm OK / I need water / I feel sick, push-to-talk in any language (Whisper) with a voice-level ring and auto-send, typing as a backup
+- Instant, specific replies; health messages alert the boss; chit-chat just shows delivered
+- Full-screen heat alert with alarm and vibration; follows the newest plan; "waiting for your crew boss" when no plan is active
+
+**AI and ML**
+- Our model: sombra-triage v1, character n-gram TF-IDF + logistic regression, 430 training sentences, 40 hand-written test sentences in 3 languages, 80% accuracy, 80% emergency recall; v2 with 150 extra sentences was tested and rejected (emergency recall fell to 70%)
+- Safety: emergency keywords always escalate; Medic can raise severity but never lower it; the rules engine decides compliance
+- Resilience: several API keys rotate, Groq backs up OpenRouter, 15-second timeouts, rules-engine fallback, recorded demo replay
+
+**Likely questions:** what if the AI is wrong · where does worker data go · workers without smartphones (next: SMS and Mixteco) · how is this different from the OSHA heat app (that's one person's number; this plans the whole crew, checks the law, and talks both ways) · cost (free-tier AI, rules fallback)
+
+---|---|---|
 | 0:00–0:20 | "Farmworkers die of heat at about 20× the rate of other workers. Piece-rate pay means a break costs them money. Rosa runs 3 crews outside Manteca." | Point at the big date and temperature |
 | 0:20–1:00 | "Five AI agents read the forecast and California heat law. Crítico rejects her usual day; the plan is rebuilt." | Scroll: scorecard (deadly heat → 0, paid breaks), rule grid ✗ → What changes table |
 | 1:00–1:50 | "Every worker gets it on their phone, in their language, out loud." | Hand a judge the phone: Español, Listen, then tap **I feel sick** or say "me siento mareado". The laptop banner and alarm go off; Medic + our model label appear |
