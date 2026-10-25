@@ -94,6 +94,16 @@ Screens: `docs/screenshots/01-command.png` … `08-phone-heat-alert.png`.
 
 **If something fails on stage:** AI slow → the agents fall back to the rules engine in seconds and the plan still works (say "AI busy, so the rules engine answered" is the safety net). Wi-Fi down → `?demo=1` replays a recorded run. Phone sound blocked → show the red takeover screen.
 
+### Facts to memorize (say these, not features)
+- **114°F** in Manteca on **July 11, 2024** (real archived weather); deadly heat from **noon to 6pm**.
+- Farmworkers die of heat at about **20×** the rate of other US workers (CDC MMWR; see docs/facts.md).
+- On that day Sombra cut **168 worker-hours of deadly heat to 0**, fixed **8 Cal/OSHA violations**, kept **88%** of work hours and paid **$324** in cool-down wages workers didn't get before.
+- **5 AI agents + 1 rules engine**: the AI drafts, plain code enforces the law, and the AI can only raise a health alert, never lower one.
+- **Our own model** (sombra-triage v1): **430** training sentences, **40** written by hand for testing, **80%** accuracy, **80%** emergency recall, in English, Spanish and Punjabi. We tried a v2, saw emergency recall drop to 70%, and kept v1.
+- Workers can speak or tap in **any language** (tested: Vietnamese translated correctly); the boss reads English.
+- **Paid breaks are the hook**: piece-rate workers skip breaks because they lose money; Sombra shows "+$3.67" on every paid cool-down (CA Labor Code 226.2).
+- **Privacy**: random worker codes, no names, no audio kept, everything deleted after **48 hours**.
+
 ### Features list (Devpost and questions)
 **Crew boss, laptop**
 - 5 real days to plan: 114°F heat wave, 118°F record heat, a 104°F day, a wildfire smoke drill, and today's live forecast. The day locks once planned; End day unlocks it and clears every phone
