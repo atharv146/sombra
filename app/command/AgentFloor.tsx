@@ -229,7 +229,7 @@ export function AgentFloor({
             <p className="mt-1">{medicOn ? "A worker reported symptoms. Medic's second opinion and first-aid steps are in that crew's channel." : "Medic wakes when a worker reports feeling sick. It can raise a health label, never lower it."}</p>
           ) : (
             <>
-              <p className="mt-2 whitespace-pre-wrap leading-relaxed">{sel?.text || "Not started yet. Plan a safe day to wake the agents."}</p>
+              <p className="mt-2 whitespace-pre-wrap leading-relaxed">{sel?.text?.replace(/VERDICT:\s*\w+\.?/gi, "").trim() || "Not started yet. Plan a safe day to wake the agents."}</p>
               {sel?.summary && <p className="mt-2 font-semibold">{sel.summary}</p>}
               {sel?.model && <p className="mt-2 text-[11px] text-[var(--muted)]">Model: {sel.model}</p>}
             </>

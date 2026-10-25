@@ -283,7 +283,7 @@ export function Command({ fields }: { fields: Field[] }) {
   );
 
   return (
-    <div style={playMin !== null ? ({ "--bg": sunTone(playMin), transition: "background 400ms linear" } as React.CSSProperties) : undefined} className="cmd grid min-h-dvh grid-cols-1 gap-5 p-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(380px,1fr)] lg:p-6">
+    <div style={playMin !== null ? ({ "--bg": sunTone(playMin), transition: "background 400ms linear" } as React.CSSProperties) : undefined} onClick={unlockAudio} className="cmd grid min-h-dvh grid-cols-1 gap-5 p-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(380px,1fr)] lg:p-6">
       {banner && (
         <div className="alert-banner fixed inset-x-0 top-0 z-50 flex items-center justify-between gap-4 bg-[#b3261e] px-5 py-4 text-white shadow-lg">
           <p className="text-lg font-semibold">

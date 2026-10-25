@@ -30,7 +30,7 @@ export function ImpactPanel({ before, after, crews, fields, risks }: { before: S
             <circle cx="64" cy="64" r={R2} fill="none" stroke="var(--good-ink)" strokeWidth="10" strokeDasharray={C2} strokeDashoffset={C2 * (1 - b.extremeWorkerHours / max)} className="ring" />
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-            <span className="font-display text-3xl leading-none text-[var(--good-ink)]">
+            <span className="font-display text-2xl leading-none text-[var(--good-ink)]">
               {a.extremeWorkerHours ? `−${Math.round((1 - b.extremeWorkerHours / a.extremeWorkerHours) * 100)}%` : "0"}
             </span>
             <span className="mt-1 text-[10px] leading-tight text-[var(--muted)]">deadly-heat

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
-import { alarm, unlockAudio } from "@/lib/alarm";
+import { alarm, chime, unlockAudio } from "@/lib/alarm";
 import { canListen, listen, speakAny, startRecording } from "@/lib/speech";
 import { toMin } from "@/lib/rules";
 import type { Lang, RadioMessage, ShiftPlan, TriageLabel } from "@/lib/types";
@@ -209,7 +209,10 @@ export function CrewView() {
             setAsk(true);
             alarm(1);
             setTimeout(() => speakAny(m.text[lang], lang), 900);
-          } else speakAny(m.text[lang], lang);
+          } else {
+            chime();
+            setTimeout(() => speakAny(m.text[lang], lang), 600);
+          }
         }
         loaded.current = true;
         setMsgs(mine);

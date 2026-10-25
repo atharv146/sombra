@@ -120,7 +120,7 @@ export function AIBrain({
                 </p>
                 <span className={`shrink-0 rounded-[4px] border px-1.5 py-0.5 text-[10px] uppercase tracking-wider ${st.cls}`}>{st.text}</span>
               </div>
-              {c?.text ? <p className="mt-1.5 whitespace-pre-wrap text-[13px] leading-relaxed">{c.text}</p> : <p className="mt-1.5 text-[13px] text-[var(--muted)]">Waiting for its turn.</p>}
+              {c?.text ? <p className="mt-1.5 whitespace-pre-wrap text-[13px] leading-relaxed">{c.text.replace(/VERDICT:\s*\w+\.?/gi, "").trim()}</p> : <p className="mt-1.5 text-[13px] text-[var(--muted)]">Waiting for its turn.</p>}
               {c?.summary && <p className="mt-1 text-[13px] font-semibold text-[var(--brand)]">{c.summary}</p>}
               {c?.model && <p className="mt-1 text-[10px] text-[var(--muted)]">model · {c.model}</p>}
             </li>
@@ -179,7 +179,7 @@ export function AIBrain({
             </div>
             <div className="rounded-[6px] border border-[var(--line)] bg-[var(--card)] p-5">
               <p className="font-label text-xs text-[var(--muted)]">What it wrote</p>
-              <p className="mt-2 whitespace-pre-wrap text-[15px] leading-relaxed">{card(focus)?.text || "Plan a safe day to see it think."}</p>
+              <p className="mt-2 whitespace-pre-wrap text-[15px] leading-relaxed">{card(focus)?.text?.replace(/VERDICT:\s*\w+\.?/gi, "").trim() || "Plan a safe day to see it think."}</p>
             </div>
           </div>
         </div>

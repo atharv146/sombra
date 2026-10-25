@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { alarm } from "@/lib/alarm";
+import { alarm, chime } from "@/lib/alarm";
 import type { Crew, Field, RadioMessage, TriageLabel } from "@/lib/types";
 
 interface Medic {
@@ -61,6 +61,7 @@ export function Channels({
         for (const m of list) {
           if (seen.current.has(m.id)) continue;
           seen.current.add(m.id);
+          if (m.from === "worker" && !first.current && !(m.intent === "health" && (m.triage?.label === "emergency" || m.triage?.label === "heat_exhaustion"))) chime();
           if (m.from !== "worker" || m.intent !== "health" || !m.triage || m.triage.label === "ok") continue;
           if (!first.current) {
             onAlert(m.crewId ?? "", m.triage.label, m.text.en);
@@ -103,6 +104,7 @@ export function Channels({
     setPending(temp);
     setText("");
     setBusy(kind);
+    if (kind === "alert") alarm(1); // confirms the alarm is going out to phones
     try {
       const res = await fetch(`/api/radio/${planId}`, {
         method: "POST",
