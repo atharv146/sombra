@@ -114,7 +114,7 @@ Screens: `docs/screenshots/01-command.png` … `08-phone-heat-alert.png`.
 - Usual day vs Sombra timelines; rule-by-crew table; "What changes" table per crew; Sombra's plan morphs in from the usual day
 - Play the day: 4am to 7pm in 25 seconds, live counters, story ticker, sun-tinted background, real heat alert to phones
 - Separate channel per crew: messages in any language translated to English, our model's health label, Medic's second opinion and first aid, "no reply yet" flags, unread badges; replies translated to Spanish or Punjabi
-- Heat alert (one crew or all), Ask how they feel, alarms and chimes, a red banner for emergencies
+- Heat alert for one crew, one field, or all crews; Ask how they feel (soft chime); alarms, chimes and a sent sound; a red banner for emergencies; unread counts on every crew tab
 - Compliance log CSV, QR code and `/crew/latest`, privacy and data-safety page, model card, credits
 
 **Worker, phone**
@@ -122,7 +122,8 @@ Screens: `docs/screenshots/01-command.png` … `08-phone-heat-alert.png`.
 - Now / Next card ("Paid break +$3.67 in 10 min"), schedule in large type, per-crew spoken briefing (server voice for Punjabi)
 - One-tap I'm OK / I need water / I feel sick, push-to-talk in any language (Whisper) with a voice-level ring and auto-send, typing as a backup
 - Instant, specific replies; health messages alert the boss; chit-chat just shows delivered
-- Full-screen heat alert with alarm and vibration; follows the newest plan; "waiting for your crew boss" when no plan is active
+- Full-screen heat alert with alarm and vibration; pop-up banner for each new boss message; unread counts on the thread and on other crews' buttons
+- Follows only the active plan: End day ends it on every phone within 3 seconds, a new day appears within seconds
 
 **AI and ML**
 - Our model: sombra-triage v1, character n-gram TF-IDF + logistic regression, 430 training sentences, 40 hand-written test sentences in 3 languages, 80% accuracy, 80% emergency recall; v2 with 150 extra sentences was tested and rejected (emergency recall fell to 70%)

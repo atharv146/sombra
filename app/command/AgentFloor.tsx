@@ -188,7 +188,7 @@ export function AgentFloor({
                   className={`flex w-full flex-col items-center rounded-[6px] px-1 py-1 text-center transition-colors ${open === id ? "bg-[var(--track)]" : ""} ${s === "working" ? "agent-breathe" : ""}`}
                 >
                   <Vignette id={id} />
-                  <span className="mt-1 text-[13px] font-semibold" style={{ color: s === "idle" ? undefined : `var(--a-${id})` }}>{id === "critico" ? "Crítico" : id[0].toUpperCase() + id.slice(1)}</span>
+                  <span className="mt-1 text-[13px] font-semibold" style={{ color: `var(--a-${id})` }}>{id === "critico" ? "Crítico" : id[0].toUpperCase() + id.slice(1)}</span>
                   <span className="text-[10px] leading-tight text-[var(--muted)]">{ROLE[id]}</span>
                   <span className={`mt-0.5 text-[10px] leading-tight ${status(id) === "rules fallback" ? "text-[var(--muted)] italic" : status(id).startsWith("rejected") ? "text-[var(--alert)]" : ""}`} aria-live="polite">
                     {status(id)}

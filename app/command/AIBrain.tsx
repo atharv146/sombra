@@ -98,7 +98,9 @@ export function AIBrain({
       <div className="flex items-end justify-between gap-3">
         <div>
           <p className="font-label text-[11px] text-[var(--muted)]">Inside Sombra&apos;s AI</p>
-          <h2 className="font-display text-3xl leading-none">Five models, one safe day</h2>
+          <h2 className="font-display text-3xl leading-none">
+            Five <span style={{ color: "var(--brand)" }}>agentic AI</span> models, one safe day
+          </h2>
         </div>
         <button onClick={() => setBig(true)} className="rounded-[6px] border border-[var(--brand)] px-3 py-1.5 text-sm text-[var(--brand)]">
           Expand the brain
@@ -121,7 +123,7 @@ export function AIBrain({
                 <span className={`shrink-0 rounded-[4px] border px-1.5 py-0.5 text-[10px] uppercase tracking-wider ${st.cls}`}>{st.text}</span>
               </div>
               {c?.text ? <p className="mt-1.5 whitespace-pre-wrap text-[13px] leading-relaxed">{c.text.replace(/VERDICT:\s*\w+\.?/gi, "").trim()}</p> : <p className="mt-1.5 text-[13px] text-[var(--muted)]">Waiting for its turn.</p>}
-              {c?.summary && <p className="mt-1 text-[13px] font-semibold text-[var(--brand)]">{c.summary}</p>}
+              {c?.summary && <p className="mt-1 text-[13px] font-semibold" style={{ color: `var(--a-${id})` }}>{c.summary}</p>}
               {c?.model && <p className="mt-1 text-[10px] text-[var(--muted)]">model · {c.model}</p>}
             </li>
           );
@@ -134,7 +136,7 @@ export function AIBrain({
           <div className="flex items-end justify-between">
             <div>
               <p className="font-label text-xs text-[var(--muted)]">Inside Sombra&apos;s AI</p>
-              <h2 className="font-display text-5xl leading-none">How the models build a safe day</h2>
+              <h2 className="font-display text-5xl leading-none">How five agentic AI models build a safe day</h2>
               <p className="mt-2 max-w-2xl text-[var(--muted)]">
                 Each model does one job and hands real data to the next. The rules engine is plain code: it has the final say on the law, so an AI mistake can&apos;t ship an unsafe plan.
               </p>

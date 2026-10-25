@@ -130,6 +130,9 @@ export function CrewView() {
   const seen = useRef(new Set<string>());
   const endRef = useRef<HTMLDivElement>(null);
   const [unread, setUnread] = useState(0);
+  const [toast, setToast] = useState<string | null>(null);
+  const [otherUnread, setOtherUnread] = useState<Record<string, number>>({});
+  const openedAt = useRef(new Date().toISOString());
   // New boss messages count up until the thread is on screen.
   useEffect(() => {
     const el = endRef.current;
@@ -207,6 +210,10 @@ export function CrewView() {
         const list = (await fetch(`/api/radio/${planId}`, { cache: "no-store" }).then((r) => r.json())) as RadioMessage[];
         if (!alive) return;
         const mine = list.filter((m) => (m.from === "boss" && (!m.crewId || m.crewId === crewId)) || (m.from === "worker" && m.workerId === workerId && m.crewId === crewId));
+        // Boss messages to other crews: count them on those crews' buttons.
+        const others: Record<string, number> = {};
+        for (const m of list) if (m.from === "boss" && m.crewId && m.crewId !== crewId && m.at > openedAt.current) others[m.crewId] = (others[m.crewId] ?? 0) + 1;
+        setOtherUnread(others);
         for (const m of mine) {
           if (seen.current.has(m.id)) continue;
           seen.current.add(m.id);
@@ -221,6 +228,8 @@ export function CrewView() {
             setTimeout(() => speakAny(m.text[lang], lang), 900);
           } else {
             chime();
+            setToast(m.text[lang]);
+            setTimeout(() => setToast(null), 5000);
             setTimeout(() => speakAny(m.text[lang], lang), 450);
           }
           setUnread((n) => n + 1);
@@ -359,6 +368,13 @@ export function CrewView() {
         </div>
       )}
 
+      {toast && (
+        <button onClick={() => (setToast(null), endRef.current?.scrollIntoView({ behavior: "smooth" }))} className="toast fixed inset-x-3 top-3 z-40 rounded-2xl bg-[var(--brand)] p-4 text-left text-[var(--brand-ink)] shadow-lg">
+          <span className="block text-xs opacity-75">{t.boss}</span>
+          <span className="block text-lg leading-snug">{toast}</span>
+        </button>
+      )}
+
       {notice && (
         <button onClick={() => setNotice(false)} className="rounded-xl bg-[#2f6f8f] px-4 py-3 text-left text-white">
           {t.newPlan} ✕
@@ -399,6 +415,7 @@ export function CrewView() {
             <button
               key={c.crewId}
               onClick={() => {
+                openedAt.current = new Date().toISOString();
                 setCrewId(c.crewId);
                 store(`sombra-crew-${planId}`, c.crewId);
                 seen.current.clear();
@@ -407,6 +424,9 @@ export function CrewView() {
               className={`rounded-full border px-3 py-1.5 ${c.crewId === mine?.crewId ? "border-[var(--ink)] bg-[var(--card)] font-medium" : "border-[var(--line)]"}`}
             >
               {plan.crewInfo?.find((x) => x.id === c.crewId)?.name ?? c.crewId}
+              {(otherUnread[c.crewId] ?? 0) > 0 && (
+                <span className="ml-1.5 inline-grid h-5 min-w-5 place-items-center rounded-full bg-[var(--alert)] px-1 text-xs text-white">{otherUnread[c.crewId]}</span>
+              )}
             </button>
           ))}
         </div>

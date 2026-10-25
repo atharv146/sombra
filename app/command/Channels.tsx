@@ -167,6 +167,23 @@ export function Channels({
             </button>
           ))}
         </div>
+        <select
+          value=""
+          onChange={async (e) => {
+            const field = e.target.value;
+            const ids = crews.filter((c) => (fieldOf[c.id] || c.fieldId) === field).map((c) => c.id);
+            for (const id of ids) await send("alert", id);
+          }}
+          className="ml-auto mr-2 rounded-[6px] border border-[var(--alert)] bg-transparent px-2 py-1.5 text-xs font-semibold text-[var(--alert)]"
+          title="Alarm only the crews working at one field"
+        >
+          <option value="">Alert a field…</option>
+          {fields.map((f) => (
+            <option key={f.id} value={f.id}>
+              {f.name} ({crews.filter((c) => (fieldOf[c.id] || c.fieldId) === f.id).map((c) => c.name).join(", ") || "no crew"})
+            </option>
+          ))}
+        </select>
         <button
           onClick={() => send("alert")}
           disabled={!!busy}

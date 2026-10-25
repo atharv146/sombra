@@ -341,3 +341,9 @@ select:focus-visible {
   box-shadow: inset 0 -4px 0 var(--heat-extreme);
   pointer-events: none;
 }
+.toast {
+  animation: toast 360ms var(--ease) both;
+}
+@keyframes toast {
+  from { opacity: 0; transform: translateY(-16px); }
+}
